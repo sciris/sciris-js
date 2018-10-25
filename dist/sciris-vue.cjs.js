@@ -1365,7 +1365,7 @@ var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;va
 }
 
 function install(Vue$$1) {
-  Vue$$1.user(VModal);
+  Vue$$1.use(VModal);
   Object.defineProperty(Vue$$1.prototype, '$notifications', {
     get() {
       return NotificationStore;

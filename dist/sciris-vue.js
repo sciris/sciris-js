@@ -12711,7 +12711,7 @@
   var VModal = unwrapExports(dist);
 
   function install(Vue) {
-    Vue.user(VModal);
+    Vue.use(VModal);
     Object.defineProperty(Vue.prototype, '$notifications', {
       get() {
         return NotificationStore;
