@@ -1055,8 +1055,8 @@ var index = {
   status,
   user,
   tasks,
-  utils,
-  eventbus
+  utils
 };
 
 exports.default = index;
+exports.EventBus = EventBus;

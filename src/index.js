@@ -13,5 +13,8 @@ export default {
   user,
   tasks,
   utils,
-  eventbus
+}
+
+export {
+  EventBus 
 }

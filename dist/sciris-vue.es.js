@@ -1049,8 +1049,8 @@ var index = {
   status,
   user,
   tasks,
-  utils,
-  eventbus
+  utils
 };
 
 export default index;
+export { EventBus };

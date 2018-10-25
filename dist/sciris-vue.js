@@ -11415,11 +11415,11 @@
     status,
     user,
     tasks,
-    utils,
-    eventbus
+    utils
   };
 
   exports.default = index$1;
+  exports.EventBus = EventBus;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
