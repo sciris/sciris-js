@@ -1,0 +1,70 @@
+{
+  "name": "sciris-vue",
+  "version": "0.1.0",
+  "author": "Optima Consortium <info@ocds.co>",
+  "scripts": {
+    "build": "bili"
+  },
+  "main": "dist/sciris-vue.cjs.js",
+  "module": "dist/sciris-vue.es.js",
+  "files": [
+    "dist/*",
+    "src/*",
+    "*.js",
+    "*.json"
+  ],
+  "babel": {
+    "presets": [
+      [
+        "vue-app"
+      ]
+    ]
+  },
+  "bili": {
+    "css": true,
+    "exports": "named",
+    "plugins": [
+      "vue"
+    ],
+    "vue": {
+      "css": true
+    },
+    "postcss": {
+      "extract": false
+    },
+    "format": [
+      "cjs",
+      "es",
+      "umd",
+      "umd-min"
+    ],
+    "banner": true,
+    "name": "sciris-vue",
+    "moduleName": "sciris-vue"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "babel": "^6.23.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-vue-app": "^2.0.0",
+    "bili": "^3.1.2",
+    "crypto": "^1.0.1",
+    "crypto-api": "^0.8.0",
+    "crypto-js": "^3.1.9-1",
+    "file-saver": "^2.0.0-rc.4",
+    "js-sha256": "^0.9.0",
+    "vue": "^2.5.17"
+  },
+  "devDependencies": {
+    "acorn": "^6.0.2",
+    "babel-plugin-component": "^1.1.1",
+    "babel-plugin-preval": "^3.0.1",
+    "css-loader": "^1.0.0",
+    "parse5": "^2.2.3",
+    "rollup": "^0.66.6",
+    "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-postcss": "^1.6.2",
+    "rollup-plugin-vue": "^2.5.4"
+  }
+}
