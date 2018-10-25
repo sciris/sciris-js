@@ -10,10 +10,10 @@ import { EventBus } from '../eventbus.js';
 
 var complete = 0.0; // Put this here so it's global
 
-EVENT_STATUS_START = 'status:start' 
-EVENT_STATUS_UPDATE = 'status:update' 
-EVENT_STATUS_SUCCEED = 'status:success' 
-EVENT_STATUS_FAIL = 'status:fail' 
+const EVENT_STATUS_START = 'status:start' 
+const EVENT_STATUS_UPDATE = 'status:update' 
+const EVENT_STATUS_SUCCEED = 'status:success' 
+const EVENT_STATUS_FAIL = 'status:fail' 
 
 function start(vm, message) {
   if (!message) { message = 'Starting progress' }
