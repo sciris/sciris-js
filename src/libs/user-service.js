@@ -1,7 +1,6 @@
 import rpcs from './rpc-service.js'
 import sha224 from 'crypto-js/sha224';
 
-
 var state = {
   currentUser: {}
 };

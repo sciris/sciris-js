@@ -6,7 +6,14 @@
 // Also, the caller needs to have imported the Spinner.vue PopupSpinner 
 // component and instantiated it.
 
+import { EventBus } from '../eventbus.js';
+
 var complete = 0.0; // Put this here so it's global
+
+EVENT_STATUS_START = 'status:start' 
+EVENT_STATUS_UPDATE = 'status:update' 
+EVENT_STATUS_SUCCEED = 'status:success' 
+EVENT_STATUS_FAIL = 'status:fail' 
 
 function start(vm, message) {
   if (!message) { message = 'Starting progress' }
@@ -22,26 +29,27 @@ function start(vm, message) {
   }, delay);
   function setFunc() {
     complete = complete + stepsize*(1-complete/100); // Increase asymptotically
-    vm.$Progress.set(complete)
+    EventBus.$emit(EVENT_STATUS_UPDATE, complete)
   }
-  vm.$spinner.start() // Bring up a spinner.
+  EventBus.$emit(EVENT_STATUS_START)
 }
 
 function succeed(vm, successMessage) {
   console.log(successMessage)
   complete = 100; // End the counter
-  vm.$spinner.stop() // Dispel the spinner.
-  vm.$Progress.finish()   // Finish the loading bar -- redundant?
+
+  var notif = {}
   if (successMessage !== '') { // Success popup.
-    vm.$notifications.notify({
+    notif = {
       message: successMessage,
       icon: 'ti-check',
       type: 'success',
       verticalAlign: 'top',
       horizontalAlign: 'right',
       timeout: 2000
-    })
+    }
   }  
+  EventBus.$emit(EVENT_STATUS_SUCCEED, notif);
 }
 
 function fail(vm, failMessage, error) {
@@ -51,18 +59,19 @@ function fail(vm, failMessage, error) {
   console.log(error.message)
   console.log(usermsg)
   complete = 100;
-  vm.$spinner.stop() // Dispel the spinner.
-  vm.$Progress.fail() // Fail the loading bar.
+
+  var notif = {}
   if (failMessage !== '') {  // Put up a failure notification.
-    vm.$notifications.notify({
+    notif = {
       message: '<b>' + failMessage + '</b>' + '<br><br>' + usermsg,
       icon: 'ti-face-sad',
       type: 'warning',
       verticalAlign: 'top',
       horizontalAlign: 'right',
       timeout: 0
-    })
+    }
   }  
+  EventBus.$emit(EVENT_STATUS_FAIL, notif);
 }
 
 export default {

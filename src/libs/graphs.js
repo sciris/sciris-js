@@ -2,8 +2,8 @@
  * Graphing functions (shared between calibration, scenarios, and optimization)
  */
 
-import utils  from './utils.js'
-import rpcs   from './rpc-service.js'
+import utils from './utils.js'
+import rpcs from './rpc-service.js'
 import status from './status-service.js'
 
 function getPlotOptions(vm, project_id) {
