@@ -12,7 +12,10 @@ import PopupSpinner from './components/PopupSpinner.vue';
 
 import { EventBus } from './eventbus.js';
 
+import VModal from 'vue-js-modal' 
+
 function install(Vue) {
+  Vue.user(VModal);
   Object.defineProperty(Vue.prototype, '$notifications', {
     get () {
       return NotificationStore

@@ -42,14 +42,9 @@ Last update: 2018-08-13
 
 <script>
   import { EventBus } from '../eventbus.js';
-  import VModal from 'vue-js-modal' 
   
   export default {
     name: 'PopupSpinner',
-
-    components: {
-      VModal 
-    },
     
     props: {
       loading: {
