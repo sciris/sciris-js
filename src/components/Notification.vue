@@ -93,7 +93,17 @@
 
 </script>
 <style lang="scss" scoped>
-  @import "../../sass/project";
+  $bg-success: rgba(0, 136, 0, 1.0);
+  $bg-info: #7CE4FE;
+  $bg-warning: rgba(226, 151, 34, 1.0);
+  $bg-danger: #FF8F5E;
+
+  $success-states-color: #229863;
+  $info-states-color: #3091B2;
+  $warning-states-color: #BB992F;
+  $danger-states-color: #B33C12;
+
+  $border-radius-base: 2px;
 
   .fade-enter-active,
   .fade-leave-active {

@@ -41,7 +41,7 @@ Last update: 2018-08-13
 </template>
 
 <script>
-  import SpinnerPlugin from './index'  // used to access the event bus
+  import { EventBus } from '../eventbus.js';
   
   export default {
     name: 'PopupSpinner',
@@ -103,12 +103,12 @@ Last update: 2018-08-13
     
     beforeMount() {
       // Create listener for start event.
-      SpinnerPlugin.eventBus.$on('start', () => {
+      EventBus.$on('start', () => {
         this.show()
       })
       
       // Create listener for stop event.
-      SpinnerPlugin.eventBus.$on('stop', () => {
+      EventBus.$on('stop', () => {
         this.hide()
       })      
     },

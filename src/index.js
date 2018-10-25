@@ -10,6 +10,8 @@ import NotificationStore from './notifications.js';
 import Notifications from './components/Notifications.vue';
 import PopupSpinner from './components/PopupSpinner.vue';
 
+import { EventBus } from './eventbus.js';
+
 function install(Vue) {
   Object.defineProperty(Vue.prototype, '$notifications', {
     get () {
@@ -20,21 +22,16 @@ function install(Vue) {
   if (!this.spinnerInstalled) {
     this.spinnerInstalled = true
 
-    // Create the event bus which allows plugin calls to talk to the 
-    // PopupSpinner object through events.
-    this.eventBus = new Vue()
-
     // Create the global $spinner functions the user can call 
     // from inside any component.
-    var that = this;
     Vue.prototype.$spinner = {
       start() {
         // Send a start event to the bus.
-        that.eventBus.$emit('start')
+        EventBus.$emit('start')
       }, 
       stop() {
         // Send a stop event to the bus.
-        that.eventBus.$emit('stop')
+        EventBus.$emit('stop')
       }
     }
   };
