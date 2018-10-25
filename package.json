@@ -49,6 +49,7 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-vue-app": "^2.0.0",
     "bili": "^3.1.2",
+    "cryptiles": "^4.1.2",
     "crypto": "^1.0.1",
     "crypto-api": "^0.8.0",
     "crypto-js": "^3.1.9-1",
