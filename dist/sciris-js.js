@@ -14705,7 +14705,7 @@
 
   function install(Vue, options = {}) {
     if (!options.disableNotifications) {
-      setupNotifications();
+      setupNotifications(Vue);
       Vue.component('Notifications', Notifications);
     }
 

@@ -38,7 +38,7 @@ function setupProgressBar(Vue, options){
 
 function install(Vue, options = {}) {
   if (!options.disableNotifications){
-    setupNotifications();
+    setupNotifications(Vue);
     Vue.component('Notifications', Notifications);
   }
   if (!options.disableSpinner && !this.spinnerInstalled) {

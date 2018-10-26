@@ -1404,7 +1404,7 @@ function setupProgressBar(Vue$$1, options) {
 
 function install(Vue$$1, options = {}) {
   if (!options.disableNotifications) {
-    setupNotifications();
+    setupNotifications(Vue$$1);
     Vue$$1.component('Notifications', Notifications);
   }
 
