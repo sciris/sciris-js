@@ -4,17 +4,18 @@ import rpc from './libs/rpc-service.js';
 import tasks from './libs/task-service.js';
 import user from './libs/user-service.js';
 import utils from './libs/utils.js';
-import { EventBus } from './eventbus.js';
+import EventBus from './eventbus.js';
+import ScirisVue from './plugins.js';
 
-export default {
+const sciris = {
   graphs,
   rpc,
   status,
   user,
   tasks,
   utils,
+  ScirisVue, 
+  EventBus, 
 }
 
-export {
-  EventBus 
-}
+export default sciris

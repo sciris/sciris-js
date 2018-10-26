@@ -6,16 +6,40 @@ import Vue from 'vue';
 import axios from 'axios';
 import saveAs from 'file-saver';
 import sha224 from 'crypto-js/sha224';
-
-const EventBus = new Vue();
-
-// progress-indicator-service.js -- functions for showing progress
-var complete = 0.0; // Put this here so it's global
+import VueProgressBar from 'vue-progressbar';
+import VModal from 'vue-js-modal';
+import DialogDrag from 'vue-dialog-drag';
 
 const EVENT_STATUS_START = 'status:start';
 const EVENT_STATUS_UPDATE = 'status:update';
 const EVENT_STATUS_SUCCEED = 'status:success';
 const EVENT_STATUS_FAIL = 'status:fail';
+const events = {
+  EVENT_STATUS_START,
+  EVENT_STATUS_UPDATE,
+  EVENT_STATUS_SUCCEED,
+  EVENT_STATUS_FAIL
+};
+const EventBus = new Vue();
+EventBus.$on(events.EVENT_STATUS_START, vm => {
+  vm.$spinner.start();
+});
+EventBus.$on(events.EVENT_STATUS_UPDATE, (vm, progress) => {
+  vm.$Progress.set(progress);
+});
+EventBus.$on(events.EVENT_STATUS_SUCCEED, (vm, notif) => {
+  vm.$spinner.stop();
+  vm.$Progress.finish();
+  if (notif) vm.$notifications.notify(notif);
+});
+EventBus.$on(events.EVENT_STATUS_FAIL, (vm, notif) => {
+  vm.$spinner.stop();
+  vm.$Progress.fail();
+  if (notif) vm.$notifications.notify(notif);
+});
+
+// progress-indicator-service.js -- functions for showing progress
+var complete = 0.0; // Put this here so it's global
 
 function start(vm, message) {
   if (!message) {
@@ -39,10 +63,10 @@ function start(vm, message) {
   function setFunc() {
     complete = complete + stepsize * (1 - complete / 100); // Increase asymptotically
 
-    EventBus.$emit(EVENT_STATUS_UPDATE, complete);
+    EventBus.$emit(events.EVENT_STATUS_UPDATE, vm, complete);
   }
 
-  EventBus.$emit(EVENT_STATUS_START);
+  EventBus.$emit(events.EVENT_STATUS_START, vm);
 }
 
 function succeed(vm, successMessage) {
@@ -63,7 +87,7 @@ function succeed(vm, successMessage) {
     };
   }
 
-  EventBus.$emit(EVENT_STATUS_SUCCEED, notif);
+  EventBus.$emit(events.EVENT_STATUS_SUCCEED, vm, notif);
 }
 
 function fail(vm, failMessage, error) {
@@ -88,7 +112,7 @@ function fail(vm, failMessage, error) {
     };
   }
 
-  EventBus.$emit(EVENT_STATUS_FAIL, notif);
+  EventBus.$emit(events.EVENT_STATUS_FAIL, vm, notif);
 }
 
 var status = {
@@ -1043,14 +1067,381 @@ var user = {
   logOut
 };
 
-var index = {
+function styleInject(css, ref) {
+  if ( ref === void 0 ) ref = {};
+  var insertAt = ref.insertAt;
+
+  if (!css || typeof document === 'undefined') { return; }
+
+  var head = document.head || document.getElementsByTagName('head')[0];
+  var style = document.createElement('style');
+  style.type = 'text/css';
+
+  if (insertAt === 'top') {
+    if (head.firstChild) {
+      head.insertBefore(style, head.firstChild);
+    } else {
+      head.appendChild(style);
+    }
+  } else {
+    head.appendChild(style);
+  }
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  } else {
+    style.appendChild(document.createTextNode(css));
+  }
+}
+
+var css = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.v-spinner .v-moon1\n{\n\n  -webkit-animation: v-moonStretchDelay 0.6s 0s infinite linear;\n  animation: v-moonStretchDelay 0.6s 0s infinite linear;\n  -webkit-animation-fill-mode: forwards;\n  animation-fill-mode: forwards;\n  position: relative;\n}\n\n.v-spinner .v-moon2\n{\n  -webkit-animation: v-moonStretchDelay 0.6s 0s infinite linear;\n  animation: v-moonStretchDelay 0.6s 0s infinite linear;\n  -webkit-animation-fill-mode: forwards;\n  animation-fill-mode: forwards;\n  opacity: 0.9;\n  position: absolute;\n}\n\n.v-spinner .v-moon3\n{\n  opacity: 0.1;\n}\n\n@-webkit-keyframes v-moonStretchDelay\n{\n  100%\n  {\n    -webkit-transform: rotate(360deg);\n    transform: rotate(360deg);\n  }\n}\n\n@keyframes v-moonStretchDelay\n{\n  100%\n  {\n    -webkit-transform: rotate(360deg);\n    transform: rotate(360deg);\n  }\n}\n\n.vue-dialog div {\n  box-sizing: border-box;\n}\n.vue-dialog .dialog-flex {\n  width: 100%;\n  height: 100%;\n}\n.vue-dialog .dialog-content {\n  flex: 1 0 auto;\n  width: 100%;\n  padding: 15px;\n  font-size: 14px;\n}\n.vue-dialog .dialog-c-title {\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n.vue-dialog .dialog-c-text {\n}\n.vue-dialog .vue-dialog-buttons {\n  display: flex;\n  flex: 0 1 auto;\n  width: 100%;\n  border-top: 1px solid #eee;\n}\n.vue-dialog .vue-dialog-buttons-none {\n  width: 100%;\n  padding-bottom: 15px;\n}\n.vue-dialog-button {\n  font-size: 12px !important;\n  background: transparent;\n  padding: 0;\n  margin: 0;\n  border: 0;\n  cursor: pointer;\n  box-sizing: border-box;\n  line-height: 40px;\n  height: 40px;\n  color: inherit;\n  font: inherit;\n  outline: none;\n}\n.vue-dialog-button:hover {\n  background: rgba(0, 0, 0, 0.01);\n}\n.vue-dialog-button:active {\n  background: rgba(0, 0, 0, 0.025);\n}\n.vue-dialog-button:not(:first-of-type) {\n  border-left: 1px solid #eee;\n}\n\n";
+styleInject(css);
+
+var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('modal',{staticStyle:{"opacity":"1.0"},attrs:{"name":"popup-spinner","height":_vm.modalHeight,"width":_vm.modalWidth,"click-to-close":false},on:{"before-open":_vm.beforeOpen,"before-close":_vm.beforeClose}},[_c('div',{style:(_vm.spinnerWrapStyle)},[_c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.loading),expression:"loading"}],staticClass:"v-spinner"},[_c('div',{staticClass:"v-moon v-moon1",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"v-moon v-moon2",style:([_vm.spinnerMoonStyle,_vm.animationStyle2])}),_vm._v(" "),_c('div',{staticClass:"v-moon v-moon3",style:([_vm.spinnerStyle,_vm.animationStyle3])})])])]),_vm._v(" "),(_vm.title !== '')?_c('div',{style:(_vm.titleStyle)},[_vm._v(" "+_vm._s(_vm.title)+" ")]):_vm._e(),_vm._v(" "),(_vm.hasCancelButton)?_c('div',{staticStyle:{"padding":"13px"}},[_c('button',{style:(_vm.cancelButtonStyle),on:{"click":_vm.cancel}},[_vm._v("Cancel")])]):_vm._e()])},staticRenderFns: [],
+  name: 'PopupSpinner',
+  
+  props: {
+    loading: {
+      type: Boolean,
+      default: true
+    },
+   title: {
+      type: String,
+      default: ''      
+    },
+    hasCancelButton: {
+      type: Boolean,
+      default: false      
+    }, 
+    color: {
+      type: String,
+      default: '#0000ff'
+    },
+    size: {
+      type: String,
+      default: '50px'
+    },
+    margin: {
+      type: String,
+      default: '2px'
+    },
+    padding: {
+      type: String,
+      default: '15px'      
+    },
+    radius: {
+      type: String,
+      default: '100%'
+    }
+  },
+  
+  data() {
+    return {
+      spinnerStyle: {
+        height: this.size,
+        width: this.size,
+        borderRadius: this.radius
+      },
+      spinnerWrapStyle: {
+        padding: this.padding
+      }, 
+      titleStyle: {
+        textAlign: 'center'
+      },
+      cancelButtonStyle: {
+        padding: '2px'
+      },          
+      opened: false
+    }
+  },
+  
+  beforeMount() {
+    // Create listener for start event.
+    EventBus.$on('spinner:start', () => {
+      this.show();
+    });
+    
+    // Create listener for stop event.
+    EventBus.$on('spinner:stop', () => {
+      this.hide();
+    });      
+  },
+  
+  computed: {
+    modalHeight() {
+      // Start with the height of the spinner wrapper.
+      let fullHeight = parseFloat(this.size) + 2 * parseFloat(this.padding);
+      
+      // If there is a title there, add space for the text.
+      if (this.title !== '') {
+        fullHeight = fullHeight + 20 + parseFloat(this.padding);        
+      }
+      
+      // If there is a cancel button there, add space for it.
+      if (this.hasCancelButton) {
+        fullHeight = fullHeight + 20 + parseFloat(this.padding);
+      }
+      
+      return fullHeight + 'px'
+    },
+    
+    modalWidth() {
+      return parseFloat(this.size) + 2 * parseFloat(this.padding) + 'px'
+    },
+    
+    moonSize() {
+      return parseFloat(this.size)/7
+    },
+    
+    spinnerMoonStyle() {
+      return {
+        height: this.moonSize  + 'px',
+        width: this.moonSize  + 'px',
+        borderRadius: this.radius
+      }
+    },
+    
+    animationStyle2() {
+      return {
+        top: parseFloat(this.size)/2 - this.moonSize/2 + 'px',
+        backgroundColor: this.color
+      }
+    },
+    
+    animationStyle3() {
+      return {
+        border: this.moonSize + 'px solid ' + this.color
+      }
+    }
+  }, 
+  
+  methods: {
+    beforeOpen() {
+      window.addEventListener('keyup', this.onKey);
+      this.opened = true;
+    }, 
+    
+    beforeClose() {
+      window.removeEventListener('keyup', this.onKey);
+      this.opened = false;
+    }, 
+    
+    onKey(event) {
+      if (event.keyCode == 27) {
+        console.log('Exited spinner through Esc key');
+        this.cancel();
+      }
+    }, 
+    
+    cancel() {
+      this.$emit('spinner-cancel');
+      this.hide();      
+    },
+    
+    show() {
+      this.$modal.show('popup-spinner'); // Bring up the spinner modal.
+    },
+    
+    hide() {
+      this.$modal.hide('popup-spinner'); // Dispel the spinner modal.
+    }
+  }
+
+}
+
+var css$1 = ".list-item {\n  display: inline-block;\n  margin-right: 10px; }\n\n.list-enter-active,\n.list-leave-active {\n  transition: all 1s; }\n\n.list-enter,\n.list-leave-to {\n  opacity: 0;\n  transform: translateY(-30px); }\n";
+styleInject(css$1);
+
+var css$2 = ".fade-enter-active,\n.fade-leave-active {\n  transition: opacity .3s; }\n\n.fade-enter,\n.fade-leave-to {\n  opacity: 0; }\n\n.alert {\n  border: 0;\n  border-radius: 0;\n  color: #FFFFFF;\n  padding: 20px 15px;\n  font-size: 14px;\n  z-index: 100;\n  display: inline-block;\n  position: fixed;\n  transition: all 0.5s ease-in-out; }\n  .alert.center {\n    left: 0px;\n    right: 0px;\n    margin: 0 auto; }\n  .alert.left {\n    left: 20px; }\n  .alert.right {\n    right: 20px; }\n  .container .alert {\n    border-radius: 0px; }\n  .navbar .alert {\n    border-radius: 0;\n    left: 0;\n    position: absolute;\n    right: 0;\n    top: 85px;\n    width: 100%;\n    z-index: 3; }\n  .navbar:not(.navbar-transparent) .alert {\n    top: 70px; }\n  .alert .alert-icon {\n    font-size: 30px;\n    margin-right: 5px; }\n  .alert .close ~ span {\n    display: inline-block;\n    max-width: 89%; }\n  .alert[data-notify=\"container\"] {\n    /*max-width: 400px;*/\n    padding: 10px 5px 5px 10px;\n    border-radius: 2px; }\n  .alert.alert-with-icon {\n    /*padding-left: 15px; // CK: actual left padding*/ }\n\n.alert-info {\n  background-color: #7CE4FE;\n  color: #3091B2; }\n\n.alert-success {\n  background-color: #008800;\n  color: #fff; }\n\n.alert-warning {\n  background-color: #e29722;\n  color: #fff; }\n\n.alert-danger {\n  background-color: #FF8F5E;\n  color: #B33C12; }\n\n#flex {\n  display: flex;\n  justify-content: space-between; }\n\n#flex div {\n  padding: 4px; }\n";
+styleInject(css$2);
+
+var Notification = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"alert open alert-with-icon",class:[_vm.verticalAlign, _vm.horizontalAlign, _vm.alertType],style:(_vm.customPosition),attrs:{"data-notify":"container","role":"alert","data-notify-position":"top-center"}},[_c('div',{attrs:{"id":"flex"}},[_c('div',{staticStyle:{"padding-top":"10px","padding-right":"10px"}},[_c('span',{staticClass:"alert-icon",class:_vm.icon,staticStyle:{"font-size":"25px"},attrs:{"data-notify":"message"}})]),_vm._v(" "),_c('div',{staticStyle:{"max-width":"400px","font-size":"15px","align-content":"center"}},[_c('div',{attrs:{"data-notify":"message"},domProps:{"innerHTML":_vm._s(_vm.message)}})]),_vm._v(" "),_c('div',{staticStyle:{"padding-left":"10px"}},[_c('button',{staticClass:"btn __trans",attrs:{"aria-hidden":"true","data-notify":"dismiss"},on:{"click":_vm.close}},[_vm._m(0)])])])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('span',{staticStyle:{"font-size":"18px","color":"#fff","background-color":"transparent","background":"transparent"}},[_c('i',{staticClass:"ti-close"})])}],_scopeId: 'data-v-9084a0ca',
+    name: 'notification',
+    props: {
+      message: String,
+      icon: {
+        type: String,
+        default: 'ti-info-alt'
+      },
+      verticalAlign: {
+        type: String,
+        default: 'top'
+      },
+      horizontalAlign: {
+        type: String,
+        default: 'center'
+      },
+      type: {
+        type: String,
+        default: 'info'
+      },
+      timeout: {
+        type: Number,
+        default: 2000
+      },
+      timestamp: {
+        type: Date,
+        default: () => new Date()
+      },      
+    },
+    data () {
+      return {}
+    },
+    computed: {
+      hasIcon () {
+        return this.icon && this.icon.length > 0
+      },
+      alertType () {
+        return `alert-${this.type}`
+      },
+      customPosition () {
+        let initialMargin = 20;
+        let alertHeight = 60;
+        let sameAlertsCount = this.$notifications.state.filter((alert) => {
+          return alert.horizontalAlign === this.horizontalAlign && alert.verticalAlign === this.verticalAlign
+        }).length;
+        let pixels = (sameAlertsCount - 1) * alertHeight + initialMargin;
+        let styles = {};
+        if (this.verticalAlign === 'top') {
+          styles.top = `${pixels}px`;
+        } else {
+          styles.bottom = `${pixels}px`;
+        }
+        return styles
+      }
+    },
+    methods: {
+      close () {
+//        console.log('Trying to close: ', this.timestamp)
+        this.$parent.$emit('on-close', this.timestamp);  
+      }
+    },
+    mounted () {
+      if (this.timeout) {
+        setTimeout(this.close, this.timeout);
+      }
+    }
+  }
+
+var Notifications = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"notifications"},[_c('transition-group',{attrs:{"name":"list"},on:{"on-close":_vm.removeNotification}},_vm._l((_vm.notifications),function(notification,index){return _c('notification',{key:index,attrs:{"message":notification.message,"icon":notification.icon,"type":notification.type,"vertical-align":notification.verticalAlign,"horizontal-align":notification.horizontalAlign,"timeout":notification.timeout,"timestamp":notification.timestamp}})}))],1)},staticRenderFns: [],
+    components: {
+      Notification
+    },
+    data () {
+      return {
+        notifications: this.$notifications.state
+      }
+    },
+    methods: {
+      removeNotification (timestamp) {
+//        console.log('Pre-removing notification: ', timestamp)
+        this.$notifications.removeNotification(timestamp);
+        
+        // Hack to address "sticky" notifications: after a removal, clear all 
+        // notifications after 2 seconds.
+//        setTimeout(this.clearAllNotifications, 2000)
+      },
+      
+      clearAllNotifications () {
+        this.$notifications.clear();
+      }
+    }
+  }
+
+var css$3 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.dropdown {\n  cursor: pointer;\n}\n";
+styleInject(css$3);
+
+var Dropdown = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{directives:[{name:"click-outside",rawName:"v-click-outside",value:(_vm.closeDropDown),expression:"closeDropDown"}],staticClass:"dropdown",class:{open:_vm.isOpen},on:{"click":_vm.toggleDropDown}},[_c('a',{staticClass:"dropdown-toggle btn-rotate",attrs:{"data-toggle":"dropdown","href":"javascript:void(0)"}},[_vm._t("title",[_c('i',{class:_vm.icon}),_vm._v(" "),_c('p',{staticClass:"notification"},[_vm._v(_vm._s(_vm.title)+" "),_c('b',{staticClass:"caret"})])])],2),_vm._v(" "),_c('ul',{staticClass:"dropdown-menu"},[_vm._t("default")],2)])},staticRenderFns: [],
+  props: {
+    title: String,
+    icon: String
+  },
+  data () {
+    return {
+      isOpen: false
+    }
+  },
+  methods: {
+    toggleDropDown () {
+      this.isOpen = !this.isOpen;
+    },
+    closeDropDown () {
+      this.isOpen = false;
+    }
+  }
+}
+
+function setupSpinner(Vue$$1) {
+  // Create the global $spinner functions the user can call 
+  // from inside any component.
+  Vue$$1.use(VModal);
+  Vue$$1.prototype.$spinner = {
+    start() {
+      // Send a start event to the bus.
+      EventBus.$emit('spinner:start');
+    },
+
+    stop() {
+      // Send a stop event to the bus.
+      EventBus.$emit('spinner:stop');
+    }
+
+  };
+}
+
+function setupNotifications(Vue$$1) {
+  Object.defineProperty(Vue$$1.prototype, '$notifications', {
+    get() {
+      return NotificationStore;
+    }
+
+  });
+}
+
+function setupProgressBar(Vue$$1, options) {
+  Vue$$1.use(VueProgressBar, options);
+}
+
+function install(Vue$$1, options = {}) {
+  if (!options.disableNotifications) {
+    setupNotifications();
+    Vue$$1.component('Notifications', Notifications);
+  }
+
+  if (!options.disableSpinner && !this.spinnerInstalled) {
+    this.spinnerInstalled = true;
+    setupSpinner(Vue$$1);
+    Vue$$1.component('PopupSpinner', PopupSpinner);
+  }
+
+  if (!options.disableProgress) {
+    setupProgressBar(Vue$$1, options.progressBarOptions);
+  }
+
+  Vue$$1.component('Dropdown', Dropdown);
+  Vue$$1.component('DialogDrag', DialogDrag);
+} // Automatic installation if Vue has been added to the global scope.
+
+
+if (typeof window !== 'undefined' && window.Vue) {
+  window.Vue.use({
+    install
+  });
+}
+
+var ScirisVue = {
+  install
+};
+
+const sciris = {
   graphs,
   rpc: rpcs,
   status,
   user,
   tasks,
-  utils
+  utils,
+  ScirisVue,
+  EventBus
 };
 
-export default index;
-export { EventBus };
+export default sciris;

@@ -6,14 +6,10 @@
 // Also, the caller needs to have imported the Spinner.vue PopupSpinner 
 // component and instantiated it.
 
-import { EventBus } from '../eventbus.js';
+import EventBus from '../eventbus.js';
+import { events } from '../eventbus.js';
 
 var complete = 0.0; // Put this here so it's global
-
-const EVENT_STATUS_START = 'status:start' 
-const EVENT_STATUS_UPDATE = 'status:update' 
-const EVENT_STATUS_SUCCEED = 'status:success' 
-const EVENT_STATUS_FAIL = 'status:fail' 
 
 function start(vm, message) {
   if (!message) { message = 'Starting progress' }
@@ -29,9 +25,9 @@ function start(vm, message) {
   }, delay);
   function setFunc() {
     complete = complete + stepsize*(1-complete/100); // Increase asymptotically
-    EventBus.$emit(EVENT_STATUS_UPDATE, complete)
+    EventBus.$emit(events.EVENT_STATUS_UPDATE, vm, complete)
   }
-  EventBus.$emit(EVENT_STATUS_START)
+  EventBus.$emit(events.EVENT_STATUS_START, vm)
 }
 
 function succeed(vm, successMessage) {
@@ -49,7 +45,7 @@ function succeed(vm, successMessage) {
       timeout: 2000
     }
   }  
-  EventBus.$emit(EVENT_STATUS_SUCCEED, notif);
+  EventBus.$emit(events.EVENT_STATUS_SUCCEED, vm, notif);
 }
 
 function fail(vm, failMessage, error) {
@@ -71,11 +67,15 @@ function fail(vm, failMessage, error) {
       timeout: 0
     }
   }  
-  EventBus.$emit(EVENT_STATUS_FAIL, notif);
+  EventBus.$emit(events.EVENT_STATUS_FAIL, vm, notif);
 }
 
 export default {
   start,
   succeed,
   fail,
+}
+
+export {
+  events 
 }
