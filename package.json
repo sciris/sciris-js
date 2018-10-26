@@ -1,12 +1,12 @@
 {
-  "name": "sciris-vue",
+  "name": "sciris-js",
   "version": "0.1.0",
   "author": "Optima Consortium <info@ocds.co>",
   "scripts": {
     "build": "bili"
   },
-  "main": "dist/sciris-vue.cjs.js",
-  "module": "dist/sciris-vue.es.js",
+  "main": "dist/sciris-js.cjs.js",
+  "module": "dist/sciris-js.es.js",
   "files": [
     "dist/*",
     "src/*",
@@ -39,8 +39,8 @@
       "umd-min"
     ],
     "banner": true,
-    "name": "sciris-vue",
-    "moduleName": "sciris-vue"
+    "name": "sciris-js",
+    "moduleName": "sciris-js"
   },
   "dependencies": {
     "axios": "^0.18.0",

@@ -1,11 +1,11 @@
 /*!
- * sciris-vue v0.1.0
+ * sciris-js v0.1.0
  * (c) 2018-present Optima Consortium <info@ocds.co>
  */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global['sciris-vue'] = {})));
+  (factory((global['sciris-js'] = {})));
 }(this, (function (exports) { 'use strict';
 
   /*!
