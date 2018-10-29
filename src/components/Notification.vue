@@ -182,7 +182,15 @@
     }
 
     &.alert-with-icon {
-      /*padding-left: 15px; // CK: actual left padding*/
+      padding-left: 65px;
+    }
+    span[data-notify="icon"] {
+      font-size: 30px;
+      display: block;
+      left: 15px;
+      position: absolute;
+      top: 50%;
+      margin-top: -20px;
     }
   }
 
