@@ -2,12 +2,12 @@ import VueProgressBar from 'vue-progressbar';
 import VModal from 'vue-js-modal';
 import DialogDrag from 'vue-dialog-drag'
 
-import NotificationStore from './notifications.vue';
 import PopupSpinner from './components/PopupSpinner.vue';
 import Notifications from './components/Notifications.vue';
 import Dropdown from './components/Dropdown.vue';
 
 import EventBus from './eventbus.js';
+import NotificationStore from './notifications.js';
 
 function setupSpinner(Vue){
   // Create the global $spinner functions the user can call 
