@@ -24,8 +24,7 @@
     "css": true,
     "exports": "named",
     "plugins": [
-      "vue",
-      "copy-glob"
+      "vue"
     ],
     "vue": {
       "css": true
@@ -33,12 +32,6 @@
     "postcss": {
       "extract": false
     },
-    "copy-glob": [
-      {
-        "files": "src/libs/themify/fonts/*.*", 
-        "dest": "dist/fonts"
-      }
-    ],
     "format": [
       "cjs",
       "es",

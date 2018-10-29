@@ -92,6 +92,11 @@
   }
 
 </script>
+
+<style> 
+@import "https://cdn.jsdelivr.net/gh/lykmapipo/themify-icons@0.1.2/css/themify-icons.css";
+</style>
+
 <style lang="scss" scoped>
   $bg-success: rgba(0, 136, 0, 1.0);
   $bg-info: #7CE4FE;

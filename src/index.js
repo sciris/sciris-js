@@ -6,7 +6,6 @@ import user from './libs/user-service.js';
 import utils from './libs/utils.js';
 import EventBus from './eventbus.js';
 import ScirisVue from './plugins.js';
-import themify from './libs/themify/themify-icons.css';
 
 const sciris = {
   graphs,

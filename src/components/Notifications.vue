@@ -16,6 +16,7 @@ Last updated: 2018-07-11
 </template>
 <script>
   import Notification from './Notification.vue'
+
   export default {
     components: {
       Notification
