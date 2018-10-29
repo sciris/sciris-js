@@ -30,7 +30,7 @@
       "css": true
     },
     "postcss": {
-      "extract": false
+      "extract": true
     },
     "format": [
       "cjs",
@@ -70,6 +70,7 @@
     "parse5": "^2.2.3",
     "rollup": "^0.47.6",
     "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-postcss": "^1.6.2",
     "rollup-plugin-vue": "^2.5.4"
   }
 }
