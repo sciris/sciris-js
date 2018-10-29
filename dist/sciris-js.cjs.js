@@ -12,6 +12,7 @@ var Vue = _interopDefault(require('vue'));
 var axios = _interopDefault(require('axios'));
 var saveAs = _interopDefault(require('file-saver'));
 var sha224 = _interopDefault(require('crypto-js/sha224'));
+var epicSpinners = require('epic-spinners');
 var VueProgressBar = _interopDefault(require('vue-progressbar'));
 var VModal = _interopDefault(require('vue-js-modal'));
 var DialogDrag = _interopDefault(require('vue-dialog-drag'));
@@ -89,7 +90,7 @@ function succeed(vm, successMessage) {
       type: 'success',
       verticalAlign: 'top',
       horizontalAlign: 'right',
-      timeout: 20000000
+      timeout: 2000
     };
   }
 
@@ -1103,11 +1104,15 @@ function styleInject(css, ref) {
   }
 }
 
-var css = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.v-spinner .v-moon1 {\n  -webkit-animation: v-moonStretchDelay 0.6s 0s infinite linear;\n  animation: v-moonStretchDelay 0.6s 0s infinite linear;\n  -webkit-animation-fill-mode: forwards;\n  animation-fill-mode: forwards;\n  position: relative;\n}\n\n.v-spinner .v-moon2 {\n  -webkit-animation: v-moonStretchDelay 0.6s 0s infinite linear;\n  animation: v-moonStretchDelay 0.6s 0s infinite linear;\n  -webkit-animation-fill-mode: forwards;\n  animation-fill-mode: forwards;\n  opacity: 0.9;\n  position: absolute;\n}\n\n.v-spinner .v-moon3\n{\n  opacity: 0.1;\n}\n\n@-webkit-keyframes v-moonStretchDelay\n{\n  100%\n  {\n    -webkit-transform: rotate(360deg);\n    transform: rotate(360deg);\n  }\n}\n\n@keyframes v-moonStretchDelay\n{\n  100%\n  {\n    -webkit-transform: rotate(360deg);\n    transform: rotate(360deg);\n  }\n}\n\n.vue-dialog div {\n  box-sizing: border-box;\n}\n.vue-dialog .dialog-flex {\n  width: 100%;\n  height: 100%;\n}\n.vue-dialog .dialog-content {\n  flex: 1 0 auto;\n  width: 100%;\n  padding: 15px;\n  font-size: 14px;\n}\n.vue-dialog .dialog-c-title {\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n.vue-dialog .dialog-c-text {\n}\n.vue-dialog .vue-dialog-buttons {\n  display: flex;\n  flex: 0 1 auto;\n  width: 100%;\n  border-top: 1px solid #eee;\n}\n.vue-dialog .vue-dialog-buttons-none {\n  width: 100%;\n  padding-bottom: 15px;\n}\n.vue-dialog-button {\n  font-size: 12px !important;\n  background: transparent;\n  padding: 0;\n  margin: 0;\n  border: 0;\n  cursor: pointer;\n  box-sizing: border-box;\n  line-height: 40px;\n  height: 40px;\n  color: inherit;\n  font: inherit;\n  outline: none;\n}\n.vue-dialog-button:hover {\n  background: rgba(0, 0, 0, 0.01);\n}\n.vue-dialog-button:active {\n  background: rgba(0, 0, 0, 0.025);\n}\n.vue-dialog-button:not(:first-of-type) {\n  border-left: 1px solid #eee;\n}\n\n";
+var css = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.loader-box {\n  display: flex;\n  justify-content: center;\n}\n.overlay-box {\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  justify-content: space-evenly;\n}\n";
 styleInject(css);
 
-var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('modal',{staticStyle:{"opacity":"1.0"},attrs:{"name":"popup-spinner","height":_vm.modalHeight,"width":_vm.modalWidth,"click-to-close":false},on:{"before-open":_vm.beforeOpen,"before-close":_vm.beforeClose}},[_c('div',{style:(_vm.spinnerWrapStyle)},[_c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.loading),expression:"loading"}],staticClass:"v-spinner"},[_c('div',{staticClass:"v-moon v-moon1",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"v-moon v-moon2",style:([_vm.spinnerMoonStyle,_vm.animationStyle2])}),_vm._v(" "),_c('div',{staticClass:"v-moon v-moon3",style:([_vm.spinnerStyle,_vm.animationStyle3])})])])]),_vm._v(" "),(_vm.title !== '')?_c('div',{style:(_vm.titleStyle)},[_vm._v(" "+_vm._s(_vm.title)+" ")]):_vm._e(),_vm._v(" "),(_vm.hasCancelButton)?_c('div',{staticStyle:{"padding":"13px"}},[_c('button',{style:(_vm.cancelButtonStyle),on:{"click":_vm.cancel}},[_vm._v("Cancel")])]):_vm._e()])},staticRenderFns: [],_scopeId: 'data-v-3515e57d',
+var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('modal',{staticStyle:{"opacity":"1.0"},attrs:{"name":"popup-spinner","height":_vm.modalHeight,"width":_vm.modalWidth,"click-to-close":false},on:{"before-open":_vm.beforeOpen,"before-close":_vm.beforeClose}},[_c('div',{staticClass:"overlay-box"},[_c('div',{staticClass:"loader-box"},[_c('fulfilling-bouncing-circle-spinner',{attrs:{"color":_vm.color,"size":_vm.spinnerSize,"animation-duration":2000}})],1),_vm._v(" "),(_vm.title !== '')?_c('div',{style:(_vm.titleStyle)},[_vm._v(" "+_vm._s(_vm.title)+" ")]):_vm._e(),_vm._v(" "),(_vm.hasCancelButton)?_c('div',{staticStyle:{"padding":"13px"}},[_c('button',{style:(_vm.cancelButtonStyle),on:{"click":_vm.cancel}},[_vm._v("Cancel")])]):_vm._e()])])},staticRenderFns: [],
   name: 'PopupSpinner',
+
+  components: {
+    FulfillingBouncingCircleSpinner: epicSpinners.FulfillingBouncingCircleSpinner 
+  },
   
   props: {
     loading: {
@@ -1146,14 +1151,6 @@ var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;va
   
   data() {
     return {
-      spinnerStyle: {
-        height: this.size,
-        width: this.size,
-        borderRadius: this.radius
-      },
-      spinnerWrapStyle: {
-        padding: this.padding
-      }, 
       titleStyle: {
         textAlign: 'center'
       },
@@ -1177,9 +1174,12 @@ var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;va
   },
   
   computed: {
+    spinnerSize(){
+      return parseFloat(this.size) - 25; 
+    },
     modalHeight() {
       // Start with the height of the spinner wrapper.
-      let fullHeight = parseFloat(this.size) + 2 * parseFloat(this.padding);
+      let fullHeight = parseFloat(this.size) + 2 * parseFloat(this.padding); 
       
       // If there is a title there, add space for the text.
       if (this.title !== '') {
@@ -1197,31 +1197,6 @@ var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;va
     modalWidth() {
       return parseFloat(this.size) + 2 * parseFloat(this.padding) + 'px'
     },
-    
-    moonSize() {
-      return parseFloat(this.size)/7
-    },
-    
-    spinnerMoonStyle() {
-      return {
-        height: this.moonSize  + 'px',
-        width: this.moonSize  + 'px',
-        borderRadius: this.radius
-      }
-    },
-    
-    animationStyle2() {
-      return {
-        top: parseFloat(this.size)/2 - this.moonSize/2 + 'px',
-        backgroundColor: this.color
-      }
-    },
-    
-    animationStyle3() {
-      return {
-        border: this.moonSize + 'px solid ' + this.color
-      }
-    }
   }, 
   
   methods: {
