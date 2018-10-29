@@ -30,7 +30,7 @@
       "css": true
     },
     "postcss": {
-      "extract": true
+      "extract": false 
     },
     "format": [
       "cjs",
