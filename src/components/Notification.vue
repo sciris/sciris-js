@@ -129,6 +129,10 @@
     position: fixed;
     transition: all 0.5s ease-in-out;
 
+    .container & {
+      border-radius: 4px;
+    }
+
     &.center {
       left: 0px;
       right: 0px;
@@ -199,9 +203,5 @@
 
   #flex {display: flex; justify-content: space-between;}
   #flex div { padding: 4px; }
-
-  .ti-close {
-    background-image: url('data:image/svg+xml;utf8,<?xmlversion="1.0"encoding="utf-8"?><!--GeneratedbyIcoMoon.io--><!DOCTYPEsvgPUBLIC"-//W3C//DTDSVG1.1//EN""http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svgversion="1.1"xmlns="http://www.w3.org/2000/svg"xmlns:xlink="http://www.w3.org/1999/xlink"width="17"height="17"viewBox="001717"><g></g><pathd="M9.2078.5l6.6466.646-0.7070.707-6.646-6.646-6.6466.646-0.707-0.7076.646-6.646-6.647-6.6460.707-0.7076.6476.6466.646-6.6460.7070.707-6.6466.646z"fill="#000000"/></svg>');
-  }
 
 </style>
