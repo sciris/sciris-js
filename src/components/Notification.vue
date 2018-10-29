@@ -7,21 +7,27 @@
     :style="customPosition"
     data-notify-position="top-center">
 
-    <div id = "flex">
-      <div style="padding-top:10px; padding-right:10px"><span class="alert-icon" data-notify="message" :class="icon" style="font-size:25px;"></span></div>
-      <div style="max-width:400px; font-size:15px; align-content:center"><div data-notify="message" v-html="message"></div></div>
-      <div style="padding-left:10px">
+    <div class="notification-box">
+      <div>
+        <span class="alert-icon" data-notify="message" :class="icon"></span>
+      </div>
+      <div class="message-box" >
+        <div class="message" data-notify="message" v-html="message"></div>
+      </div>
+      <div>
         <button
-          class="btn __trans"
+          class="btn__trans close-button"
           aria-hidden="true"
           data-notify="dismiss"
-          @click="close"><span style="font-size:18px; color:#fff; background-color: transparent; background: transparent"><i class="ti-close"></i></span>
+          @click="close">
+            <i class="ti-close"></i>
         </button>
       </div>
     </div>
 
   </div>
 </template>
+
 <script>
   export default {
     name: 'notification',
@@ -123,6 +129,19 @@
     opacity: 0
   }
 
+  .close-button,
+  .close-button:hover {
+    background: none;
+    line-height: 0em;
+    padding: 5px 5px;
+    margin-left: 10px;
+    border-radius: 3px;
+  }
+  .close-button:hover {
+    background: #ffffff63;
+    color: #737373;
+  }
+
   .alert {
     border: 0;
     border-radius: 0;
@@ -177,13 +196,13 @@
 
     &[data-notify="container"] {
       /*max-width: 400px;*/
-      padding: 10px 5px 5px 10px; // CK: This actually affects the padding!
+      padding: 0; 
       border-radius: $border-radius-base;
     }
 
     &.alert-with-icon {
-      padding-left: 65px;
     }
+
     span[data-notify="icon"] {
       font-size: 30px;
       display: block;
@@ -214,7 +233,44 @@
     color: $danger-states-color;
   }
 
-  #flex {display: flex; justify-content: space-between;}
-  #flex div { padding: 4px; }
+  .message-box {
+    font-size: 15px; 
+    align-content: center;
+    max-width: 400px; 
+    min-width: 150px;
+    padding-left: 10px;
+    flex-grow: 1;
+  }
+
+  .message-box .message {
+    line-height: 1.5em;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+
+  .notification-box {
+    display: flex; 
+    justify-content: flex-start;
+    padding: 10px 15px;
+  }
+
+  .notification-box > div {
+    align-self: center;
+  }
+
+  .btn__trans {
+    font-size: 18px;
+    color: rgb(255, 255, 255);
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    background-image: none;
+    outline: none;
+  }
+
 
 </style>

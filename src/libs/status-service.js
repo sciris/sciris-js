@@ -42,7 +42,7 @@ function succeed(vm, successMessage) {
       type: 'success',
       verticalAlign: 'top',
       horizontalAlign: 'right',
-      timeout: 2000
+      timeout: 20000000
     }
   }  
   EventBus.$emit(events.EVENT_STATUS_SUCCEED, vm, notif);
@@ -50,6 +50,9 @@ function succeed(vm, successMessage) {
 
 function fail(vm, failMessage, error) {
   console.log(failMessage)
+  var error = error || {
+    "message": "unknown message"
+  };
   var msgsplit = error.message.split('Exception details:') // WARNING, must match sc_app.py
   var usermsg = msgsplit[0].replace(/\n/g,'<br>')
   console.log(error.message)
