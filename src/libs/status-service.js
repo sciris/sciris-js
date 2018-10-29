@@ -42,7 +42,7 @@ function succeed(vm, successMessage) {
       type: 'success',
       verticalAlign: 'top',
       horizontalAlign: 'right',
-      timeout: 20000000
+      timeout: 2000
     }
   }  
   EventBus.$emit(events.EVENT_STATUS_SUCCEED, vm, notif);
