@@ -78,7 +78,3 @@ export default {
   succeed,
   fail,
 }
-
-export {
-  events 
-}

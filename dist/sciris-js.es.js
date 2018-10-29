@@ -1446,9 +1446,127 @@ var ScirisVue = {
   install
 };
 
+const rpc = rpcs.rpc;
+const download = rpcs.download;
+const upload = rpcs.upload;
+const succeed$1 = status.succeed;
+const fail$1 = status.fail;
+const start$1 = status.start;
+const placeholders$1 = graphs.placeholders;
+const clearGraphs$1 = graphs.clearGraphs;
+const getPlotOptions$1 = graphs.getPlotOptions;
+const togglePlotControls$1 = graphs.togglePlotControls;
+const makeGraphs$1 = graphs.makeGraphs;
+const reloadGraphs$1 = graphs.reloadGraphs;
+const scaleFigs$1 = graphs.scaleFigs;
+const showBrowserWindowSize$1 = graphs.showBrowserWindowSize;
+const addListener$1 = graphs.addListener;
+const onMouseUpdate$1 = graphs.onMouseUpdate;
+const createDialogs$1 = graphs.createDialogs;
+const newDialog$1 = graphs.newDialog;
+const findDialog$1 = graphs.findDialog;
+const maximize$1 = graphs.maximize;
+const minimize$1 = graphs.minimize;
+const getTaskResultWaiting$1 = tasks.getTaskResultWaiting;
+const getTaskResultPolling$1 = tasks.getTaskResultPolling;
+const loginCall$1 = user.loginCall;
+const logoutCall$1 = user.logoutCall;
+const getCurrentUserInfo$1 = user.getCurrentUserInfo;
+const registerUser$1 = user.registerUser;
+const changeUserInfo$1 = user.changeUserInfo;
+const changeUserPassword$1 = user.changeUserPassword;
+const adminGetUserInfo$1 = user.adminGetUserInfo;
+const deleteUser$1 = user.deleteUser;
+const activateUserAccount$1 = user.activateUserAccount;
+const deactivateUserAccount$1 = user.deactivateUserAccount;
+const grantUserAdminRights$1 = user.grantUserAdminRights;
+const revokeUserAdminRights$1 = user.revokeUserAdminRights;
+const resetUserPassword$1 = user.resetUserPassword;
+const getUserInfo$1 = user.getUserInfo;
+const currentUser$1 = user.currentUser;
+const checkLoggedIn$1 = user.checkLoggedIn;
+const checkAdminLoggedIn$1 = user.checkAdminLoggedIn;
+const logOut$1 = user.logOut;
+const sleep$1 = utils.sleep;
+const getUniqueName$1 = utils.getUniqueName;
+const validateYears$1 = utils.validateYears;
+const projectID$1 = utils.projectID;
+const hasData$1 = utils.hasData;
+const hasPrograms$1 = utils.hasPrograms;
+const simStart$1 = utils.simStart;
+const simEnd$1 = utils.simEnd;
+const simYears$1 = utils.simYears;
+const dataStart$1 = utils.dataStart;
+const dataEnd$1 = utils.dataEnd;
+const dataYears$1 = utils.dataYears;
+const projectionYears$1 = utils.projectionYears;
+const activePops$1 = utils.activePops;
+const updateSorting$1 = utils.updateSorting;
 const sciris = {
+  // rpc-service.js
+  rpc,
+  download,
+  upload,
+  // graphs.js
+  placeholders: placeholders$1,
+  clearGraphs: clearGraphs$1,
+  getPlotOptions: getPlotOptions$1,
+  togglePlotControls: togglePlotControls$1,
+  makeGraphs: makeGraphs$1,
+  reloadGraphs: reloadGraphs$1,
+  scaleFigs: scaleFigs$1,
+  showBrowserWindowSize: showBrowserWindowSize$1,
+  addListener: addListener$1,
+  onMouseUpdate: onMouseUpdate$1,
+  createDialogs: createDialogs$1,
+  newDialog: newDialog$1,
+  findDialog: findDialog$1,
+  maximize: maximize$1,
+  minimize: minimize$1,
+  // status-service.js
+  succeed: succeed$1,
+  fail: fail$1,
+  start: start$1,
+  // task-service.js
+  getTaskResultWaiting: getTaskResultWaiting$1,
+  getTaskResultPolling: getTaskResultPolling$1,
+  // user-service.js
+  loginCall: loginCall$1,
+  logoutCall: logoutCall$1,
+  getCurrentUserInfo: getCurrentUserInfo$1,
+  registerUser: registerUser$1,
+  changeUserInfo: changeUserInfo$1,
+  changeUserPassword: changeUserPassword$1,
+  adminGetUserInfo: adminGetUserInfo$1,
+  deleteUser: deleteUser$1,
+  activateUserAccount: activateUserAccount$1,
+  deactivateUserAccount: deactivateUserAccount$1,
+  grantUserAdminRights: grantUserAdminRights$1,
+  revokeUserAdminRights: revokeUserAdminRights$1,
+  resetUserPassword: resetUserPassword$1,
+  getUserInfo: getUserInfo$1,
+  currentUser: currentUser$1,
+  checkLoggedIn: checkLoggedIn$1,
+  checkAdminLoggedIn: checkAdminLoggedIn$1,
+  logOut: logOut$1,
+  // utils.js
+  sleep: sleep$1,
+  getUniqueName: getUniqueName$1,
+  validateYears: validateYears$1,
+  projectID: projectID$1,
+  hasData: hasData$1,
+  hasPrograms: hasPrograms$1,
+  simStart: simStart$1,
+  simEnd: simEnd$1,
+  simYears: simYears$1,
+  dataStart: dataStart$1,
+  dataEnd: dataEnd$1,
+  dataYears: dataYears$1,
+  projectionYears: projectionYears$1,
+  activePops: activePops$1,
+  updateSorting: updateSorting$1,
+  rpcs,
   graphs,
-  rpc: rpcs,
   status,
   user,
   tasks,
