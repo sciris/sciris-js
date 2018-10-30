@@ -62,7 +62,6 @@ You can also listen to events occured inside sciris by:
 import { EventBus } from 'sciris-vue';
 
 EventBus.$on(event, callback)
-
 ```
 
 Events include
