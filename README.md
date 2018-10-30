@@ -5,7 +5,7 @@
 npm install --save git+https://github.com/sciris/sciris-js.git
 ```
 
-## Rebuild after updates 
+## Rebuild after updates during development
 
 ```
 npm run build
