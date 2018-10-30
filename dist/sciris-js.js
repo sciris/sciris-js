@@ -14398,7 +14398,7 @@
     }
   }
 
-  var css = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.loader-box {\n  display: flex;\n  justify-content: center;\n}\n.overlay-box {\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  justify-content: space-evenly;\n}\n";
+  var css = ".loader-box {\n  display: flex;\n  justify-content: center; }\n\n.overlay-box {\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  justify-content: space-evenly; }\n";
   styleInject(css);
 
   var css$1 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.hollow-dots-spinner, .hollow-dots-spinner * {\n  box-sizing: border-box;\n}\n\n.hollow-dots-spinner {\n  height: 15px;\n  width: calc(30px * 3);\n}\n\n.hollow-dots-spinner .dot {\n  width: 15px;\n  height: 15px;\n  margin: 0 calc(15px / 2);\n  border: calc(15px / 5) solid #ff1d5e;\n  border-radius: 50%;\n  float: left;\n  transform: scale(0);\n  animation: hollow-dots-spinner-animation 1000ms ease infinite 0ms;\n}\n\n.hollow-dots-spinner .dot:nth-child(1) {\n  animation-delay: calc(300ms * 1);\n}\n\n.hollow-dots-spinner .dot:nth-child(2) {\n  animation-delay: calc(300ms * 2);\n}\n\n.hollow-dots-spinner .dot:nth-child(3) {\n  animation-delay: calc(300ms * 3);\n\n}\n\n@keyframes hollow-dots-spinner-animation {\n  50% {\n    transform: scale(1);\n    opacity: 1;\n  }\n  100% {\n    opacity: 0;\n  }\n}\n";
@@ -14511,7 +14511,7 @@
   var css$20 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.atom-spinner, .atom-spinner * {\n  box-sizing: border-box;\n}\n\n.atom-spinner {\n  height: 60px;\n  width: 60px;\n  overflow: hidden;\n}\n\n.atom-spinner .spinner-inner {\n  position: relative;\n  display: block;\n  height: 100%;\n  width: 100%;\n}\n\n.atom-spinner .spinner-circle {\n  display: block;\n  position: absolute;\n  color: #ff1d5e;\n  font-size: calc(60px * 0.24);\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n}\n\n.atom-spinner .spinner-line {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  border-radius: 50%;\n  animation-duration: 1s;\n  border-left-width: calc(60px / 25);\n  border-top-width: calc(60px / 25);\n  border-left-color: #ff1d5e;\n  border-left-style: solid;\n  border-top-style: solid;\n  border-top-color: transparent;\n}\n\n.atom-spinner .spinner-line:nth-child(1) {\n  animation: atom-spinner-animation-1 1s linear infinite;\n  transform: rotateZ(120deg) rotateX(66deg) rotateZ(0deg);\n}\n\n.atom-spinner .spinner-line:nth-child(2) {\n  animation: atom-spinner-animation-2 1s linear infinite;\n  transform: rotateZ(240deg) rotateX(66deg) rotateZ(0deg);\n}\n\n.atom-spinner .spinner-line:nth-child(3) {\n  animation: atom-spinner-animation-3 1s linear infinite;\n  transform: rotateZ(360deg) rotateX(66deg) rotateZ(0deg);\n}\n\n@keyframes atom-spinner-animation-1 {\n  100% {\n    transform: rotateZ(120deg) rotateX(66deg) rotateZ(360deg);\n  }\n}\n\n@keyframes atom-spinner-animation-2 {\n  100% {\n    transform: rotateZ(240deg) rotateX(66deg) rotateZ(360deg);\n  }\n}\n\n@keyframes atom-spinner-animation-3 {\n  100% {\n    transform: rotateZ(360deg) rotateX(66deg) rotateZ(360deg);\n  }\n}\n\n\n";
   styleInject(css$20);
 
-  var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('modal',{staticStyle:{"opacity":"1.0"},attrs:{"name":"popup-spinner","height":_vm.modalHeight,"width":_vm.modalWidth,"click-to-close":false},on:{"before-open":_vm.beforeOpen,"before-close":_vm.beforeClose}},[_c('div',{staticClass:"overlay-box"},[_c('div',{staticClass:"loader-box"},[_c('fulfilling-bouncing-circle-spinner',{attrs:{"color":_vm.color,"size":_vm.spinnerSize,"animation-duration":2000}})],1),_vm._v(" "),(_vm.title !== '')?_c('div',{style:(_vm.titleStyle)},[_vm._v(" "+_vm._s(_vm.title)+" ")]):_vm._e(),_vm._v(" "),(_vm.hasCancelButton)?_c('div',{staticStyle:{"padding":"13px"}},[_c('button',{style:(_vm.cancelButtonStyle),on:{"click":_vm.cancel}},[_vm._v("Cancel")])]):_vm._e()])])},staticRenderFns: [],
+  var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('modal',{staticStyle:{"opacity":"1.0"},attrs:{"name":"popup-spinner","height":_vm.modalHeight,"width":_vm.modalWidth,"click-to-close":false},on:{"before-open":_vm.beforeOpen,"before-close":_vm.beforeClose}},[_c('div',{staticClass:"overlay-box"},[_c('div',{staticClass:"loader-box"},[_c('fulfilling-bouncing-circle-spinner',{attrs:{"color":_vm.color,"size":_vm.spinnerSize,"animation-duration":2000}})],1),_vm._v(" "),(_vm.title !== '')?_c('div',{style:(_vm.titleStyle)},[_vm._v(" "+_vm._s(_vm.title)+" ")]):_vm._e(),_vm._v(" "),(_vm.hasCancelButton)?_c('div',{staticStyle:{"padding":"13px"}},[_c('button',{style:(_vm.cancelButtonStyle),on:{"click":_vm.cancel}},[_vm._v("Cancel")])]):_vm._e()])])},staticRenderFns: [],_scopeId: 'data-v-3515e57d',
     name: 'PopupSpinner',
 
     components: {
@@ -14640,106 +14640,100 @@
   var css$21 = ".list-item {\n  display: inline-block;\n  margin-right: 10px; }\n\n.list-enter-active,\n.list-leave-active {\n  transition: all 1s; }\n\n.list-enter,\n.list-leave-to {\n  opacity: 0;\n  transform: translateY(-30px); }\n";
   styleInject(css$21);
 
-  var css$22 = ".fade-enter-active,\n.fade-leave-active {\n  transition: opacity .3s; }\n\n.fade-enter,\n.fade-leave-to {\n  opacity: 0; }\n\n.close-button,\n.close-button:hover {\n  background: none;\n  line-height: 0em;\n  padding: 5px 5px;\n  margin-left: 10px;\n  border-radius: 3px; }\n\n.close-button:hover {\n  background: #ffffff63;\n  color: #737373; }\n\n.alert {\n  border: 0;\n  border-radius: 0;\n  color: #FFFFFF;\n  padding: 20px 15px;\n  font-size: 14px;\n  z-index: 100;\n  display: inline-block;\n  position: fixed;\n  transition: all 0.5s ease-in-out; }\n  .container .alert {\n    border-radius: 4px; }\n  .alert.center {\n    left: 0px;\n    right: 0px;\n    margin: 0 auto; }\n  .alert.left {\n    left: 20px; }\n  .alert.right {\n    right: 20px; }\n  .container .alert {\n    border-radius: 0px; }\n  .navbar .alert {\n    border-radius: 0;\n    left: 0;\n    position: absolute;\n    right: 0;\n    top: 85px;\n    width: 100%;\n    z-index: 3; }\n  .navbar:not(.navbar-transparent) .alert {\n    top: 70px; }\n  .alert .alert-icon {\n    font-size: 30px;\n    margin-right: 5px; }\n  .alert .close ~ span {\n    display: inline-block;\n    max-width: 89%; }\n  .alert[data-notify=\"container\"] {\n    /*max-width: 400px;*/\n    padding: 0;\n    border-radius: 2px; }\n  .alert span[data-notify=\"icon\"] {\n    font-size: 30px;\n    display: block;\n    left: 15px;\n    position: absolute;\n    top: 50%;\n    margin-top: -20px; }\n\n.alert-info {\n  background-color: #7CE4FE;\n  color: #3091B2; }\n\n.alert-success {\n  background-color: #008800;\n  color: #fff; }\n\n.alert-warning {\n  background-color: #e29722;\n  color: #fff; }\n\n.alert-danger {\n  background-color: #FF8F5E;\n  color: #B33C12; }\n\n.message-box {\n  font-size: 15px;\n  align-content: center;\n  max-width: 400px;\n  min-width: 150px;\n  padding-left: 10px;\n  flex-grow: 1; }\n\n.message-box .message {\n  line-height: 1.5em;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  width: 100%; }\n\n.notification-box {\n  display: flex;\n  justify-content: flex-start;\n  padding: 10px 15px; }\n\n.notification-box > div {\n  align-self: center; }\n\n.btn__trans {\n  font-size: 18px;\n  color: white;\n  background-color: transparent;\n  background-repeat: no-repeat;\n  border: none;\n  cursor: pointer;\n  overflow: hidden;\n  background-image: none;\n  outline: none; }\n";
+  var css$22 = ".fade-enter-active,\n.fade-leave-active {\n  transition: opacity .3s; }\n\n.fade-enter,\n.fade-leave-to {\n  opacity: 0; }\n\n.close-button,\n.close-button:hover {\n  background: none;\n  line-height: 0em;\n  padding: 5px 5px;\n  margin-left: 10px;\n  border-radius: 3px; }\n\n.close-button:hover {\n  background: #ffffff63;\n  color: #737373; }\n\n.alert {\n  border: 0;\n  border-radius: 0;\n  color: #FFFFFF;\n  padding: 20px 15px;\n  font-size: 14px;\n  z-index: 100;\n  display: inline-block;\n  position: fixed;\n  transition: all 0.5s ease-in-out; }\n  .container .alert {\n    border-radius: 4px; }\n  .alert.center {\n    left: 0px;\n    right: 0px;\n    margin: 0 auto; }\n  .alert.left {\n    left: 20px; }\n  .alert.right {\n    right: 20px; }\n  .container .alert {\n    border-radius: 0px; }\n  .alert .alert-icon {\n    font-size: 30px;\n    margin-right: 5px; }\n  .alert .close ~ span {\n    display: inline-block;\n    max-width: 89%; }\n  .alert[data-notify=\"container\"] {\n    padding: 0;\n    border-radius: 2px; }\n  .alert span[data-notify=\"icon\"] {\n    font-size: 30px;\n    display: block;\n    left: 15px;\n    position: absolute;\n    top: 50%;\n    margin-top: -20px; }\n\n.alert-info {\n  background-color: #7CE4FE;\n  color: #3091B2; }\n\n.alert-success {\n  background-color: #008800;\n  color: #fff; }\n\n.alert-warning {\n  background-color: #e29722;\n  color: #fff; }\n\n.alert-danger {\n  background-color: #FF8F5E;\n  color: #B33C12; }\n\n.message-box {\n  font-size: 15px;\n  align-content: center;\n  max-width: 400px;\n  min-width: 150px;\n  padding-left: 10px;\n  flex-grow: 1; }\n\n.message-box .message {\n  line-height: 1.5em;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  width: 100%; }\n\n.notification-box {\n  display: flex;\n  justify-content: flex-start;\n  padding: 10px 15px; }\n\n.notification-box > div {\n  align-self: center; }\n\n.btn__trans {\n  font-size: 18px;\n  color: white;\n  background-color: transparent;\n  background-repeat: no-repeat;\n  border: none;\n  cursor: pointer;\n  overflow: hidden;\n  background-image: none;\n  outline: none; }\n";
   styleInject(css$22);
 
-  var css$23 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n \n@import \"https://cdn.jsdelivr.net/gh/lykmapipo/themify-icons@0.1.2/css/themify-icons.css\";\n";
+  var css$23 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n \n@import \"https://cdn.jsdelivr.net/gh/lykmapipo/themify-icons@0.1.2/css/themify-icons.css\";\n";
   styleInject(css$23);
 
-  var Notification = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"alert open alert-with-icon",class:[_vm.verticalAlign, _vm.horizontalAlign, _vm.alertType],style:(_vm.customPosition),attrs:{"data-notify":"container","role":"alert","data-notify-position":"top-center"}},[_c('div',{staticClass:"notification-box"},[_c('div',[_c('span',{staticClass:"alert-icon",class:_vm.icon,attrs:{"data-notify":"message"}})]),_vm._v(" "),_c('div',{staticClass:"message-box"},[_c('div',{staticClass:"message",attrs:{"data-notify":"message"},domProps:{"innerHTML":_vm._s(_vm.message)}})]),_vm._v(" "),_c('div',[_c('button',{staticClass:"btn__trans close-button",attrs:{"aria-hidden":"true","data-notify":"dismiss"},on:{"click":_vm.close}},[_c('i',{staticClass:"ti-close"})])])])])},staticRenderFns: [],_scopeId: 'data-v-9084a0ca',
-      name: 'notification',
-      props: {
-        message: String,
-        icon: {
-          type: String,
-          default: 'ti-info-alt'
-        },
-        verticalAlign: {
-          type: String,
-          default: 'top'
-        },
-        horizontalAlign: {
-          type: String,
-          default: 'center'
-        },
-        type: {
-          type: String,
-          default: 'info'
-        },
-        timeout: {
-          type: Number,
-          default: 2000
-        },
-        timestamp: {
-          type: Date,
-          default: () => new Date()
-        },      
+  var Notification = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"alert open alert-with-icon",class:[_vm.verticalAlign, _vm.horizontalAlign, _vm.alertType],style:(_vm.customPosition),attrs:{"role":"alert","data-notify":"container","data-notify-position":"top-center"}},[_c('div',{staticClass:"notification-box"},[_c('div',[_c('span',{staticClass:"alert-icon",class:_vm.icon,attrs:{"data-notify":"message"}})]),_vm._v(" "),_c('div',{staticClass:"message-box"},[_c('div',{staticClass:"message",attrs:{"data-notify":"message"},domProps:{"innerHTML":_vm._s(_vm.message)}})]),_vm._v(" "),_c('div',[_c('button',{staticClass:"btn__trans close-button",attrs:{"aria-hidden":"true","data-notify":"dismiss"},on:{"click":_vm.close}},[_c('i',{staticClass:"ti-close"})])])])])},staticRenderFns: [],_scopeId: 'data-v-9084a0ca',
+    name: 'notification',
+    props: {
+      message: String,
+      icon: {
+        type: String,
+        default: 'ti-info-alt'
       },
-      data () {
-        return {}
+      verticalAlign: {
+        type: String,
+        default: 'top'
       },
-      computed: {
-        hasIcon () {
-          return this.icon && this.icon.length > 0
-        },
-        alertType () {
-          return `alert-${this.type}`
-        },
-        customPosition () {
-          let initialMargin = 20;
-          let alertHeight = 60;
-          let sameAlertsCount = this.$notifications.state.filter((alert) => {
-            return alert.horizontalAlign === this.horizontalAlign && alert.verticalAlign === this.verticalAlign
-          }).length;
-          let pixels = (sameAlertsCount - 1) * alertHeight + initialMargin;
-          let styles = {};
-          if (this.verticalAlign === 'top') {
-            styles.top = `${pixels}px`;
-          } else {
-            styles.bottom = `${pixels}px`;
-          }
-          return styles
+      horizontalAlign: {
+        type: String,
+        default: 'center'
+      },
+      type: {
+        type: String,
+        default: 'info'
+      },
+      timeout: {
+        type: Number,
+        default: 2000
+      },
+      timestamp: {
+        type: Date,
+        default: () => new Date()
+      },      
+    },
+    data () {
+      return {}
+    },
+    computed: {
+      hasIcon () {
+        return this.icon && this.icon.length > 0
+      },
+      alertType () {
+        return `alert-${this.type}`
+      },
+      customPosition () {
+        let initialMargin = 20;
+        let alertHeight = 60;
+        let sameAlertsCount = this.$notifications.state.filter((alert) => {
+          return alert.horizontalAlign === this.horizontalAlign && alert.verticalAlign === this.verticalAlign
+        }).length;
+        let pixels = (sameAlertsCount - 1) * alertHeight + initialMargin;
+        let styles = {};
+        if (this.verticalAlign === 'top') {
+          styles.top = `${pixels}px`;
+        } else {
+          styles.bottom = `${pixels}px`;
         }
-      },
-      methods: {
-        close () {
-  //        console.log('Trying to close: ', this.timestamp)
-          this.$parent.$emit('on-close', this.timestamp);  
-        }
-      },
-      mounted () {
-        if (this.timeout) {
-          setTimeout(this.close, this.timeout);
-        }
+        return styles
+      }
+    },
+    methods: {
+      close () {
+        this.$parent.$emit('on-close', this.timestamp);  
+      }
+    },
+    mounted () {
+      if (this.timeout) {
+        setTimeout(this.close, this.timeout);
       }
     }
+  }
 
   var Notifications = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"notifications"},[_c('transition-group',{attrs:{"name":"list"},on:{"on-close":_vm.removeNotification}},_vm._l((_vm.notifications),function(notification,index){return _c('notification',{key:index,attrs:{"message":notification.message,"icon":notification.icon,"type":notification.type,"vertical-align":notification.verticalAlign,"horizontal-align":notification.horizontalAlign,"timeout":notification.timeout,"timestamp":notification.timestamp}})}))],1)},staticRenderFns: [],
-      components: {
-        Notification
+    components: {
+      Notification
+    },
+    data () {
+      return {
+        notifications: this.$notifications.state
+      }
+    },
+    methods: {
+      removeNotification (timestamp) {
+        this.$notifications.removeNotification(timestamp);
       },
-      data () {
-        return {
-          notifications: this.$notifications.state
-        }
-      },
-      methods: {
-        removeNotification (timestamp) {
-  //        console.log('Pre-removing notification: ', timestamp)
-          this.$notifications.removeNotification(timestamp);
-          
-          // Hack to address "sticky" notifications: after a removal, clear all 
-          // notifications after 2 seconds.
-  //        setTimeout(this.clearAllNotifications, 2000)
-        },
-        
-        clearAllNotifications () {
-          this.$notifications.clear();
-        }
+      
+      clearAllNotifications () {
+        this.$notifications.clear();
       }
     }
+  }
 
-  var css$24 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.dropdown {\n  cursor: pointer;\n}\n";
+  var css$24 = ".dropdown {\n  cursor: pointer; }\n";
   styleInject(css$24);
 
   var Dropdown = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{directives:[{name:"click-outside",rawName:"v-click-outside",value:(_vm.closeDropDown),expression:"closeDropDown"}],staticClass:"dropdown",class:{open:_vm.isOpen},on:{"click":_vm.toggleDropDown}},[_c('a',{staticClass:"dropdown-toggle btn-rotate",attrs:{"data-toggle":"dropdown","href":"javascript:void(0)"}},[_vm._t("title",[_c('i',{class:_vm.icon}),_vm._v(" "),_c('p',{staticClass:"notification"},[_vm._v(_vm._s(_vm.title)+" "),_c('b',{staticClass:"caret"})])])],2),_vm._v(" "),_c('ul',{staticClass:"dropdown-menu"},[_vm._t("default")],2)])},staticRenderFns: [],

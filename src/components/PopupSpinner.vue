@@ -171,15 +171,7 @@ Last update: 2018-08-13
 
   }
 </script>
-<style>
-.loader-box {
-  display: flex;
-  justify-content: center;
-}
-.overlay-box {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: space-evenly;
-}
+
+<style lang="scss" scoped>
+@import "../styles/popupspinner.scss"
 </style>
