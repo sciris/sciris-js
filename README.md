@@ -37,11 +37,19 @@ options = {
   },
   progressbar: {
     disable: false,
-    options: {...}
+    options: {
+      color: 'rgb(0, 0, 255)',
+      failedColor: 'red',
+      thickness: '3px',
+      transition: {
+        speed: '0.2s',
+        opacity: '0.6s',
+        termination: 300
+      } 
+    }
   }
 }
 ```
-
 
 You now have access to various scris tools such as: 
 
