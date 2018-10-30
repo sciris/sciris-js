@@ -23,20 +23,20 @@ const events = {
 };
 const EventBus = new Vue();
 EventBus.$on(events.EVENT_STATUS_START, vm => {
-  vm.$spinner.start();
+  if (vm.$spinner) vm.$spinner.start();
 });
 EventBus.$on(events.EVENT_STATUS_UPDATE, (vm, progress) => {
-  vm.$Progress.set(progress);
+  if (vm.$Progress) vm.$Progress.set(progress);
 });
 EventBus.$on(events.EVENT_STATUS_SUCCEED, (vm, notif) => {
-  vm.$spinner.stop();
-  vm.$Progress.finish();
-  if (notif) vm.$notifications.notify(notif);
+  if (vm.$spinner) vm.$spinner.stop();
+  if (vm.$Progress) vm.$Progress.finish();
+  if (notif && vm.$notifications) vm.$notifications.notify(notif);
 });
 EventBus.$on(events.EVENT_STATUS_FAIL, (vm, notif) => {
-  vm.$spinner.stop();
-  vm.$Progress.fail();
-  if (notif) vm.$notifications.notify(notif);
+  if (vm.$spinner) vm.$spinner.stop();
+  if (vm.$Progress) vm.$Progress.fail();
+  if (notif && vm.$notifications) vm.$notifications.notify(notif);
 });
 
 // progress-indicator-service.js -- functions for showing progress
