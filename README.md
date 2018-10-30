@@ -25,6 +25,24 @@ import sciris from 'sciris-js';
 Vue.use(sciris.ScirisVue, options)
 ```
 
+The options can are used to control specific features:
+
+```
+options = {
+  notifications: {
+    disable: false,
+  },
+  spinner: {
+    disable: false,
+  },
+  progressbar: {
+    disable: false,
+    options: {...}
+  }
+}
+```
+
+
 You now have access to various scris tools such as: 
 
 ```
