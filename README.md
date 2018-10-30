@@ -1,8 +1,8 @@
-# sciris-vue
+# sciris-js
 
 ## Project setup
 ```
-npm install --save git+https://[apitoken]:x-oauth-basic@github.com/sciris/sciris-vue.git
+npm install --save git+https://github.com/sciris/sciris-js.git
 ```
 
 ## Rebuild after updates 
@@ -11,25 +11,50 @@ npm install --save git+https://[apitoken]:x-oauth-basic@github.com/sciris/sciris
 npm run build
 ```
 
-this will use bili to build for npm 
-
+[billi](https://bili.egoist.moe/#/) is used for building this library.
 
 ## Sciris Usage
 
 ```
-import sciris from 'sciris-vue';
+import Vue from 'vue'
+import sciris from 'sciris-js';
+
+// If you want to install the vue components used by sciris-js in your app.
+// options
+
+Vue.use(sciris.ScirisVue, options)
 ```
 
-after which you'll have access to various sciris tools such as:
+You now have access to various scris tools such as: 
 
 ```
-  sciris.graphs
-  sciris.rpc
-  sciris.status
-  sciris.user
-  sciris.tasks
-  sciris.utils
+sciris.graphs
+sciris.rpcs
+sciris.status
+sciris.user
+sciris.tasks
+sciris.utils
 ```
+
+You can refrence the functions provided by sciris directly via the shorthands: 
+
+```
+sciris.rpc(...)
+sciris.succeed(...)
+sciris.loginCall(...)
+```
+
+
+Or you can use the full paths of the functions
+
+```
+sciris.rpcs.rpc(...)
+sciris.rpcs.download(...)
+sciris.status.succeed(...)
+sciris.user.loginCall(...)
+```
+
+## Events
 
 You can also listen to events occured inside sciris by:
 
@@ -40,11 +65,11 @@ EventBus.$on(event, callback)
 
 ```
 
-events include
+Events include
 
-```
-'status:start'		=> A task has been started 
-'status:update'		=> Porgress of a task has been updated 
-'status:success'	=> A task has succeeded. It will pass a notification object if it can.
-'status:fail'		=> A task has failed. It will pass a notification object if it can.
-```
+|Name|Args|Description|
+|:---|---|---|
+|'status:start'|`vm`| Task has been started|
+|'status:update'|`vm`, `progress` |Porgress of a task has been updated  |
+|'status:success'| `vm`, `notif` |A task has succeeded. It will pass a notification object if it can. |
+|'status:fail'| `vm`, `notif` |A task has failed. It will pass a notification object if it can. | 
