@@ -62,14 +62,13 @@ You can also listen to events occured inside sciris by:
 import { EventBus } from 'sciris-vue';
 
 EventBus.$on(event, callback)
-
 ```
 
 Events include
 
 |Name|Args|Description|
 |:---|---|---|
-|'status:start'|`vm`| Task has been started|
-|'status:update'|`vm`, `progress` |Porgress of a task has been updated  |
-|'status:success'| `vm`, `notif` |A task has succeeded. It will pass a notification object if it can. |
-|'status:fail'| `vm`, `notif` |A task has failed. It will pass a notification object if it can. | 
+|status:start|`vm`| Task has been started|
+|status:update|`vm`, `progress` |Porgress of a task has been updated  |
+|status:success| `vm`, `notif` |A task has succeeded. It will pass a notification object if it can. |
+|status:fail| `vm`, `notif` |A task has failed. It will pass a notification object if it can. | 
