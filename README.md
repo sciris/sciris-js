@@ -85,9 +85,9 @@ sciris.user.loginCall(...)
 You can also listen to events occured inside sciris by:
 
 ```
-import { EventBus } from 'sciris-vue';
+import sciris from 'sciris-js';
 
-EventBus.$on(event, callback)
+sciris.EventBus.$on(event, callback)
 ```
 
 Events include
