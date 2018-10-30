@@ -15,7 +15,7 @@ npm run build
 
 ## Sciris Usage
 
-```
+```js
 import Vue from 'vue'
 import sciris from 'sciris-js';
 
@@ -27,7 +27,7 @@ Vue.use(sciris.ScirisVue, options)
 
 The options can are used to control specific features:
 
-```
+```js
 options = {
   notifications: {
     disable: false,
@@ -53,7 +53,7 @@ options = {
 
 You now have access to various scris tools such as: 
 
-```
+```js
 sciris.graphs
 sciris.rpcs
 sciris.status
@@ -64,7 +64,7 @@ sciris.utils
 
 You can refrence the functions provided by sciris directly via the shorthands: 
 
-```
+```js
 sciris.rpc(...)
 sciris.succeed(...)
 sciris.loginCall(...)
@@ -73,7 +73,7 @@ sciris.loginCall(...)
 
 Or you can use the full paths of the functions
 
-```
+```js
 sciris.rpcs.rpc(...)
 sciris.rpcs.download(...)
 sciris.status.succeed(...)
@@ -84,7 +84,7 @@ sciris.user.loginCall(...)
 
 You can also listen to events occured inside sciris by:
 
-```
+```js
 import sciris from 'sciris-js';
 
 sciris.EventBus.$on(event, callback)
