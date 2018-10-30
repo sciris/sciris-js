@@ -14820,19 +14820,20 @@
   }
 
   function install(Vue, options = {}) {
-    if (!options.disableNotifications) {
+    if (!options.notifications || !options.notifications.disabled) {
       setupNotifications(Vue);
       Vue.component('Notifications', Notifications);
     }
 
-    if (!options.disableSpinner && !this.spinnerInstalled) {
+    if ((!options.spinner || !options.spinner.disabled) && !this.spinnerInstalled) {
       this.spinnerInstalled = true;
       setupSpinner(Vue);
       Vue.component('PopupSpinner', PopupSpinner);
     }
 
-    if (!options.disableProgress) {
-      setupProgressBar(Vue, options.progressBarOptions);
+    if (!options.progressbar || !options.progressbar.disabled) {
+      var progressbarOptions = options.progressbar ? options.progressbar.options : {};
+      setupProgressBar(Vue, progressbarOptions);
     }
 
     Vue.component('Dropdown', Dropdown);
