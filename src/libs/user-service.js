@@ -115,10 +115,6 @@ function getUserInfo(store) {
   })
 }
 
-function currentUser() {
-    return store.state.currentUser
-}
-
 function checkLoggedIn() {
   if (this.currentUser.displayname === undefined)
     return false
@@ -131,21 +127,6 @@ function checkAdminLoggedIn() {
   if (this.checkLoggedIn()) {
     return this.currentUser.admin
   }
-}
-
-function logOut(router) {
-  // Do the actual logout RPC.
-  logoutCall()
-  .then(response => {
-    // Update the user info.
-    getUserInfo()
-
-    // Clear out the active project.
-    store.commit('newActiveProject', {})
-
-    // Navigate to the login page automatically.
-    router.push('/login')
-  })
 }
 
 export default {
@@ -163,8 +144,6 @@ export default {
   revokeUserAdminRights,
   resetUserPassword,
   getUserInfo, 
-  currentUser, 
-  checkLoggedIn, 
-  checkAdminLoggedIn,
-  logOut
+  checkLoggedIn,
+  checkAdminLoggedIn
 }

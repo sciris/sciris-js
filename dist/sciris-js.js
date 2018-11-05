@@ -11388,10 +11388,6 @@
     });
   }
 
-  function currentUser() {
-    return store.state.currentUser;
-  }
-
   function checkLoggedIn() {
     if (this.currentUser.displayname === undefined) return false;else return true;
   }
@@ -11402,18 +11398,6 @@
     if (this.checkLoggedIn()) {
       return this.currentUser.admin;
     }
-  }
-
-  function logOut(router) {
-    // Do the actual logout RPC.
-    logoutCall().then(response => {
-      // Update the user info.
-      getUserInfo(); // Clear out the active project.
-
-      store.commit('newActiveProject', {}); // Navigate to the login page automatically.
-
-      router.push('/login');
-    });
   }
 
   var user = {
@@ -11431,10 +11415,8 @@
     revokeUserAdminRights,
     resetUserPassword,
     getUserInfo,
-    currentUser,
     checkLoggedIn,
-    checkAdminLoggedIn,
-    logOut
+    checkAdminLoggedIn
   };
 
   var vueProgressbar = createCommonjsModule(function (module, exports) {
@@ -14761,7 +14743,6 @@
 
     // here the notifications will be added
     removeNotification(timestamp) {
-      //    console.log('Removing notification: ', timestamp)
       const indexToDelete = this.state.findIndex(n => n.timestamp === timestamp);
 
       if (indexToDelete !== -1) {
@@ -14772,18 +14753,15 @@
     notify(notification) {
       // Create a timestamp to serve as a unique ID for the notification.
       notification.timestamp = new Date();
-      notification.timestamp.setMilliseconds(notification.timestamp.getMilliseconds() + this.state.length); //    console.log('Adding notification: ', notification.timestamp)    
-
+      notification.timestamp.setMilliseconds(notification.timestamp.getMilliseconds() + this.state.length);
       this.state.push(notification);
     },
 
     clear() {
-      //    console.log('Removing all notifications: ', this.state.length)
       // This removes all of them in a way that the GUI keeps up.
       while (this.state.length > 0) {
         this.removeNotification(this.state[0].timestamp);
-      } //    this.state = []  // This way destroys GUI state.
-
+      }
     }
 
   };
@@ -14888,10 +14866,10 @@
   const revokeUserAdminRights$1 = user.revokeUserAdminRights;
   const resetUserPassword$1 = user.resetUserPassword;
   const getUserInfo$1 = user.getUserInfo;
-  const currentUser$1 = user.currentUser;
+  const currentUser = user.currentUser;
   const checkLoggedIn$1 = user.checkLoggedIn;
   const checkAdminLoggedIn$1 = user.checkAdminLoggedIn;
-  const logOut$1 = user.logOut;
+  const logOut = user.logOut;
   const sleep$1 = utils.sleep;
   const getUniqueName$1 = utils.getUniqueName;
   const validateYears$1 = utils.validateYears;
@@ -14950,10 +14928,10 @@
     revokeUserAdminRights: revokeUserAdminRights$1,
     resetUserPassword: resetUserPassword$1,
     getUserInfo: getUserInfo$1,
-    currentUser: currentUser$1,
+    currentUser,
     checkLoggedIn: checkLoggedIn$1,
     checkAdminLoggedIn: checkAdminLoggedIn$1,
-    logOut: logOut$1,
+    logOut,
     // utils.js
     sleep: sleep$1,
     getUniqueName: getUniqueName$1,
