@@ -15,6 +15,7 @@ var sha224 = _interopDefault(require('crypto-js/sha224'));
 var epicSpinners = require('epic-spinners');
 var VueProgressBar = _interopDefault(require('vue-progressbar'));
 var VModal = _interopDefault(require('vue-js-modal'));
+var vueClickaway = require('vue-clickaway');
 var DialogDrag = _interopDefault(require('vue-dialog-drag'));
 
 const EVENT_STATUS_START = 'status:start';
@@ -37,12 +38,12 @@ EventBus.$on(events.EVENT_STATUS_UPDATE, (vm, progress) => {
 EventBus.$on(events.EVENT_STATUS_SUCCEED, (vm, notif) => {
   if (vm.$spinner) vm.$spinner.stop();
   if (vm.$Progress) vm.$Progress.finish();
-  if (notif && vm.$notifications) vm.$notifications.notify(notif);
+  if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
 });
 EventBus.$on(events.EVENT_STATUS_FAIL, (vm, notif) => {
   if (vm.$spinner) vm.$spinner.stop();
   if (vm.$Progress) vm.$Progress.fail();
-  if (notif && vm.$notifications) vm.$notifications.notify(notif);
+  if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
 });
 
 // progress-indicator-service.js -- functions for showing progress
@@ -1059,6 +1060,88 @@ var user = {
   checkAdminLoggedIn
 };
 
+/*
+ * Heftier functions that are shared across pages
+ */
+
+function updateSets(vm) {
+  return new Promise((resolve, reject) => {
+    console.log('updateSets() called');
+    rpcs.rpc('get_parset_info', [vm.projectID]) // Get the current user's parsets from the server.
+    .then(response => {
+      vm.parsetOptions = response.data; // Set the scenarios to what we received.
+
+      if (vm.parsetOptions.indexOf(vm.activeParset) === -1) {
+        console.log('Parameter set ' + vm.activeParset + ' no longer found');
+        vm.activeParset = vm.parsetOptions[0]; // If the active parset no longer exists in the array, reset it
+      } else {
+        console.log('Parameter set ' + vm.activeParset + ' still found');
+      }
+
+      vm.newParsetName = vm.activeParset; // WARNING, KLUDGY
+
+      console.log('Parset options: ' + vm.parsetOptions);
+      console.log('Active parset: ' + vm.activeParset);
+      rpcs.rpc('get_progset_info', [vm.projectID]) // Get the current user's progsets from the server.
+      .then(response => {
+        vm.progsetOptions = response.data; // Set the scenarios to what we received.
+
+        if (vm.progsetOptions.indexOf(vm.activeProgset) === -1) {
+          console.log('Program set ' + vm.activeProgset + ' no longer found');
+          vm.activeProgset = vm.progsetOptions[0]; // If the active parset no longer exists in the array, reset it
+        } else {
+          console.log('Program set ' + vm.activeProgset + ' still found');
+        }
+
+        vm.newProgsetName = vm.activeProgset; // WARNING, KLUDGY
+
+        console.log('Progset options: ' + vm.progsetOptions);
+        console.log('Active progset: ' + vm.activeProgset);
+        resolve(response);
+      }).catch(error => {
+        status.fail(this, 'Could not get progset info', error);
+        reject(error);
+      });
+    }).catch(error => {
+      status.fail(this, 'Could not get parset info', error);
+      reject(error);
+    });
+  }).catch(error => {
+    status.fail(this, 'Could not get parset info', error);
+    reject(error);
+  });
+}
+
+function exportGraphs(vm) {
+  return new Promise((resolve, reject) => {
+    console.log('exportGraphs() called');
+    rpcs.download('download_graphs', [vm.$store.state.currentUser.username]).then(response => {
+      resolve(response);
+    }).catch(error => {
+      status.fail(vm, 'Could not download graphs', error);
+      reject(error);
+    });
+  });
+}
+
+function exportResults(vm, serverDatastoreId) {
+  return new Promise((resolve, reject) => {
+    console.log('exportResults()');
+    rpcs.download('export_results', [serverDatastoreId, vm.$store.state.currentUser.username]).then(response => {
+      resolve(response);
+    }).catch(error => {
+      status.fail(vm, 'Could not export results', error);
+      reject(error);
+    });
+  });
+}
+
+var shared = {
+  updateSets,
+  exportGraphs,
+  exportResults
+};
+
 function styleInject(css, ref) {
   if ( ref === void 0 ) ref = {};
   var insertAt = ref.insertAt;
@@ -1238,7 +1321,7 @@ var Notification = {render: function(){var _vm=this;var _h=_vm.$createElement;va
     },
     horizontalAlign: {
       type: String,
-      default: 'center'
+      default: 'right'
     },
     type: {
       type: String,
@@ -1311,17 +1394,26 @@ var Notifications = {render: function(){var _vm=this;var _h=_vm.$createElement;v
   }
 }
 
-var css$4 = ".dropdown {\n  cursor: pointer; }\n";
+var css$4 = ".dropdown-toggle {\n  cursor: pointer;\n  display: flex;\n  justify-content: space-evenly;\n  text-transform: initial; }\n\n.dropdown-toggle:after {\n  position: absolute;\n  right: 10px;\n  top: 50%;\n  margin-top: -2px; }\n\n.dropdown-menu {\n  margin-top: 20px; }\n";
 styleInject(css$4);
 
-var Dropdown = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{directives:[{name:"click-outside",rawName:"v-click-outside",value:(_vm.closeDropDown),expression:"closeDropDown"}],staticClass:"dropdown",class:{open:_vm.isOpen},on:{"click":_vm.toggleDropDown}},[_c('a',{staticClass:"dropdown-toggle btn-rotate",attrs:{"data-toggle":"dropdown","href":"javascript:void(0)"}},[_vm._t("title",[_c('i',{class:_vm.icon}),_vm._v(" "),_c('p',{staticClass:"notification"},[_vm._v(_vm._s(_vm.title)+" "),_c('b',{staticClass:"caret"})])])],2),_vm._v(" "),_c('ul',{staticClass:"dropdown-menu"},[_vm._t("default")],2)])},staticRenderFns: [],
+var Dropdown = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{directives:[{name:"click-outside",rawName:"v-click-outside",value:(_vm.closeDropDown),expression:"closeDropDown"}],staticClass:"dropdown",class:{open:_vm.isOpen}},[_c('a',{staticClass:"dropdown-toggle btn-rotate",style:(_vm.style),attrs:{"href":"javascript:void(0)","data-toggle":"dropdown"},on:{"click":_vm.toggleDropDown}},[_vm._t("title",[_c('i',{class:_vm.icon}),_vm._v(" "),_c('div',{staticClass:"dropdown-title"},[_vm._v(_vm._s(_vm.title)+" "),_c('b',{staticClass:"caret"})])])],2),_vm._v(" "),_c('ul',{staticClass:"dropdown-menu"},[_vm._t("default")],2)])},staticRenderFns: [],
   props: {
     title: String,
-    icon: String
+    icon: String,
+    width: {
+      type: String,
+      default: "170px"
+    },
   },
   data () {
     return {
       isOpen: false
+    }
+  },
+  computed: {
+    style () {
+      return 'width: ' + this.width;
     }
   },
   methods: {
@@ -1365,7 +1457,6 @@ const NotificationStore = {
 function setupSpinner(Vue$$1) {
   // Create the global $spinner functions the user can call 
   // from inside any component.
-  Vue$$1.use(VModal);
   Vue$$1.prototype.$spinner = {
     start() {
       // Send a start event to the bus.
@@ -1394,6 +1485,8 @@ function setupProgressBar(Vue$$1, options) {
 }
 
 function install(Vue$$1, options = {}) {
+  Vue$$1.use(VModal);
+
   if (!options.notifications || !options.notifications.disabled) {
     setupNotifications(Vue$$1);
     Vue$$1.component('Notifications', Notifications);
@@ -1412,6 +1505,7 @@ function install(Vue$$1, options = {}) {
 
   Vue$$1.component('Dropdown', Dropdown);
   Vue$$1.component('DialogDrag', DialogDrag);
+  Vue$$1.directive('click-outside', vueClickaway.directive);
 } // Automatic installation if Vue has been added to the global scope.
 
 
@@ -1431,6 +1525,9 @@ const upload = rpcs.upload;
 const succeed$1 = status.succeed;
 const fail$1 = status.fail;
 const start$1 = status.start;
+const updateSets$1 = shared.updateSets;
+const exportGraphs$1 = shared.exportGraphs;
+const exportResults$1 = shared.exportResults;
 const placeholders$1 = graphs.placeholders;
 const clearGraphs$1 = graphs.clearGraphs;
 const getPlotOptions$1 = graphs.getPlotOptions;
@@ -1486,6 +1583,10 @@ const sciris = {
   rpc,
   download,
   upload,
+  // shared.js
+  updateSets: updateSets$1,
+  exportGraphs: exportGraphs$1,
+  exportResults: exportResults$1,
   // graphs.js
   placeholders: placeholders$1,
   clearGraphs: clearGraphs$1,
@@ -1547,6 +1648,7 @@ const sciris = {
   rpcs,
   graphs,
   status,
+  shared,
   user,
   tasks,
   utils,

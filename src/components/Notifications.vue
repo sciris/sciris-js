@@ -29,28 +29,27 @@ Last updated: 2018-07-11
 </template>
 
 <script>
-  import Notification from './Notification.vue'
+import Notification from './Notification.vue'
 
-  export default {
-    components: {
-      Notification
+export default {
+  components: {
+    Notification
+  },
+  data () {
+    return {
+      notifications: this.$notifications.state
+    }
+  },
+  methods: {
+    removeNotification (timestamp) {
+      this.$notifications.removeNotification(timestamp)
     },
-    data () {
-      return {
-        notifications: this.$notifications.state
-      }
-    },
-    methods: {
-      removeNotification (timestamp) {
-        this.$notifications.removeNotification(timestamp)
-      },
-      
-      clearAllNotifications () {
-        this.$notifications.clear()
-      }
+    
+    clearAllNotifications () {
+      this.$notifications.clear()
     }
   }
-
+}
 </script>
 
 <style lang="scss">

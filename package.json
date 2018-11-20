@@ -58,18 +58,20 @@
     "crypto": "^1.0.1",
     "crypto-api": "^0.8.0",
     "crypto-js": "^3.1.9-1",
-    "epic-spinners": "^1.0.4",
     "file-saver": "^2.0.0-rc.4",
     "js-sha256": "^0.9.0",
     "vue": "^2.5.17",
+    "vue-clickaway": "^2.2.2",
     "vue-dialog-drag": "^0.1.29",
     "vue-js-modal": "^1.3.26",
-    "vue-progressbar": "git@github.com:sciris/vue-progressbar.git"
+    "vue-progressbar": "git@github.com:sciris/vue-progressbar.git",
+    "vue2-simplert-plugin": "^0.5.3"
   },
   "devDependencies": {
     "bili": "^3.1.2",
     "parse5": "^2.2.3",
     "rollup": "^0.47.6",
+    "epic-spinners": "^1.0.4",
     "rollup-plugin-babel": "^3.0.7",
     "rollup-plugin-copy-glob": "^0.2.2",
     "rollup-plugin-postcss": "^1.6.2",

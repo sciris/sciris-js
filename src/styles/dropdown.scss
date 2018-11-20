@@ -1,4 +1,17 @@
-.dropdown 
-{
+.dropdown-toggle {
   cursor: pointer;
+  display: flex;
+  justify-content: space-evenly;
+  text-transform: initial;
+}
+
+.dropdown-toggle:after{
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  margin-top: -2px;
+}
+
+.dropdown-menu {
+  margin-top: 20px;
 }

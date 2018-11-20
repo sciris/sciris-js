@@ -53,7 +53,7 @@
       },
       horizontalAlign: {
         type: String,
-        default: 'center'
+        default: 'right'
       },
       type: {
         type: String,

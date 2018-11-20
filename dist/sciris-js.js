@@ -8038,12 +8038,12 @@
   EventBus.$on(events$1.EVENT_STATUS_SUCCEED, (vm, notif) => {
     if (vm.$spinner) vm.$spinner.stop();
     if (vm.$Progress) vm.$Progress.finish();
-    if (notif && vm.$notifications) vm.$notifications.notify(notif);
+    if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
   });
   EventBus.$on(events$1.EVENT_STATUS_FAIL, (vm, notif) => {
     if (vm.$spinner) vm.$spinner.stop();
     if (vm.$Progress) vm.$Progress.fail();
-    if (notif && vm.$notifications) vm.$notifications.notify(notif);
+    if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
   });
 
   // progress-indicator-service.js -- functions for showing progress
@@ -11419,6 +11419,88 @@
     checkAdminLoggedIn
   };
 
+  /*
+   * Heftier functions that are shared across pages
+   */
+
+  function updateSets(vm) {
+    return new Promise((resolve, reject) => {
+      console.log('updateSets() called');
+      rpcs.rpc('get_parset_info', [vm.projectID]) // Get the current user's parsets from the server.
+      .then(response => {
+        vm.parsetOptions = response.data; // Set the scenarios to what we received.
+
+        if (vm.parsetOptions.indexOf(vm.activeParset) === -1) {
+          console.log('Parameter set ' + vm.activeParset + ' no longer found');
+          vm.activeParset = vm.parsetOptions[0]; // If the active parset no longer exists in the array, reset it
+        } else {
+          console.log('Parameter set ' + vm.activeParset + ' still found');
+        }
+
+        vm.newParsetName = vm.activeParset; // WARNING, KLUDGY
+
+        console.log('Parset options: ' + vm.parsetOptions);
+        console.log('Active parset: ' + vm.activeParset);
+        rpcs.rpc('get_progset_info', [vm.projectID]) // Get the current user's progsets from the server.
+        .then(response => {
+          vm.progsetOptions = response.data; // Set the scenarios to what we received.
+
+          if (vm.progsetOptions.indexOf(vm.activeProgset) === -1) {
+            console.log('Program set ' + vm.activeProgset + ' no longer found');
+            vm.activeProgset = vm.progsetOptions[0]; // If the active parset no longer exists in the array, reset it
+          } else {
+            console.log('Program set ' + vm.activeProgset + ' still found');
+          }
+
+          vm.newProgsetName = vm.activeProgset; // WARNING, KLUDGY
+
+          console.log('Progset options: ' + vm.progsetOptions);
+          console.log('Active progset: ' + vm.activeProgset);
+          resolve(response);
+        }).catch(error => {
+          status.fail(this, 'Could not get progset info', error);
+          reject(error);
+        });
+      }).catch(error => {
+        status.fail(this, 'Could not get parset info', error);
+        reject(error);
+      });
+    }).catch(error => {
+      status.fail(this, 'Could not get parset info', error);
+      reject(error);
+    });
+  }
+
+  function exportGraphs(vm) {
+    return new Promise((resolve, reject) => {
+      console.log('exportGraphs() called');
+      rpcs.download('download_graphs', [vm.$store.state.currentUser.username]).then(response => {
+        resolve(response);
+      }).catch(error => {
+        status.fail(vm, 'Could not download graphs', error);
+        reject(error);
+      });
+    });
+  }
+
+  function exportResults(vm, serverDatastoreId) {
+    return new Promise((resolve, reject) => {
+      console.log('exportResults()');
+      rpcs.download('export_results', [serverDatastoreId, vm.$store.state.currentUser.username]).then(response => {
+        resolve(response);
+      }).catch(error => {
+        status.fail(vm, 'Could not export results', error);
+        reject(error);
+      });
+    });
+  }
+
+  var shared = {
+    updateSets,
+    exportGraphs,
+    exportResults
+  };
+
   var vueProgressbar = createCommonjsModule(function (module, exports) {
   !function(t,o){module.exports=o();}(commonjsGlobal,function(){!function(){if("undefined"!=typeof document){var t=document.head||document.getElementsByTagName("head")[0],o=document.createElement("style"),i=" .__cov-progress { opacity: 1; z-index: 999999; } ";o.type="text/css", o.styleSheet?o.styleSheet.cssText=i:o.appendChild(document.createTextNode(i)), t.appendChild(o);}}();var t="undefined"!=typeof window,r={render:function(){var t=this,o=t.$createElement;return(t._self._c||o)("div",{staticClass:"__cov-progress",style:t.style})},staticRenderFns:[],name:"VueProgress",serverCacheKey:function(){return"Progress"},computed:{style:function(){var t=this.progress,o=t.options,i=!!o.show,e=o.location,s={"background-color":o.canSuccess?o.color:o.failedColor,opacity:o.show?1:0,position:o.position};return"top"===e||"bottom"===e?("top"===e?s.top="0px":s.bottom="0px", o.inverse?s.right="0px":s.left="0px", s.width=t.percent+"%", s.height=o.thickness, s.transition=(i?"width "+o.transition.speed+", ":"")+"opacity "+o.transition.opacity):"left"!==e&&"right"!==e||("left"===e?s.left="0px":s.right="0px", o.inverse?s.top="0px":s.bottom="0px", s.height=t.percent+"%", s.width=o.thickness, s.transition=(i?"height "+o.transition.speed+", ":"")+"opacity "+o.transition.opacity), s},progress:function(){return t?window.VueProgressBarEventBus.RADON_LOADING_BAR:{percent:0,options:{canSuccess:!0,show:!1,color:"rgb(19, 91, 55)",failedColor:"red",thickness:"2px",transition:{speed:"0.2s",opacity:"0.6s",termination:300},location:"top",autoRevert:!0,inverse:!1}}}}};return{install:function(o){var t=1<arguments.length&&void 0!==arguments[1]?arguments[1]:{},i=(o.version.split(".")[0], "undefined"!=typeof window),e={$vm:null,state:{tFailColor:"",tColor:"",timer:null,cut:0},init:function(t){this.$vm=t;},start:function(t){var o=this;this.$vm&&(t||(t=3e3), this.$vm.RADON_LOADING_BAR.percent=0, this.$vm.RADON_LOADING_BAR.options.show=!0, this.$vm.RADON_LOADING_BAR.options.canSuccess=!0, this.state.cut=1e4/Math.floor(t), clearInterval(this.state.timer), this.state.timer=setInterval(function(){o.increase(o.state.cut*Math.random()), 95<o.$vm.RADON_LOADING_BAR.percent&&o.$vm.RADON_LOADING_BAR.options.autoFinish&&o.finish();},100));},set:function(t){this.$vm.RADON_LOADING_BAR.options.show=!0, this.$vm.RADON_LOADING_BAR.options.canSuccess=!0, this.$vm.RADON_LOADING_BAR.percent=Math.floor(t);},get:function(){return Math.floor(this.$vm.RADON_LOADING_BAR.percent)},increase:function(t){this.$vm.RADON_LOADING_BAR.percent=Math.min(99,this.$vm.RADON_LOADING_BAR.percent+Math.floor(t));},decrease:function(t){this.$vm.RADON_LOADING_BAR.percent=this.$vm.RADON_LOADING_BAR.percent-Math.floor(t);},hide:function(){var t=this;clearInterval(this.state.timer), this.state.timer=null, setTimeout(function(){t.$vm.RADON_LOADING_BAR.options.show=!1, o.nextTick(function(){setTimeout(function(){t.$vm.RADON_LOADING_BAR.percent=0;},100), t.$vm.RADON_LOADING_BAR.options.autoRevert&&setTimeout(function(){t.revert();},300);});},this.$vm.RADON_LOADING_BAR.options.transition.termination);},pause:function(){clearInterval(this.state.timer);},finish:function(){this.$vm&&(this.$vm.RADON_LOADING_BAR.percent=100, this.hide());},fail:function(){this.$vm.RADON_LOADING_BAR.options.canSuccess=!1, this.$vm.RADON_LOADING_BAR.percent=100, this.hide();},setFailColor:function(t){this.$vm.RADON_LOADING_BAR.options.failedColor=t;},setColor:function(t){this.$vm.RADON_LOADING_BAR.options.color=t;},setLocation:function(t){this.$vm.RADON_LOADING_BAR.options.location=t;},setTransition:function(t){this.$vm.RADON_LOADING_BAR.options.transition=t;},tempFailColor:function(t){this.state.tFailColor=this.$vm.RADON_LOADING_BAR.options.failedColor, this.$vm.RADON_LOADING_BAR.options.failedColor=t;},tempColor:function(t){this.state.tColor=this.$vm.RADON_LOADING_BAR.options.color, this.$vm.RADON_LOADING_BAR.options.color=t;},tempLocation:function(t){this.state.tLocation=this.$vm.RADON_LOADING_BAR.options.location, this.$vm.RADON_LOADING_BAR.options.location=t;},tempTransition:function(t){this.state.tTransition=this.$vm.RADON_LOADING_BAR.options.transition, this.$vm.RADON_LOADING_BAR.options.transition=t;},revertColor:function(){this.$vm.RADON_LOADING_BAR.options.color=this.state.tColor, this.state.tColor="";},revertFailColor:function(){this.$vm.RADON_LOADING_BAR.options.failedColor=this.state.tFailColor, this.state.tFailColor="";},revertLocation:function(){this.$vm.RADON_LOADING_BAR.options.location=this.state.tLocation, this.state.tLocation="";},revertTransition:function(){this.$vm.RADON_LOADING_BAR.options.transition=this.state.tTransition, this.state.tTransition={};},revert:function(){this.$vm.RADON_LOADING_BAR.options.autoRevert&&(this.state.tColor&&this.revertColor(), this.state.tFailColor&&this.revertFailColor(), this.state.tLocation&&this.revertLocation(), !this.state.tTransition||void 0===this.state.tTransition.speed&&void 0===this.state.tTransition.opacity||this.revertTransition());},parseMeta:function(t){for(var o in t.func){var i=t.func[o];switch(i.call){case"color":switch(i.modifier){case"set":this.setColor(i.argument);break;case"temp":this.tempColor(i.argument);}break;case"fail":switch(i.modifier){case"set":this.setFailColor(i.argument);break;case"temp":this.tempFailColor(i.argument);}break;case"location":switch(i.modifier){case"set":this.setLocation(i.argument);break;case"temp":this.tempLocation(i.argument);}break;case"transition":switch(i.modifier){case"set":this.setTransition(i.argument);break;case"temp":this.tempTransition(i.argument);}}}}},s=function(t,o){for(var i,e,s=1;s<arguments.length;++s)for(i in e=arguments[s])Object.prototype.hasOwnProperty.call(e,i)&&(t[i]=e[i]);return t}({canSuccess:!0,show:!1,color:"#73ccec",position:"fixed",failedColor:"red",thickness:"2px",transition:{speed:"0.2s",opacity:"0.6s",termination:300},autoRevert:!0,location:"top",inverse:!1,autoFinish:!0},t),n=new o({data:{RADON_LOADING_BAR:{percent:0,options:s}}});i&&(window.VueProgressBarEventBus=n, e.init(n)), o.component("vue-progress-bar",r), o.prototype.$Progress=e;}}});
   });
@@ -12405,6 +12487,81 @@
   });
 
   var VModal = unwrapExports(dist);
+
+  var Vue$1 = Vue;
+  Vue$1 = 'default' in Vue$1 ? Vue$1['default'] : Vue$1;
+
+  var version = '2.2.2';
+
+  var compatible = (/^2\./).test(Vue$1.version);
+  if (!compatible) {
+    Vue$1.util.warn('VueClickaway ' + version + ' only supports Vue 2.x, and does not support Vue ' + Vue$1.version);
+  }
+
+
+
+  // @SECTION: implementation
+
+  var HANDLER = '_vue_clickaway_handler';
+
+  function bind$2(el, binding, vnode) {
+    unbind(el);
+
+    var vm = vnode.context;
+
+    var callback = binding.value;
+    if (typeof callback !== 'function') {
+      {
+        Vue$1.util.warn(
+          'v-' + binding.name + '="' +
+          binding.expression + '" expects a function value, ' +
+          'got ' + callback
+        );
+      }
+      return;
+    }
+
+    // @NOTE: Vue binds directives in microtasks, while UI events are dispatched
+    //        in macrotasks. This causes the listener to be set up before
+    //        the "origin" click event (the event that lead to the binding of
+    //        the directive) arrives at the document root. To work around that,
+    //        we ignore events until the end of the "initial" macrotask.
+    // @REFERENCE: https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/
+    // @REFERENCE: https://github.com/simplesmiler/vue-clickaway/issues/8
+    var initialMacrotaskEnded = false;
+    setTimeout(function() {
+      initialMacrotaskEnded = true;
+    }, 0);
+
+    el[HANDLER] = function(ev) {
+      // @NOTE: this test used to be just `el.containts`, but working with path is better,
+      //        because it tests whether the element was there at the time of
+      //        the click, not whether it is there now, that the event has arrived
+      //        to the top.
+      // @NOTE: `.path` is non-standard, the standard way is `.composedPath()`
+      var path = ev.path || (ev.composedPath ? ev.composedPath() : undefined);
+      if (initialMacrotaskEnded && (path ? path.indexOf(el) < 0 : !el.contains(ev.target))) {
+        return callback.call(vm, ev);
+      }
+    };
+
+    document.documentElement.addEventListener('click', el[HANDLER], false);
+  }
+
+  function unbind(el) {
+    document.documentElement.removeEventListener('click', el[HANDLER], false);
+    delete el[HANDLER];
+  }
+
+  var directive$1 = {
+    bind: bind$2,
+    update: function(el, binding) {
+      if (binding.value === binding.oldValue) return;
+      bind$2(el, binding);
+    },
+    unbind: unbind,
+  };
+  var directive_1 = directive$1;
 
   var vueDialogDrag_umd = createCommonjsModule(function (module, exports) {
   (function webpackUniversalModuleDefinition(root, factory) {
@@ -14642,7 +14799,7 @@
       },
       horizontalAlign: {
         type: String,
-        default: 'center'
+        default: 'right'
       },
       type: {
         type: String,
@@ -14715,17 +14872,26 @@
     }
   }
 
-  var css$24 = ".dropdown {\n  cursor: pointer; }\n";
+  var css$24 = ".dropdown-toggle {\n  cursor: pointer;\n  display: flex;\n  justify-content: space-evenly;\n  text-transform: initial; }\n\n.dropdown-toggle:after {\n  position: absolute;\n  right: 10px;\n  top: 50%;\n  margin-top: -2px; }\n\n.dropdown-menu {\n  margin-top: 20px; }\n";
   styleInject(css$24);
 
-  var Dropdown = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{directives:[{name:"click-outside",rawName:"v-click-outside",value:(_vm.closeDropDown),expression:"closeDropDown"}],staticClass:"dropdown",class:{open:_vm.isOpen},on:{"click":_vm.toggleDropDown}},[_c('a',{staticClass:"dropdown-toggle btn-rotate",attrs:{"data-toggle":"dropdown","href":"javascript:void(0)"}},[_vm._t("title",[_c('i',{class:_vm.icon}),_vm._v(" "),_c('p',{staticClass:"notification"},[_vm._v(_vm._s(_vm.title)+" "),_c('b',{staticClass:"caret"})])])],2),_vm._v(" "),_c('ul',{staticClass:"dropdown-menu"},[_vm._t("default")],2)])},staticRenderFns: [],
+  var Dropdown = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{directives:[{name:"click-outside",rawName:"v-click-outside",value:(_vm.closeDropDown),expression:"closeDropDown"}],staticClass:"dropdown",class:{open:_vm.isOpen}},[_c('a',{staticClass:"dropdown-toggle btn-rotate",style:(_vm.style),attrs:{"href":"javascript:void(0)","data-toggle":"dropdown"},on:{"click":_vm.toggleDropDown}},[_vm._t("title",[_c('i',{class:_vm.icon}),_vm._v(" "),_c('div',{staticClass:"dropdown-title"},[_vm._v(_vm._s(_vm.title)+" "),_c('b',{staticClass:"caret"})])])],2),_vm._v(" "),_c('ul',{staticClass:"dropdown-menu"},[_vm._t("default")],2)])},staticRenderFns: [],
     props: {
       title: String,
-      icon: String
+      icon: String,
+      width: {
+        type: String,
+        default: "170px"
+      },
     },
     data () {
       return {
         isOpen: false
+      }
+    },
+    computed: {
+      style () {
+        return 'width: ' + this.width;
       }
     },
     methods: {
@@ -14769,7 +14935,6 @@
   function setupSpinner(Vue) {
     // Create the global $spinner functions the user can call 
     // from inside any component.
-    Vue.use(VModal);
     Vue.prototype.$spinner = {
       start() {
         // Send a start event to the bus.
@@ -14798,6 +14963,8 @@
   }
 
   function install(Vue, options = {}) {
+    Vue.use(VModal);
+
     if (!options.notifications || !options.notifications.disabled) {
       setupNotifications(Vue);
       Vue.component('Notifications', Notifications);
@@ -14816,6 +14983,7 @@
 
     Vue.component('Dropdown', Dropdown);
     Vue.component('DialogDrag', DialogDrag);
+    Vue.directive('click-outside', directive_1);
   } // Automatic installation if Vue has been added to the global scope.
 
 
@@ -14835,6 +15003,9 @@
   const succeed$1 = status.succeed;
   const fail$1 = status.fail;
   const start$1 = status.start;
+  const updateSets$1 = shared.updateSets;
+  const exportGraphs$1 = shared.exportGraphs;
+  const exportResults$1 = shared.exportResults;
   const placeholders$1 = graphs.placeholders;
   const clearGraphs$1 = graphs.clearGraphs;
   const getPlotOptions$1 = graphs.getPlotOptions;
@@ -14890,6 +15061,10 @@
     rpc,
     download,
     upload,
+    // shared.js
+    updateSets: updateSets$1,
+    exportGraphs: exportGraphs$1,
+    exportResults: exportResults$1,
     // graphs.js
     placeholders: placeholders$1,
     clearGraphs: clearGraphs$1,
@@ -14951,6 +15126,7 @@
     rpcs,
     graphs,
     status,
+    shared,
     user,
     tasks,
     utils,

@@ -1,6 +1,7 @@
 import VueProgressBar from 'vue-progressbar';
 import VModal from 'vue-js-modal';
-import DialogDrag from 'vue-dialog-drag'
+import { directive as vClickOutside } from 'vue-clickaway';
+import DialogDrag from 'vue-dialog-drag';
 
 import PopupSpinner from './components/PopupSpinner.vue';
 import Notifications from './components/Notifications.vue';
@@ -12,7 +13,6 @@ import NotificationStore from './notifications.js';
 function setupSpinner(Vue){
   // Create the global $spinner functions the user can call 
   // from inside any component.
-  Vue.use(VModal);
   Vue.prototype.$spinner = {
     start() {
       // Send a start event to the bus.
@@ -38,6 +38,7 @@ function setupProgressBar(Vue, options){
 };
 
 function install(Vue, options = {}) {
+  Vue.use(VModal);
   if (!options.notifications || !options.notifications.disabled){
     setupNotifications(Vue);
     Vue.component('Notifications', Notifications);
@@ -55,6 +56,8 @@ function install(Vue, options = {}) {
   }
   Vue.component('Dropdown', Dropdown);
   Vue.component('DialogDrag', DialogDrag);
+
+  Vue.directive('click-outside', vClickOutside)
 }
 
 // Automatic installation if Vue has been added to the global scope.

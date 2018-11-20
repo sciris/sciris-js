@@ -31,7 +31,7 @@ EventBus.$on(events.EVENT_STATUS_SUCCEED, (vm, notif) => {
   if (vm.$Progress)
     vm.$Progress.finish();
 
-  if (notif && vm.$notifications)
+  if (notif && notif.message && vm.$notifications)
     vm.$notifications.notify(notif);
 });
 
@@ -42,7 +42,7 @@ EventBus.$on(events.EVENT_STATUS_FAIL, (vm, notif) => {
   if (vm.$Progress)
     vm.$Progress.fail();
 
-  if (notif && vm.$notifications)
+  if (notif && notif.message && vm.$notifications)
     vm.$notifications.notify(notif);
 }); 
 

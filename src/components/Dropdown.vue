@@ -1,20 +1,19 @@
 <template>
-  <li 
-    class="dropdown" 
+  <li class="dropdown" 
     :class="{open:isOpen}" 
-    @click="toggleDropDown" 
     v-click-outside="closeDropDown">
 
-    <a 
+    <a href="javascript:void(0)"
       class="dropdown-toggle btn-rotate" 
       data-toggle="dropdown" 
-      href="javascript:void(0)">
+      :style="style"
+      @click="toggleDropDown">
 
       <slot name="title">
         <i :class="icon"></i>
-        <p class="notification">{{title}}
+        <div class="dropdown-title">{{title}}
           <b class="caret"></b>
-        </p>
+        </div>
       </slot>
 
     </a>
@@ -29,11 +28,20 @@
   export default{
     props: {
       title: String,
-      icon: String
+      icon: String,
+      width: {
+        type: String,
+        default: "170px"
+      },
     },
     data () {
       return {
         isOpen: false
+      }
+    },
+    computed: {
+      style () {
+        return 'width: ' + this.width;
       }
     },
     methods: {

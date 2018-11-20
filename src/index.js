@@ -4,6 +4,7 @@ import rpcs from './libs/rpc-service.js';
 import tasks from './libs/task-service.js';
 import user from './libs/user-service.js';
 import utils from './libs/utils.js';
+import shared from './libs/shared.js';
 import EventBus from './eventbus.js';
 import ScirisVue from './plugins.js';
 
@@ -14,6 +15,10 @@ const upload = rpcs.upload;
 const succeed = status.succeed;
 const fail = status.fail;
 const start = status.start;
+
+const updateSets = shared.updateSets; 
+const exportGraphs = shared.exportGraphs;
+const exportResults = shared.exportResults;
 
 const placeholders = graphs.placeholders; 
 const clearGraphs = graphs.clearGraphs; 
@@ -74,6 +79,11 @@ const sciris = {
   rpc,
   download,
   upload,
+
+  // shared.js
+  updateSets,
+  exportGraphs,
+  exportResults,
 
   // graphs.js
   placeholders, 
@@ -141,6 +151,7 @@ const sciris = {
   rpcs,
   graphs,
   status,
+  shared,
   user,
   tasks,
   utils,
