@@ -8,10 +8,7 @@
   "main": "dist/sciris-js.cjs.js",
   "module": "dist/sciris-js.es.js",
   "files": [
-    "dist/*",
-    "src/*",
-    "*.js",
-    "*.json"
+    "dist/*"
   ],
   "babel": {
     "presets": [
