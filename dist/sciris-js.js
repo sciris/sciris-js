@@ -1008,7 +1008,7 @@
           return
         }
         /* eslint-enable no-self-compare */
-        if ("development" !== 'production' && customSetter) {
+        if (customSetter) {
           customSetter();
         }
         if (setter) {
@@ -1028,8 +1028,7 @@
    * already exist.
    */
   function set (target, key, val) {
-    if ("development" !== 'production' &&
-      (isUndef(target) || isPrimitive(target))
+    if (isUndef(target) || isPrimitive(target)
     ) {
       warn(("Cannot set reactive property on undefined, null, or primitive value: " + ((target))));
     }
@@ -1044,7 +1043,7 @@
     }
     var ob = (target).__ob__;
     if (target._isVue || (ob && ob.vmCount)) {
-      "development" !== 'production' && warn(
+      warn(
         'Avoid adding reactive properties to a Vue instance or its root $data ' +
         'at runtime - declare it upfront in the data option.'
       );
@@ -1063,8 +1062,7 @@
    * Delete a property and trigger change if necessary.
    */
   function del (target, key) {
-    if ("development" !== 'production' &&
-      (isUndef(target) || isPrimitive(target))
+    if (isUndef(target) || isPrimitive(target)
     ) {
       warn(("Cannot delete reactive property on undefined, null, or primitive value: " + ((target))));
     }
@@ -1074,7 +1072,7 @@
     }
     var ob = (target).__ob__;
     if (target._isVue || (ob && ob.vmCount)) {
-      "development" !== 'production' && warn(
+      warn(
         'Avoid deleting properties on a Vue instance or its root $data ' +
         '- just set it to null.'
       );
@@ -1200,7 +1198,7 @@
   ) {
     if (!vm) {
       if (childVal && typeof childVal !== 'function') {
-        "development" !== 'production' && warn(
+        warn(
           'The "data" option should be a function ' +
           'that returns a per-instance value in component ' +
           'definitions.',
@@ -1250,7 +1248,7 @@
   ) {
     var res = Object.create(parentVal || null);
     if (childVal) {
-      "development" !== 'production' && assertObjectType(key, childVal, vm);
+      assertObjectType(key, childVal, vm);
       return extend(res, childVal)
     } else {
       return res
@@ -1514,7 +1512,7 @@
     if (hasOwn(assets, PascalCaseId)) { return assets[PascalCaseId] }
     // fallback to prototype chain
     var res = assets[id] || assets[camelizedId] || assets[PascalCaseId];
-    if ("development" !== 'production' && warnMissing && !res) {
+    if (warnMissing && !res) {
       warn(
         'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
         options
@@ -1574,7 +1572,7 @@
     }
     var def = prop.default;
     // warn against non-factory defaults for Object & Array
-    if ("development" !== 'production' && isObject(def)) {
+    if (isObject(def)) {
       warn(
         'Invalid default value for prop "' + key + '": ' +
         'Props with type Object/Array must use a factory function ' +
@@ -2047,7 +2045,7 @@
       event = normalizeEvent(name);
       /* istanbul ignore if */
       if (isUndef(cur)) {
-        "development" !== 'production' && warn(
+        warn(
           "Invalid handler for event \"" + (event.name) + "\": got " + String(cur),
           vm
         );
@@ -2327,7 +2325,7 @@
       });
 
       var reject = once(function (reason) {
-        "development" !== 'production' && warn(
+        warn(
           "Failed to resolve async component: " + (String(factory)) +
           (reason ? ("\nReason: " + reason) : '')
         );
@@ -2766,7 +2764,7 @@
 
     var updateComponent;
     /* istanbul ignore if */
-    if ("development" !== 'production' && config.performance && mark) {
+    if (config.performance && mark) {
       updateComponent = function () {
         var name = vm._name;
         var id = vm._uid;
@@ -2980,7 +2978,7 @@
       has[id] = null;
       watcher.run();
       // in dev build, check and stop circular updates.
-      if ("development" !== 'production' && has[id] != null) {
+      if (has[id] != null) {
         circular[id] = (circular[id] || 0) + 1;
         if (circular[id] > MAX_UPDATE_COUNT) {
           warn(
@@ -3116,7 +3114,7 @@
       this.getter = parsePath(expOrFn);
       if (!this.getter) {
         this.getter = function () {};
-        "development" !== 'production' && warn(
+        warn(
           "Failed watching path: \"" + expOrFn + "\" " +
           'Watcher only accepts simple dot-delimited paths. ' +
           'For full control, use a function instead.',
@@ -3371,7 +3369,7 @@
       : data || {};
     if (!isPlainObject(data)) {
       data = {};
-      "development" !== 'production' && warn(
+      warn(
         'data functions should return an object:\n' +
         'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
         vm
@@ -3393,7 +3391,7 @@
         }
       }
       if (props && hasOwn(props, key)) {
-        "development" !== 'production' && warn(
+        warn(
           "The data property \"" + key + "\" is already declared as a prop. " +
           "Use prop default value instead.",
           vm
@@ -3430,7 +3428,7 @@
     for (var key in computed) {
       var userDef = computed[key];
       var getter = typeof userDef === 'function' ? userDef : userDef.get;
-      if ("development" !== 'production' && getter == null) {
+      if (getter == null) {
         warn(
           ("Getter is missing for computed property \"" + key + "\"."),
           vm
@@ -3483,8 +3481,7 @@
         ? userDef.set
         : noop;
     }
-    if ("development" !== 'production' &&
-        sharedPropertyDefinition.set === noop) {
+    if (sharedPropertyDefinition.set === noop) {
       sharedPropertyDefinition.set = function () {
         warn(
           ("Computed property \"" + key + "\" was assigned to but it has no setter."),
@@ -3733,7 +3730,7 @@
     if (scopedSlotFn) { // scoped slot
       props = props || {};
       if (bindObject) {
-        if ("development" !== 'production' && !isObject(bindObject)) {
+        if (!isObject(bindObject)) {
           warn(
             'slot v-bind without argument expects an Object',
             this
@@ -3746,7 +3743,7 @@
       var slotNodes = this.$slots[name];
       // warn duplicate slot usage
       if (slotNodes) {
-        if ("development" !== 'production' && slotNodes._rendered) {
+        if (slotNodes._rendered) {
           warn(
             "Duplicate presence of slot \"" + name + "\" found in the same render tree " +
             "- this will likely cause render errors.",
@@ -3821,7 +3818,7 @@
   ) {
     if (value) {
       if (!isObject(value)) {
-        "development" !== 'production' && warn(
+        warn(
           'v-bind without argument expects an Object or Array value',
           this
         );
@@ -3927,7 +3924,7 @@
   function bindObjectListeners (data, value) {
     if (value) {
       if (!isPlainObject(value)) {
-        "development" !== 'production' && warn(
+        warn(
           'v-on without argument expects an Object value',
           this
         );
@@ -4359,7 +4356,7 @@
     normalizationType
   ) {
     if (isDef(data) && isDef((data).__ob__)) {
-      "development" !== 'production' && warn(
+      warn(
         "Avoid using observed data object as vnode data: " + (JSON.stringify(data)) + "\n" +
         'Always create fresh vnode data objects in each render!',
         context
@@ -4375,8 +4372,7 @@
       return createEmptyVNode()
     }
     // warn against non-primitive key
-    if ("development" !== 'production' &&
-      isDef(data) && isDef(data.key) && !isPrimitive(data.key)
+    if (isDef(data) && isDef(data.key) && !isPrimitive(data.key)
     ) {
       {
         warn(
@@ -4553,7 +4549,7 @@
       }
       // return empty vnode in case the render function errored out
       if (!(vnode instanceof VNode)) {
-        if ("development" !== 'production' && Array.isArray(vnode)) {
+        if (Array.isArray(vnode)) {
           warn(
             'Multiple root nodes returned from render function. Render function ' +
             'should return a single root node.',
@@ -4580,7 +4576,7 @@
 
       var startTag, endTag;
       /* istanbul ignore if */
-      if ("development" !== 'production' && config.performance && mark) {
+      if (config.performance && mark) {
         startTag = "vue-perf-start:" + (vm._uid);
         endTag = "vue-perf-end:" + (vm._uid);
         mark(startTag);
@@ -4617,7 +4613,7 @@
       callHook(vm, 'created');
 
       /* istanbul ignore if */
-      if ("development" !== 'production' && config.performance && mark) {
+      if (config.performance && mark) {
         vm._name = formatComponentName(vm, false);
         mark(endTag);
         measure(("vue " + (vm._name) + " init"), startTag, endTag);
@@ -4708,8 +4704,7 @@
   }
 
   function Vue (options) {
-    if ("development" !== 'production' &&
-      !(this instanceof Vue)
+    if (!(this instanceof Vue)
     ) {
       warn('Vue is a constructor and should be called with the `new` keyword');
     }
@@ -4777,7 +4772,7 @@
       }
 
       var name = extendOptions.name || Super.options.name;
-      if ("development" !== 'production' && name) {
+      if (name) {
         validateComponentName(name);
       }
 
@@ -4860,7 +4855,7 @@
           return this.options[type + 's'][id]
         } else {
           /* istanbul ignore if */
-          if ("development" !== 'production' && type === 'component') {
+          if (type === 'component') {
             validateComponentName(id);
           }
           if (type === 'component' && isPlainObject(definition)) {
@@ -5284,7 +5279,7 @@
     if (typeof el === 'string') {
       var selected = document.querySelector(el);
       if (!selected) {
-        "development" !== 'production' && warn(
+        warn(
           'Cannot find element: ' + el
         );
         return document.createElement('div')
@@ -5575,7 +5570,7 @@
           insert(parentElm, vnode.elm, refElm);
         }
 
-        if ("development" !== 'production' && data && data.pre) {
+        if (data && data.pre) {
           creatingElmInVPre--;
         }
       } else if (isTrue(vnode.isComment)) {
@@ -5993,8 +5988,7 @@
             if (isDef(i = data) && isDef(i = i.domProps) && isDef(i = i.innerHTML)) {
               if (i !== elm.innerHTML) {
                 /* istanbul ignore if */
-                if ("development" !== 'production' &&
-                  typeof console !== 'undefined' &&
+                if (typeof console !== 'undefined' &&
                   !hydrationBailed
                 ) {
                   hydrationBailed = true;
@@ -6019,8 +6013,7 @@
               // longer than the virtual children list.
               if (!childrenMatch || childNode) {
                 /* istanbul ignore if */
-                if ("development" !== 'production' &&
-                  typeof console !== 'undefined' &&
+                if (typeof console !== 'undefined' &&
                   !hydrationBailed
                 ) {
                   hydrationBailed = true;
@@ -7138,7 +7131,7 @@
         : duration
     );
 
-    if ("development" !== 'production' && explicitEnterDuration != null) {
+    if (explicitEnterDuration != null) {
       checkDuration(explicitEnterDuration, 'enter', vnode);
     }
 
@@ -7246,7 +7239,7 @@
         : duration
     );
 
-    if ("development" !== 'production' && isDef(explicitLeaveDuration)) {
+    if (isDef(explicitLeaveDuration)) {
       checkDuration(explicitLeaveDuration, 'leave', vnode);
     }
 
@@ -7473,7 +7466,7 @@
     var value = binding.value;
     var isMultiple = el.multiple;
     if (isMultiple && !Array.isArray(value)) {
-      "development" !== 'production' && warn(
+      warn(
         "<select multiple v-model=\"" + (binding.expression) + "\"> " +
         "expects an Array value for its binding, but got " + (Object.prototype.toString.call(value).slice(8, -1)),
         vm
@@ -7689,7 +7682,7 @@
       }
 
       // warn multiple elements
-      if ("development" !== 'production' && children.length > 1) {
+      if (children.length > 1) {
         warn(
           '<transition> can only be used on a single element. Use ' +
           '<transition-group> for lists.',
@@ -7700,8 +7693,7 @@
       var mode = this.mode;
 
       // warn invalid mode
-      if ("development" !== 'production' &&
-        mode && mode !== 'in-out' && mode !== 'out-in'
+      if (mode && mode !== 'in-out' && mode !== 'out-in'
       ) {
         warn(
           'invalid <transition> mode: ' + mode,
@@ -7994,8 +7986,6 @@
         if (devtools) {
           devtools.emit('init', Vue);
         } else if (
-          "development" !== 'production' &&
-          "development" !== 'test' &&
           isChrome
         ) {
           console[console.info ? 'info' : 'log'](
@@ -8004,9 +7994,7 @@
           );
         }
       }
-      if ("development" !== 'production' &&
-        "development" !== 'test' &&
-        config.productionTip !== false &&
+      if (config.productionTip !== false &&
         typeof console !== 'undefined'
       ) {
         console[console.info ? 'info' : 'log'](
@@ -9002,8 +8990,7 @@
       // For IE 8/9 CORS support
       // Only supports POST and GET calls and doesn't returns the response headers.
       // DON'T do this for testing b/c XMLHttpRequest is mocked, not XDomainRequest.
-      if ("development" !== 'test' &&
-          typeof window !== 'undefined' &&
+      if (typeof window !== 'undefined' &&
           window.XDomainRequest && !('withCredentials' in request) &&
           !isURLSameOrigin(config.url)) {
         request = new window.XDomainRequest();
@@ -9654,7 +9641,7 @@
   }
 
   var FileSaver_min = createCommonjsModule(function (module, exports) {
-  (function(a,b){if("function"==typeof undefined&&undefined.amd)undefined([],b);else b();})(commonjsGlobal,function(){function b(a,b){return"undefined"==typeof b?b={autoBom:!1}:"object"!=typeof b&&(console.warn("Depricated: Expected third argument to be a object"), b={autoBom:!b}), b.autoBom&&/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a.type)?new Blob(["\uFEFF",a],{type:a.type}):a}function c(b,c,d){var e=new XMLHttpRequest;e.open("GET",b), e.responseType="blob", e.onload=function(){a(e.response,c,d);}, e.onerror=function(){console.error("could not download file");}, e.send();}function d(a){var b=new XMLHttpRequest;return b.open("HEAD",a,!1), b.send(), 200<=b.status&&299>=b.status}function e(a){try{a.dispatchEvent(new MouseEvent("click"));}catch(c){var b=document.createEvent("MouseEvents");b.initMouseEvent("click",!0,!0,window,0,0,0,80,20,!1,!1,!1,!1,0,null), a.dispatchEvent(b);}}var f=function(){try{return Function("return this")()||(eval)("this")}catch(a){return"object"==typeof window&&window.window===window?window:"object"==typeof self&&self.self===self?self:"object"==typeof commonjsGlobal&&commonjsGlobal.global===commonjsGlobal?commonjsGlobal:this}}(),a=f.saveAs||"object"!=typeof window||window!==f?function(){}:"download"in HTMLAnchorElement.prototype?function(b,g,h){var i=f.URL||f.webkitURL,j=document.createElement("a");g=g||b.name||"download", j.download=g, j.rel="noopener", "string"==typeof b?(j.href=b, j.origin===location.origin?e(j):d(j.href)?c(b,g,h):e(j,j.target="_blank")):(j.href=i.createObjectURL(b), setTimeout(function(){i.revokeObjectURL(j.href);},4E4), setTimeout(function(){e(j);},0));}:"msSaveOrOpenBlob"in navigator?function(f,g,h){if(g=g||f.name||"download", "string"!=typeof f)navigator.msSaveOrOpenBlob(b(f,h),g);else if(d(f))c(f,g,h);else{var i=document.createElement("a");i.href=f, i.target="_blank", setTimeout(function(){e(i);});}}:function(a,b,d,e){if(e=e||open("","_blank"), e&&(e.document.title=e.document.body.innerText="downloading..."), "string"==typeof a)return c(a,b,d);var g="application/octet-stream"===a.type,h=/constructor/i.test(f.HTMLElement)||f.safari,i=/CriOS\/[\d]+/.test(navigator.userAgent);if((i||g&&h)&&"object"==typeof FileReader){var j=new FileReader;j.onloadend=function(){var a=j.result;a=i?a:a.replace(/^data:[^;]*;/,"data:attachment/file;"), e?e.location.href=a:location=a, e=null;}, j.readAsDataURL(a);}else{var k=f.URL||f.webkitURL,l=k.createObjectURL(a);e?e.location=l:location.href=l, e=null, setTimeout(function(){k.revokeObjectURL(l);},4E4);}};f.saveAs=a.saveAs=a, "undefined"!='object'&&(module.exports=a);});
+  (function(a,b){b();})(commonjsGlobal,function(){function b(a,b){return "undefined"==typeof b?b={autoBom:!1}:"object"!=typeof b&&(console.warn("Depricated: Expected third argument to be a object"),b={autoBom:!b}),b.autoBom&&/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a.type)?new Blob(["\uFEFF",a],{type:a.type}):a}function c(b,c,d){var e=new XMLHttpRequest;e.open("GET",b),e.responseType="blob",e.onload=function(){a(e.response,c,d);},e.onerror=function(){console.error("could not download file");},e.send();}function d(a){var b=new XMLHttpRequest;return b.open("HEAD",a,!1),b.send(),200<=b.status&&299>=b.status}function e(a){try{a.dispatchEvent(new MouseEvent("click"));}catch(c){var b=document.createEvent("MouseEvents");b.initMouseEvent("click",!0,!0,window,0,0,0,80,20,!1,!1,!1,!1,0,null),a.dispatchEvent(b);}}var f="object"==typeof window&&window.window===window?window:"object"==typeof self&&self.self===self?self:"object"==typeof commonjsGlobal&&commonjsGlobal.global===commonjsGlobal?commonjsGlobal:void 0,a=f.saveAs||"object"!=typeof window||window!==f?function(){}:"download"in HTMLAnchorElement.prototype?function(b,g,h){var i=f.URL||f.webkitURL,j=document.createElement("a");g=g||b.name||"download",j.download=g,j.rel="noopener","string"==typeof b?(j.href=b,j.origin===location.origin?e(j):d(j.href)?c(b,g,h):e(j,j.target="_blank")):(j.href=i.createObjectURL(b),setTimeout(function(){i.revokeObjectURL(j.href);},4E4),setTimeout(function(){e(j);},0));}:"msSaveOrOpenBlob"in navigator?function(f,g,h){if(g=g||f.name||"download","string"!=typeof f)navigator.msSaveOrOpenBlob(b(f,h),g);else if(d(f))c(f,g,h);else{var i=document.createElement("a");i.href=f,i.target="_blank",setTimeout(function(){e(i);});}}:function(a,b,d,e){if(e=e||open("","_blank"),e&&(e.document.title=e.document.body.innerText="downloading..."),"string"==typeof a)return c(a,b,d);var g="application/octet-stream"===a.type,h=/constructor/i.test(f.HTMLElement)||f.safari,i=/CriOS\/[\d]+/.test(navigator.userAgent);if((i||g&&h)&&"object"==typeof FileReader){var j=new FileReader;j.onloadend=function(){var a=j.result;a=i?a:a.replace(/^data:[^;]*;/,"data:attachment/file;"),e?e.location.href=a:location=a,e=null;},j.readAsDataURL(a);}else{var k=f.URL||f.webkitURL,l=k.createObjectURL(a);e?e.location=l:location.href=l,e=null,setTimeout(function(){k.revokeObjectURL(l);},4E4);}};f.saveAs=a.saveAs=a,module.exports=a;});
 
 
   });
@@ -9878,7 +9865,7 @@
       let divlabel = 'fig' + index;
       let div = document.getElementById(divlabel); // CK: Not sure if this is necessary? To ensure the div is clear first
 
-      while (div.firstChild) {
+      while (div && div.firstChild) {
         div.removeChild(div.firstChild);
       }
 
@@ -11502,7 +11489,7 @@
   };
 
   var vueProgressbar = createCommonjsModule(function (module, exports) {
-  !function(t,o){module.exports=o();}(commonjsGlobal,function(){!function(){if("undefined"!=typeof document){var t=document.head||document.getElementsByTagName("head")[0],o=document.createElement("style"),i=" .__cov-progress { opacity: 1; z-index: 999999; } ";o.type="text/css", o.styleSheet?o.styleSheet.cssText=i:o.appendChild(document.createTextNode(i)), t.appendChild(o);}}();var t="undefined"!=typeof window,r={render:function(){var t=this,o=t.$createElement;return(t._self._c||o)("div",{staticClass:"__cov-progress",style:t.style})},staticRenderFns:[],name:"VueProgress",serverCacheKey:function(){return"Progress"},computed:{style:function(){var t=this.progress,o=t.options,i=!!o.show,e=o.location,s={"background-color":o.canSuccess?o.color:o.failedColor,opacity:o.show?1:0,position:o.position};return"top"===e||"bottom"===e?("top"===e?s.top="0px":s.bottom="0px", o.inverse?s.right="0px":s.left="0px", s.width=t.percent+"%", s.height=o.thickness, s.transition=(i?"width "+o.transition.speed+", ":"")+"opacity "+o.transition.opacity):"left"!==e&&"right"!==e||("left"===e?s.left="0px":s.right="0px", o.inverse?s.top="0px":s.bottom="0px", s.height=t.percent+"%", s.width=o.thickness, s.transition=(i?"height "+o.transition.speed+", ":"")+"opacity "+o.transition.opacity), s},progress:function(){return t?window.VueProgressBarEventBus.RADON_LOADING_BAR:{percent:0,options:{canSuccess:!0,show:!1,color:"rgb(19, 91, 55)",failedColor:"red",thickness:"2px",transition:{speed:"0.2s",opacity:"0.6s",termination:300},location:"top",autoRevert:!0,inverse:!1}}}}};return{install:function(o){var t=1<arguments.length&&void 0!==arguments[1]?arguments[1]:{},i=(o.version.split(".")[0], "undefined"!=typeof window),e={$vm:null,state:{tFailColor:"",tColor:"",timer:null,cut:0},init:function(t){this.$vm=t;},start:function(t){var o=this;this.$vm&&(t||(t=3e3), this.$vm.RADON_LOADING_BAR.percent=0, this.$vm.RADON_LOADING_BAR.options.show=!0, this.$vm.RADON_LOADING_BAR.options.canSuccess=!0, this.state.cut=1e4/Math.floor(t), clearInterval(this.state.timer), this.state.timer=setInterval(function(){o.increase(o.state.cut*Math.random()), 95<o.$vm.RADON_LOADING_BAR.percent&&o.$vm.RADON_LOADING_BAR.options.autoFinish&&o.finish();},100));},set:function(t){this.$vm.RADON_LOADING_BAR.options.show=!0, this.$vm.RADON_LOADING_BAR.options.canSuccess=!0, this.$vm.RADON_LOADING_BAR.percent=Math.floor(t);},get:function(){return Math.floor(this.$vm.RADON_LOADING_BAR.percent)},increase:function(t){this.$vm.RADON_LOADING_BAR.percent=Math.min(99,this.$vm.RADON_LOADING_BAR.percent+Math.floor(t));},decrease:function(t){this.$vm.RADON_LOADING_BAR.percent=this.$vm.RADON_LOADING_BAR.percent-Math.floor(t);},hide:function(){var t=this;clearInterval(this.state.timer), this.state.timer=null, setTimeout(function(){t.$vm.RADON_LOADING_BAR.options.show=!1, o.nextTick(function(){setTimeout(function(){t.$vm.RADON_LOADING_BAR.percent=0;},100), t.$vm.RADON_LOADING_BAR.options.autoRevert&&setTimeout(function(){t.revert();},300);});},this.$vm.RADON_LOADING_BAR.options.transition.termination);},pause:function(){clearInterval(this.state.timer);},finish:function(){this.$vm&&(this.$vm.RADON_LOADING_BAR.percent=100, this.hide());},fail:function(){this.$vm.RADON_LOADING_BAR.options.canSuccess=!1, this.$vm.RADON_LOADING_BAR.percent=100, this.hide();},setFailColor:function(t){this.$vm.RADON_LOADING_BAR.options.failedColor=t;},setColor:function(t){this.$vm.RADON_LOADING_BAR.options.color=t;},setLocation:function(t){this.$vm.RADON_LOADING_BAR.options.location=t;},setTransition:function(t){this.$vm.RADON_LOADING_BAR.options.transition=t;},tempFailColor:function(t){this.state.tFailColor=this.$vm.RADON_LOADING_BAR.options.failedColor, this.$vm.RADON_LOADING_BAR.options.failedColor=t;},tempColor:function(t){this.state.tColor=this.$vm.RADON_LOADING_BAR.options.color, this.$vm.RADON_LOADING_BAR.options.color=t;},tempLocation:function(t){this.state.tLocation=this.$vm.RADON_LOADING_BAR.options.location, this.$vm.RADON_LOADING_BAR.options.location=t;},tempTransition:function(t){this.state.tTransition=this.$vm.RADON_LOADING_BAR.options.transition, this.$vm.RADON_LOADING_BAR.options.transition=t;},revertColor:function(){this.$vm.RADON_LOADING_BAR.options.color=this.state.tColor, this.state.tColor="";},revertFailColor:function(){this.$vm.RADON_LOADING_BAR.options.failedColor=this.state.tFailColor, this.state.tFailColor="";},revertLocation:function(){this.$vm.RADON_LOADING_BAR.options.location=this.state.tLocation, this.state.tLocation="";},revertTransition:function(){this.$vm.RADON_LOADING_BAR.options.transition=this.state.tTransition, this.state.tTransition={};},revert:function(){this.$vm.RADON_LOADING_BAR.options.autoRevert&&(this.state.tColor&&this.revertColor(), this.state.tFailColor&&this.revertFailColor(), this.state.tLocation&&this.revertLocation(), !this.state.tTransition||void 0===this.state.tTransition.speed&&void 0===this.state.tTransition.opacity||this.revertTransition());},parseMeta:function(t){for(var o in t.func){var i=t.func[o];switch(i.call){case"color":switch(i.modifier){case"set":this.setColor(i.argument);break;case"temp":this.tempColor(i.argument);}break;case"fail":switch(i.modifier){case"set":this.setFailColor(i.argument);break;case"temp":this.tempFailColor(i.argument);}break;case"location":switch(i.modifier){case"set":this.setLocation(i.argument);break;case"temp":this.tempLocation(i.argument);}break;case"transition":switch(i.modifier){case"set":this.setTransition(i.argument);break;case"temp":this.tempTransition(i.argument);}}}}},s=function(t,o){for(var i,e,s=1;s<arguments.length;++s)for(i in e=arguments[s])Object.prototype.hasOwnProperty.call(e,i)&&(t[i]=e[i]);return t}({canSuccess:!0,show:!1,color:"#73ccec",position:"fixed",failedColor:"red",thickness:"2px",transition:{speed:"0.2s",opacity:"0.6s",termination:300},autoRevert:!0,location:"top",inverse:!1,autoFinish:!0},t),n=new o({data:{RADON_LOADING_BAR:{percent:0,options:s}}});i&&(window.VueProgressBarEventBus=n, e.init(n)), o.component("vue-progress-bar",r), o.prototype.$Progress=e;}}});
+  !function(t,o){module.exports=o();}(commonjsGlobal,function(){!function(){if("undefined"!=typeof document){var t=document.head||document.getElementsByTagName("head")[0],o=document.createElement("style"),i=" .__cov-progress { opacity: 1; z-index: 999999; } ";o.type="text/css",o.styleSheet?o.styleSheet.cssText=i:o.appendChild(document.createTextNode(i)),t.appendChild(o);}}();var t="undefined"!=typeof window,r={render:function(){var t=this,o=t.$createElement;return (t._self._c||o)("div",{staticClass:"__cov-progress",style:t.style})},staticRenderFns:[],name:"VueProgress",serverCacheKey:function(){return "Progress"},computed:{style:function(){var t=this.progress,o=t.options,i=!!o.show,e=o.location,s={"background-color":o.canSuccess?o.color:o.failedColor,opacity:o.show?1:0,position:o.position};return "top"===e||"bottom"===e?("top"===e?s.top="0px":s.bottom="0px",o.inverse?s.right="0px":s.left="0px",s.width=t.percent+"%",s.height=o.thickness,s.transition=(i?"width "+o.transition.speed+", ":"")+"opacity "+o.transition.opacity):"left"!==e&&"right"!==e||("left"===e?s.left="0px":s.right="0px",o.inverse?s.top="0px":s.bottom="0px",s.height=t.percent+"%",s.width=o.thickness,s.transition=(i?"height "+o.transition.speed+", ":"")+"opacity "+o.transition.opacity),s},progress:function(){return t?window.VueProgressBarEventBus.RADON_LOADING_BAR:{percent:0,options:{canSuccess:!0,show:!1,color:"rgb(19, 91, 55)",failedColor:"red",thickness:"2px",transition:{speed:"0.2s",opacity:"0.6s",termination:300},location:"top",autoRevert:!0,inverse:!1}}}}};return {install:function(o){var t=1<arguments.length&&void 0!==arguments[1]?arguments[1]:{},i=(o.version.split(".")[0],"undefined"!=typeof window),e={$vm:null,state:{tFailColor:"",tColor:"",timer:null,cut:0},init:function(t){this.$vm=t;},start:function(t){var o=this;this.$vm&&(t||(t=3e3),this.$vm.RADON_LOADING_BAR.percent=0,this.$vm.RADON_LOADING_BAR.options.show=!0,this.$vm.RADON_LOADING_BAR.options.canSuccess=!0,this.state.cut=1e4/Math.floor(t),clearInterval(this.state.timer),this.state.timer=setInterval(function(){o.increase(o.state.cut*Math.random()),95<o.$vm.RADON_LOADING_BAR.percent&&o.$vm.RADON_LOADING_BAR.options.autoFinish&&o.finish();},100));},set:function(t){this.$vm.RADON_LOADING_BAR.options.show=!0,this.$vm.RADON_LOADING_BAR.options.canSuccess=!0,this.$vm.RADON_LOADING_BAR.percent=Math.floor(t);},get:function(){return Math.floor(this.$vm.RADON_LOADING_BAR.percent)},increase:function(t){this.$vm.RADON_LOADING_BAR.percent=Math.min(99,this.$vm.RADON_LOADING_BAR.percent+Math.floor(t));},decrease:function(t){this.$vm.RADON_LOADING_BAR.percent=this.$vm.RADON_LOADING_BAR.percent-Math.floor(t);},hide:function(){var t=this;clearInterval(this.state.timer),this.state.timer=null,setTimeout(function(){t.$vm.RADON_LOADING_BAR.options.show=!1,o.nextTick(function(){setTimeout(function(){t.$vm.RADON_LOADING_BAR.percent=0;},100),t.$vm.RADON_LOADING_BAR.options.autoRevert&&setTimeout(function(){t.revert();},300);});},this.$vm.RADON_LOADING_BAR.options.transition.termination);},pause:function(){clearInterval(this.state.timer);},finish:function(){this.$vm&&(this.$vm.RADON_LOADING_BAR.percent=100,this.hide());},fail:function(){this.$vm.RADON_LOADING_BAR.options.canSuccess=!1,this.$vm.RADON_LOADING_BAR.percent=100,this.hide();},setFailColor:function(t){this.$vm.RADON_LOADING_BAR.options.failedColor=t;},setColor:function(t){this.$vm.RADON_LOADING_BAR.options.color=t;},setLocation:function(t){this.$vm.RADON_LOADING_BAR.options.location=t;},setTransition:function(t){this.$vm.RADON_LOADING_BAR.options.transition=t;},tempFailColor:function(t){this.state.tFailColor=this.$vm.RADON_LOADING_BAR.options.failedColor,this.$vm.RADON_LOADING_BAR.options.failedColor=t;},tempColor:function(t){this.state.tColor=this.$vm.RADON_LOADING_BAR.options.color,this.$vm.RADON_LOADING_BAR.options.color=t;},tempLocation:function(t){this.state.tLocation=this.$vm.RADON_LOADING_BAR.options.location,this.$vm.RADON_LOADING_BAR.options.location=t;},tempTransition:function(t){this.state.tTransition=this.$vm.RADON_LOADING_BAR.options.transition,this.$vm.RADON_LOADING_BAR.options.transition=t;},revertColor:function(){this.$vm.RADON_LOADING_BAR.options.color=this.state.tColor,this.state.tColor="";},revertFailColor:function(){this.$vm.RADON_LOADING_BAR.options.failedColor=this.state.tFailColor,this.state.tFailColor="";},revertLocation:function(){this.$vm.RADON_LOADING_BAR.options.location=this.state.tLocation,this.state.tLocation="";},revertTransition:function(){this.$vm.RADON_LOADING_BAR.options.transition=this.state.tTransition,this.state.tTransition={};},revert:function(){this.$vm.RADON_LOADING_BAR.options.autoRevert&&(this.state.tColor&&this.revertColor(),this.state.tFailColor&&this.revertFailColor(),this.state.tLocation&&this.revertLocation(),!this.state.tTransition||void 0===this.state.tTransition.speed&&void 0===this.state.tTransition.opacity||this.revertTransition());},parseMeta:function(t){for(var o in t.func){var i=t.func[o];switch(i.call){case"color":switch(i.modifier){case"set":this.setColor(i.argument);break;case"temp":this.tempColor(i.argument);}break;case"fail":switch(i.modifier){case"set":this.setFailColor(i.argument);break;case"temp":this.tempFailColor(i.argument);}break;case"location":switch(i.modifier){case"set":this.setLocation(i.argument);break;case"temp":this.tempLocation(i.argument);}break;case"transition":switch(i.modifier){case"set":this.setTransition(i.argument);break;case"temp":this.tempTransition(i.argument);}}}}},s=function(t,o){for(var i,e,s=1;s<arguments.length;++s)for(i in e=arguments[s])Object.prototype.hasOwnProperty.call(e,i)&&(t[i]=e[i]);return t}({canSuccess:!0,show:!1,color:"#73ccec",position:"fixed",failedColor:"red",thickness:"2px",transition:{speed:"0.2s",opacity:"0.6s",termination:300},autoRevert:!0,location:"top",inverse:!1,autoFinish:!0},t),n=new o({data:{RADON_LOADING_BAR:{percent:0,options:s}}});i&&(window.VueProgressBarEventBus=n,e.init(n)),o.component("vue-progress-bar",r),o.prototype.$Progress=e;}}});
   });
 
   var dist = createCommonjsModule(function (module, exports) {
@@ -11517,10 +11504,12 @@
                   l: !1,
                   exports: {}
               };
-              return modules[moduleId].call(module.exports, module, module.exports, __webpack_require__), module.l = !0, module.exports;
+              return modules[moduleId].call(module.exports, module, module.exports, __webpack_require__), 
+              module.l = !0, module.exports;
           }
           var installedModules = {};
-          return __webpack_require__.m = modules, __webpack_require__.c = installedModules, __webpack_require__.i = function(value) {
+          return __webpack_require__.m = modules, __webpack_require__.c = installedModules, 
+          __webpack_require__.i = function(value) {
               return value;
           }, __webpack_require__.d = function(exports, name, getter) {
               __webpack_require__.o(exports, name) || Object.defineProperty(exports, name, {
@@ -11543,7 +11532,8 @@
               var esModule, scriptExports = rawScriptExports = rawScriptExports || {}, type = typeof rawScriptExports.default;
               "object" !== type && "function" !== type || (esModule = rawScriptExports, scriptExports = rawScriptExports.default);
               var options = "function" == typeof scriptExports ? scriptExports.options : scriptExports;
-              if (compiledTemplate && (options.render = compiledTemplate.render, options.staticRenderFns = compiledTemplate.staticRenderFns), scopeId && (options._scopeId = scopeId), cssModules) {
+              if (compiledTemplate && (options.render = compiledTemplate.render, options.staticRenderFns = compiledTemplate.staticRenderFns), 
+              scopeId && (options._scopeId = scopeId), cssModules) {
                   var computed = options.computed || (options.computed = {});
                   Object.keys(cssModules).forEach(function(key) {
                       var module = cssModules[key];
@@ -11607,7 +11597,8 @@
                   }
                   for (i = 0; i < modules.length; i++) {
                       var item = modules[i];
-                      "number" == typeof item[0] && alreadyImportedModules[item[0]] || (mediaQuery && !item[2] ? item[2] = mediaQuery : mediaQuery && (item[2] = "(" + item[2] + ") and (" + mediaQuery + ")"), list.push(item));
+                      "number" == typeof item[0] && alreadyImportedModules[item[0]] || (mediaQuery && !item[2] ? item[2] = mediaQuery : mediaQuery && (item[2] = "(" + item[2] + ") and (" + mediaQuery + ")"), 
+                      list.push(item));
                   }
               }, list;
           };
@@ -11642,8 +11633,10 @@
               }
               if (isOldIE) {
                   var styleIndex = singletonCounter++;
-                  styleElement = singletonElement || (singletonElement = createStyleElement()), update = applyToSingletonTag.bind(null, styleElement, styleIndex, !1), remove = applyToSingletonTag.bind(null, styleElement, styleIndex, !0);
-              } else styleElement = createStyleElement(), update = applyToTag.bind(null, styleElement), remove = function() {
+                  styleElement = singletonElement || (singletonElement = createStyleElement()), update = applyToSingletonTag.bind(null, styleElement, styleIndex, !1), 
+                  remove = applyToSingletonTag.bind(null, styleElement, styleIndex, !0);
+              } else styleElement = createStyleElement(), update = applyToTag.bind(null, styleElement), 
+              remove = function() {
                   styleElement.parentNode.removeChild(styleElement);
               };
               return update(obj), function(newObj) {
@@ -11662,7 +11655,9 @@
           }
           function applyToTag(styleElement, obj) {
               var css = obj.css, media = obj.media, sourceMap = obj.sourceMap;
-              if (media && styleElement.setAttribute("media", media), sourceMap && (css += "\n/*# sourceURL=" + sourceMap.sources[0] + " */", css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */"), styleElement.styleSheet) styleElement.styleSheet.cssText = css; else {
+              if (media && styleElement.setAttribute("media", media), sourceMap && (css += "\n/*# sourceURL=" + sourceMap.sources[0] + " */", 
+              css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */"), 
+              styleElement.styleSheet) styleElement.styleSheet.cssText = css; else {
                   for (;styleElement.firstChild; ) styleElement.removeChild(styleElement.firstChild);
                   styleElement.appendChild(document.createTextNode(css));
               }
@@ -11718,7 +11713,8 @@
           var _Modal = __webpack_require__(6), _Modal2 = _interopRequireDefault(_Modal), _Dialog = __webpack_require__(5), _Dialog2 = _interopRequireDefault(_Dialog), _ModalsContainer = __webpack_require__(7), _ModalsContainer2 = _interopRequireDefault(_ModalsContainer), Plugin = {
               install: function(Vue) {
                   var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
-                  this.installed || (this.installed = !0, this.event = new Vue(), this.rootInstance = null, this.componentName = options.componentName || "modal", Vue.prototype.$modal = {
+                  this.installed || (this.installed = !0, this.event = new Vue(), this.rootInstance = null, 
+                  this.componentName = options.componentName || "Modal", Vue.prototype.$modal = {
                       show: function(modal, paramsOrProps, params) {
                           var events = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : {};
                           if ("string" == typeof modal) return void Plugin.event.$emit("toggle", modal, !0, paramsOrProps);
@@ -11732,7 +11728,9 @@
                       toggle: function(name, params) {
                           Plugin.event.$emit("toggle", name, void 0, params);
                       }
-                  }, Vue.component(this.componentName, _Modal2.default), options.dialog && Vue.component("v-dialog", _Dialog2.default), options.dynamic && (Vue.component("modals-container", _ModalsContainer2.default), Vue.mixin({
+                  }, Vue.component(this.componentName, _Modal2.default), options.dialog && Vue.component("VDialog", _Dialog2.default), 
+                  options.dynamic && (Vue.component("ModalsContainer", _ModalsContainer2.default), 
+                  Vue.mixin({
                       beforeMount: function() {
                           null === Plugin.rootInstance && (Plugin.rootInstance = this.$root);
                       }
@@ -11743,20 +11741,24 @@
       }, function(module, exports, __webpack_require__) {
           __webpack_require__(21);
           var Component = __webpack_require__(0)(__webpack_require__(8), __webpack_require__(18), null, null);
-          Component.options.__file = "/Users/yev.vlasenko2/Projects/vue/vue-js-modal/src/Dialog.vue", Component.esModule && Object.keys(Component.esModule).some(function(key) {
+          Component.options.__file = "D:\\Projects\\vue\\vue-js-modal\\src\\Dialog.vue", Component.esModule && Object.keys(Component.esModule).some(function(key) {
               return "default" !== key && "__esModule" !== key;
-          }) && console.error("named exports are not supported in *.vue files."), Component.options.functional && console.error("[vue-loader] Dialog.vue: functional components are not supported with templates, they should use render functions."), module.exports = Component.exports;
+          }) && console.error("named exports are not supported in *.vue files."), Component.options.functional && console.error("[vue-loader] Dialog.vue: functional components are not supported with templates, they should use render functions."), 
+          module.exports = Component.exports;
       }, function(module, exports, __webpack_require__) {
           __webpack_require__(22);
           var Component = __webpack_require__(0)(__webpack_require__(9), __webpack_require__(19), null, null);
-          Component.options.__file = "/Users/yev.vlasenko2/Projects/vue/vue-js-modal/src/Modal.vue", Component.esModule && Object.keys(Component.esModule).some(function(key) {
+          Component.options.__file = "D:\\Projects\\vue\\vue-js-modal\\src\\Modal.vue", Component.esModule && Object.keys(Component.esModule).some(function(key) {
               return "default" !== key && "__esModule" !== key;
-          }) && console.error("named exports are not supported in *.vue files."), Component.options.functional && console.error("[vue-loader] Modal.vue: functional components are not supported with templates, they should use render functions."), module.exports = Component.exports;
+          }) && console.error("named exports are not supported in *.vue files."), Component.options.functional && console.error("[vue-loader] Modal.vue: functional components are not supported with templates, they should use render functions."), 
+          module.exports = Component.exports;
       }, function(module, exports, __webpack_require__) {
           var Component = __webpack_require__(0)(__webpack_require__(10), __webpack_require__(17), null, null);
-          Component.options.__file = "/Users/yev.vlasenko2/Projects/vue/vue-js-modal/src/ModalsContainer.vue", Component.esModule && Object.keys(Component.esModule).some(function(key) {
+          Component.options.__file = "D:\\Projects\\vue\\vue-js-modal\\src\\ModalsContainer.vue", 
+          Component.esModule && Object.keys(Component.esModule).some(function(key) {
               return "default" !== key && "__esModule" !== key;
-          }) && console.error("named exports are not supported in *.vue files."), Component.options.functional && console.error("[vue-loader] ModalsContainer.vue: functional components are not supported with templates, they should use render functions."), module.exports = Component.exports;
+          }) && console.error("named exports are not supported in *.vue files."), Component.options.functional && console.error("[vue-loader] ModalsContainer.vue: functional components are not supported with templates, they should use render functions."), 
+          module.exports = Component.exports;
       }, function(module, exports, __webpack_require__) {
           Object.defineProperty(exports, "__esModule", {
               value: !0
@@ -11796,7 +11798,8 @@
               },
               methods: {
                   beforeOpened: function(event) {
-                      window.addEventListener("keyup", this.onKeyUp), this.params = event.params || {}, this.$emit("before-opened", event);
+                      window.addEventListener("keyup", this.onKeyUp), this.params = event.params || {}, 
+                      this.$emit("before-opened", event);
                   },
                   beforeClosed: function(event) {
                       window.removeEventListener("keyup", this.onKeyUp), this.params = {}, this.$emit("before-closed", event);
@@ -11832,7 +11835,7 @@
                   for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
               }
               return target;
-          }, _index = __webpack_require__(4), _index2 = _interopRequireDefault(_index), _Resizer = __webpack_require__(16), _Resizer2 = _interopRequireDefault(_Resizer), _util = __webpack_require__(1), _parser = __webpack_require__(12);
+          }, _index = __webpack_require__(4), _index2 = _interopRequireDefault(_index), _Resizer = __webpack_require__(16), _Resizer2 = _interopRequireDefault(_Resizer), _utils = __webpack_require__(1), _parser = __webpack_require__(12);
           exports.default = {
               name: "VueJsModal",
               props: {
@@ -11961,8 +11964,10 @@
               },
               beforeMount: function() {
                   var _this = this;
-                  if (_index2.default.event.$on("toggle", this.handleToggleEvent), window.addEventListener("resize", this.handleWindowResize), this.handleWindowResize(), this.scrollable && !this.isAutoHeight && console.warn('Modal "' + this.name + '" has scrollable flag set to true but height is not "auto" (' + this.height + ")"), this.isAutoHeight) {
-                      var MutationObserver = (0, _util.getMutationObserver)();
+                  if (_index2.default.event.$on("toggle", this.handleToggleEvent), window.addEventListener("resize", this.handleWindowResize), 
+                  this.handleWindowResize(), this.scrollable && !this.isAutoHeight && console.warn('Modal "' + this.name + '" has scrollable flag set to true but height is not "auto" (' + this.height + ")"), 
+                  this.isAutoHeight) {
+                      var MutationObserver = (0, _utils.getMutationObserver)();
                       MutationObserver && (this.mutationObserver = new MutationObserver(function(mutations) {
                           _this.updateRenderedHeight();
                       }));
@@ -11970,7 +11975,9 @@
                   this.clickToClose && window.addEventListener("keyup", this.handleEscapeKeyUp);
               },
               beforeDestroy: function() {
-                  _index2.default.event.$off("toggle", this.handleToggleEvent), window.removeEventListener("resize", this.handleWindowResize), this.clickToClose && window.removeEventListener("keyup", this.handleEscapeKeyUp), this.scrollable && document.body.classList.remove("v--modal-block-scroll");
+                  _index2.default.event.$off("toggle", this.handleToggleEvent), window.removeEventListener("resize", this.handleWindowResize), 
+                  this.clickToClose && window.removeEventListener("keyup", this.handleEscapeKeyUp), 
+                  this.scrollable && document.body.classList.remove("v--modal-block-scroll");
               },
               computed: {
                   isAutoHeight: function() {
@@ -11979,19 +11986,19 @@
                   position: function() {
                       var window = this.window, shift = this.shift, pivotX = this.pivotX, pivotY = this.pivotY, trueModalWidth = this.trueModalWidth, trueModalHeight = this.trueModalHeight, maxLeft = window.width - trueModalWidth, maxTop = window.height - trueModalHeight, left = shift.left + pivotX * maxLeft, top = shift.top + pivotY * maxTop;
                       return {
-                          left: parseInt((0, _util.inRange)(0, maxLeft, left)),
-                          top: parseInt((0, _util.inRange)(0, maxTop, top))
+                          left: parseInt((0, _utils.inRange)(0, maxLeft, left)),
+                          top: parseInt((0, _utils.inRange)(0, maxTop, top))
                       };
                   },
                   trueModalWidth: function() {
                       var window = this.window, modal = this.modal, adaptive = this.adaptive, minWidth = this.minWidth, maxWidth = this.maxWidth, value = "%" === modal.widthType ? window.width / 100 * modal.width : modal.width, max = Math.min(window.width, maxWidth);
-                      return adaptive ? (0, _util.inRange)(minWidth, max, value) : value;
+                      return adaptive ? (0, _utils.inRange)(minWidth, max, value) : value;
                   },
                   trueModalHeight: function() {
                       var window = this.window, modal = this.modal, isAutoHeight = this.isAutoHeight, adaptive = this.adaptive, maxHeight = this.maxHeight, value = "%" === modal.heightType ? window.height / 100 * modal.height : modal.height;
                       if (isAutoHeight) return this.modal.renderedHeight;
                       var max = Math.min(window.height, maxHeight);
-                      return adaptive ? (0, _util.inRange)(this.minHeight, max, value) : value;
+                      return adaptive ? (0, _utils.inRange)(this.minHeight, max, value) : value;
                   },
                   overlayClass: function() {
                       return {
@@ -12011,6 +12018,20 @@
                       };
                   }
               },
+              watch: {
+                  visible: function(value) {
+                      var _this2 = this;
+                      value ? (this.visibility.overlay = !0, setTimeout(function() {
+                          _this2.visibility.modal = !0, _this2.$nextTick(function() {
+                              _this2.addDraggableListeners(), _this2.callAfterEvent(!0);
+                          });
+                      }, this.delay)) : (this.visibility.modal = !1, setTimeout(function() {
+                          _this2.visibility.overlay = !1, _this2.$nextTick(function() {
+                              _this2.removeDraggableListeners(), _this2.callAfterEvent(!1);
+                          });
+                      }, this.delay));
+                  }
+              },
               methods: {
                   handleToggleEvent: function(name, state, params) {
                       if (this.name === name) {
@@ -12020,7 +12041,8 @@
                   },
                   setInitialSize: function() {
                       var modal = this.modal, width = (0, _parser.parseNumber)(this.width), height = (0, _parser.parseNumber)(this.height);
-                      modal.width = width.value, modal.widthType = width.type, modal.height = height.value, modal.heightType = height.type;
+                      modal.width = width.value, modal.widthType = width.type, modal.height = height.value, 
+                      modal.heightType = height.type;
                   },
                   handleEscapeKeyUp: function(event) {
                       27 === event.which && this.visible && this.$modal.hide(this.name);
@@ -12030,13 +12052,14 @@
                   },
                   createModalEvent: function() {
                       var args = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
-                      return (0, _util.createModalEvent)(_extends({
+                      return (0, _utils.createModalEvent)(_extends({
                           name: this.name,
                           ref: this.$refs.modal
                       }, args));
                   },
                   handleModalResize: function(event) {
-                      this.modal.widthType = "px", this.modal.width = event.size.width, this.modal.heightType = "px", this.modal.height = event.size.height;
+                      this.modal.widthType = "px", this.modal.width = event.size.width, this.modal.heightType = "px", 
+                      this.modal.height = event.size.height;
                       var size = this.modal.size;
                       this.$emit("resize", this.createModalEvent({
                           size: size
@@ -12046,7 +12069,8 @@
                       var reset = this.reset, scrollable = this.scrollable, visible = this.visible;
                       if (visible !== nextState) {
                           var beforeEventName = visible ? "before-close" : "before-open";
-                          "before-open" === beforeEventName ? (document.activeElement && "BODY" !== document.activeElement.tagName && document.activeElement.blur && document.activeElement.blur(), reset && (this.setInitialSize(), this.shift.left = 0, this.shift.top = 0), scrollable && document.body.classList.add("v--modal-block-scroll")) : scrollable && document.body.classList.remove("v--modal-block-scroll");
+                          "before-open" === beforeEventName ? (document.activeElement && "BODY" !== document.activeElement.tagName && document.activeElement.blur && document.activeElement.blur(), 
+                          reset && (this.setInitialSize(), this.shift.left = 0, this.shift.top = 0), scrollable && document.body.classList.add("v--modal-block-scroll")) : scrollable && document.body.classList.remove("v--modal-block-scroll");
                           var stopEventExecution = !1, stop = function() {
                               stopEventExecution = !0;
                           }, beforeEvent = this.createModalEvent({
@@ -12054,7 +12078,7 @@
                               state: nextState,
                               params: params
                           });
-                          this.$emit(beforeEventName, beforeEvent), stopEventExecution || (this.visible = nextState, this.visible ? this.startOpeningModal() : this.startClosingModal());
+                          this.$emit(beforeEventName, beforeEvent), stopEventExecution || (this.visible = nextState);
                       }
                   },
                   getDraggableElement: function() {
@@ -12064,20 +12088,15 @@
                   handleBackgroundClick: function() {
                       this.clickToClose && this.toggle(!1);
                   },
-                  startOpeningModal: function() {
-                      var _this2 = this;
-                      this.visibility.overlay = !0, setTimeout(function() {
-                          _this2.visibility.modal = !0;
-                      }, this.delay);
-                  },
-                  startClosingModal: function() {
-                      var _this3 = this;
-                      this.visibility.modal = !1, setTimeout(function() {
-                          _this3.visibility.overlay = !1;
-                      }, this.delay);
+                  callAfterEvent: function(state) {
+                      state ? this.connectObserver() : this.disconnectObserver();
+                      var eventName = state ? "opened" : "closed", event = this.createModalEvent({
+                          state: state
+                      });
+                      this.$emit(eventName, event);
                   },
                   addDraggableListeners: function() {
-                      var _this4 = this;
+                      var _this3 = this;
                       if (this.draggable) {
                           var dragger = this.getDraggableElement();
                           if (dragger) {
@@ -12087,13 +12106,18 @@
                                   var target = event.target;
                                   if (!target || "INPUT" !== target.nodeName) {
                                       var _getPosition = getPosition(event), clientX = _getPosition.clientX, clientY = _getPosition.clientY;
-                                      document.addEventListener("mousemove", _handleDraggableMousemove), document.addEventListener("touchmove", _handleDraggableMousemove), document.addEventListener("mouseup", _handleDraggableMouseup), document.addEventListener("touchend", _handleDraggableMouseup), startX = clientX, startY = clientY, cachedShiftX = _this4.shift.left, cachedShiftY = _this4.shift.top;
+                                      document.addEventListener("mousemove", _handleDraggableMousemove), document.addEventListener("touchmove", _handleDraggableMousemove), 
+                                      document.addEventListener("mouseup", _handleDraggableMouseup), document.addEventListener("touchend", _handleDraggableMouseup), 
+                                      startX = clientX, startY = clientY, cachedShiftX = _this3.shift.left, cachedShiftY = _this3.shift.top;
                                   }
                               }, _handleDraggableMousemove = function(event) {
                                   var _getPosition2 = getPosition(event), clientX = _getPosition2.clientX, clientY = _getPosition2.clientY;
-                                  _this4.shift.left = cachedShiftX + clientX - startX, _this4.shift.top = cachedShiftY + clientY - startY, event.preventDefault();
+                                  _this3.shift.left = cachedShiftX + clientX - startX, _this3.shift.top = cachedShiftY + clientY - startY, 
+                                  event.preventDefault();
                               }, _handleDraggableMouseup = function _handleDraggableMouseup(event) {
-                                  document.removeEventListener("mousemove", _handleDraggableMousemove), document.removeEventListener("touchmove", _handleDraggableMousemove), document.removeEventListener("mouseup", _handleDraggableMouseup), document.removeEventListener("touchend", _handleDraggableMouseup), event.preventDefault();
+                                  document.removeEventListener("mousemove", _handleDraggableMousemove), document.removeEventListener("touchmove", _handleDraggableMousemove), 
+                                  document.removeEventListener("mouseup", _handleDraggableMouseup), document.removeEventListener("touchend", _handleDraggableMouseup), 
+                                  event.preventDefault();
                               };
                               dragger.addEventListener("mousedown", handleDraggableMousedown), dragger.addEventListener("touchstart", handleDraggableMousedown);
                           }
@@ -12116,16 +12140,8 @@
                   beforeTransitionEnter: function() {
                       this.connectObserver();
                   },
-                  afterTransitionEnter: function() {
-                      this.addDraggableListeners(), this.$emit("opened", this.createModalEvent({
-                          state: !0
-                      }));
-                  },
-                  afterTransitionLeave: function() {
-                      this.removeDraggableListeners(), this.disconnectObserver(), this.$emit("closed", this.createModalEvent({
-                          state: !1
-                      }));
-                  }
+                  afterTransitionEnter: function() {},
+                  afterTransitionLeave: function() {}
               }
           };
       }, function(module, exports, __webpack_require__) {
@@ -12138,7 +12154,7 @@
                   for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
               }
               return target;
-          }, _util = __webpack_require__(1);
+          }, _utils = __webpack_require__(1);
           exports.default = {
               data: function() {
                   return {
@@ -12150,7 +12166,7 @@
               },
               methods: {
                   add: function(component) {
-                      var componentAttrs = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, _this = this, modalAttrs = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, modalListeners = arguments[3], id = (0, _util.generateId)(), name = modalAttrs.name || "_dynamic_modal_" + id;
+                      var componentAttrs = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, _this = this, modalAttrs = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, modalListeners = arguments[3], id = (0, _utils.generateId)(), name = modalAttrs.name || "_dynamic_modal_" + id;
                       this.modals.push({
                           id: id,
                           modalAttrs: _extends({}, modalAttrs, {
@@ -12172,7 +12188,7 @@
           Object.defineProperty(exports, "__esModule", {
               value: !0
           });
-          var _util = __webpack_require__(1);
+          var _utils = __webpack_require__(1);
           exports.default = {
               name: "VueJsModalResizer",
               props: {
@@ -12204,10 +12220,12 @@
               },
               methods: {
                   start: function(event) {
-                      this.clicked = !0, window.addEventListener("mousemove", this.mousemove, !1), window.addEventListener("mouseup", this.stop, !1), event.stopPropagation(), event.preventDefault();
+                      this.clicked = !0, window.addEventListener("mousemove", this.mousemove, !1), window.addEventListener("mouseup", this.stop, !1), 
+                      event.stopPropagation(), event.preventDefault();
                   },
                   stop: function() {
-                      this.clicked = !1, window.removeEventListener("mousemove", this.mousemove, !1), window.removeEventListener("mouseup", this.stop, !1), this.$emit("resize-stop", {
+                      this.clicked = !1, window.removeEventListener("mousemove", this.mousemove, !1), 
+                      window.removeEventListener("mouseup", this.stop, !1), this.$emit("resize-stop", {
                           element: this.$el.parentElement,
                           size: this.size
                       });
@@ -12219,7 +12237,7 @@
                       var el = this.$el.parentElement;
                       if (el) {
                           var width = event.clientX - el.offsetLeft, height = event.clientY - el.offsetTop;
-                          width = (0, _util.inRange)(this.minWidth, window.innerWidth, width), height = (0, _util.inRange)(this.minHeight, window.innerHeight, height), this.size = {
+                          width = (0, _utils.inRange)(this.minWidth, window.innerWidth, width), height = (0, _utils.inRange)(this.minHeight, window.innerHeight, height), this.size = {
                               width: width,
                               height: height
                           }, el.style.width = width + "px", el.style.height = height + "px", this.$emit("resize", {
@@ -12289,17 +12307,19 @@
               return value >= 0;
           };
       }, function(module, exports, __webpack_require__) {
-          exports = module.exports = __webpack_require__(2)(), exports.push([ module.i, "\n.vue-dialog div {\n  box-sizing: border-box;\n}\n.vue-dialog .dialog-flex {\n  width: 100%;\n  height: 100%;\n}\n.vue-dialog .dialog-content {\n  flex: 1 0 auto;\n  width: 100%;\n  padding: 15px;\n  font-size: 14px;\n}\n.vue-dialog .dialog-c-title {\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n.vue-dialog .dialog-c-text {\n}\n.vue-dialog .vue-dialog-buttons {\n  display: flex;\n  flex: 0 1 auto;\n  width: 100%;\n  border-top: 1px solid #eee;\n}\n.vue-dialog .vue-dialog-buttons-none {\n  width: 100%;\n  padding-bottom: 15px;\n}\n.vue-dialog-button {\n  font-size: 12px !important;\n  background: transparent;\n  padding: 0;\n  margin: 0;\n  border: 0;\n  cursor: pointer;\n  box-sizing: border-box;\n  line-height: 40px;\n  height: 40px;\n  color: inherit;\n  font: inherit;\n  outline: none;\n}\n.vue-dialog-button:hover {\n  background: rgba(0, 0, 0, 0.01);\n}\n.vue-dialog-button:active {\n  background: rgba(0, 0, 0, 0.025);\n}\n.vue-dialog-button:not(:first-of-type) {\n  border-left: 1px solid #eee;\n}\n", "" ]);
+          exports = module.exports = __webpack_require__(2)(), exports.push([ module.i, "\n.vue-dialog div {\r\n  box-sizing: border-box;\n}\n.vue-dialog .dialog-flex {\r\n  width: 100%;\r\n  height: 100%;\n}\n.vue-dialog .dialog-content {\r\n  flex: 1 0 auto;\r\n  width: 100%;\r\n  padding: 15px;\r\n  font-size: 14px;\n}\n.vue-dialog .dialog-c-title {\r\n  font-weight: 600;\r\n  padding-bottom: 15px;\n}\n.vue-dialog .dialog-c-text {\n}\n.vue-dialog .vue-dialog-buttons {\r\n  display: flex;\r\n  flex: 0 1 auto;\r\n  width: 100%;\r\n  border-top: 1px solid #eee;\n}\n.vue-dialog .vue-dialog-buttons-none {\r\n  width: 100%;\r\n  padding-bottom: 15px;\n}\n.vue-dialog-button {\r\n  font-size: 12px !important;\r\n  background: transparent;\r\n  padding: 0;\r\n  margin: 0;\r\n  border: 0;\r\n  cursor: pointer;\r\n  box-sizing: border-box;\r\n  line-height: 40px;\r\n  height: 40px;\r\n  color: inherit;\r\n  font: inherit;\r\n  outline: none;\n}\n.vue-dialog-button:hover {\r\n  background: rgba(0, 0, 0, 0.01);\n}\n.vue-dialog-button:active {\r\n  background: rgba(0, 0, 0, 0.025);\n}\n.vue-dialog-button:not(:first-of-type) {\r\n  border-left: 1px solid #eee;\n}\r\n", "" ]);
       }, function(module, exports, __webpack_require__) {
-          exports = module.exports = __webpack_require__(2)(), exports.push([ module.i, "\n.v--modal-block-scroll {\n  overflow: hidden;\n  width: 100vw;\n}\n.v--modal-overlay {\n  position: fixed;\n  box-sizing: border-box;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: 100vh;\n  background: rgba(0, 0, 0, 0.2);\n  z-index: 999;\n  opacity: 1;\n}\n.v--modal-overlay.scrollable {\n  height: 100%;\n  min-height: 100vh;\n  overflow-y: auto;\n  -webkit-overflow-scrolling: touch;\n}\n.v--modal-overlay .v--modal-background-click {\n  min-height: 100%;\n  width: 100%;\n}\n.v--modal-overlay .v--modal-box {\n  position: relative;\n  overflow: hidden;\n  box-sizing: border-box;\n}\n.v--modal-overlay.scrollable .v--modal-box {\n  margin-bottom: 2px;\n}\n.v--modal {\n  background-color: white;\n  text-align: left;\n  border-radius: 3px;\n  box-shadow: 0 20px 60px -2px rgba(27, 33, 58, 0.4);\n  padding: 0;\n}\n.v--modal.v--modal-fullscreen {\n  width: 100vw;\n  height: 100vh;\n  margin: 0;\n  left: 0;\n  top: 0;\n}\n.v--modal-top-right {\n  display: block;\n  position: absolute;\n  right: 0;\n  top: 0;\n}\n.overlay-fade-enter-active,\n.overlay-fade-leave-active {\n  transition: all 0.2s;\n}\n.overlay-fade-enter,\n.overlay-fade-leave-active {\n  opacity: 0;\n}\n.nice-modal-fade-enter-active,\n.nice-modal-fade-leave-active {\n  transition: all 0.4s;\n}\n.nice-modal-fade-enter,\n.nice-modal-fade-leave-active {\n  opacity: 0;\n  transform: translateY(-20px);\n}\n", "" ]);
+          exports = module.exports = __webpack_require__(2)(), exports.push([ module.i, "\n.v--modal-block-scroll {\r\n  overflow: hidden;\r\n  width: 100vw;\n}\n.v--modal-overlay {\r\n  position: fixed;\r\n  box-sizing: border-box;\r\n  left: 0;\r\n  top: 0;\r\n  width: 100%;\r\n  height: 100vh;\r\n  background: rgba(0, 0, 0, 0.2);\r\n  z-index: 999;\r\n  opacity: 1;\n}\n.v--modal-overlay.scrollable {\r\n  height: 100%;\r\n  min-height: 100vh;\r\n  overflow-y: auto;\r\n  -webkit-overflow-scrolling: touch;\n}\n.v--modal-overlay .v--modal-background-click {\r\n  min-height: 100%;\r\n  width: 100%;\n}\n.v--modal-overlay .v--modal-box {\r\n  position: relative;\r\n  overflow: hidden;\r\n  box-sizing: border-box;\n}\n.v--modal-overlay.scrollable .v--modal-box {\r\n  margin-bottom: 2px;\n}\n.v--modal {\r\n  background-color: white;\r\n  text-align: left;\r\n  border-radius: 3px;\r\n  box-shadow: 0 20px 60px -2px rgba(27, 33, 58, 0.4);\r\n  padding: 0;\n}\n.v--modal.v--modal-fullscreen {\r\n  width: 100vw;\r\n  height: 100vh;\r\n  margin: 0;\r\n  left: 0;\r\n  top: 0;\n}\n.v--modal-top-right {\r\n  display: block;\r\n  position: absolute;\r\n  right: 0;\r\n  top: 0;\n}\n.overlay-fade-enter-active,\r\n.overlay-fade-leave-active {\r\n  transition: all 0.2s;\n}\n.overlay-fade-enter,\r\n.overlay-fade-leave-active {\r\n  opacity: 0;\n}\n.nice-modal-fade-enter-active,\r\n.nice-modal-fade-leave-active {\r\n  transition: all 0.4s;\n}\n.nice-modal-fade-enter,\r\n.nice-modal-fade-leave-active {\r\n  opacity: 0;\r\n  transform: translateY(-20px);\n}\r\n", "" ]);
       }, function(module, exports, __webpack_require__) {
-          exports = module.exports = __webpack_require__(2)(), exports.push([ module.i, "\n.vue-modal-resizer {\n  display: block;\n  overflow: hidden;\n  position: absolute;\n  width: 12px;\n  height: 12px;\n  right: 0;\n  bottom: 0;\n  z-index: 9999999;\n  background: transparent;\n  cursor: se-resize;\n}\n.vue-modal-resizer::after {\n  display: block;\n  position: absolute;\n  content: '';\n  background: transparent;\n  left: 0;\n  top: 0;\n  width: 0;\n  height: 0;\n  border-bottom: 10px solid #ddd;\n  border-left: 10px solid transparent;\n}\n.vue-modal-resizer.clicked::after {\n  border-bottom: 10px solid #369be9;\n}\n", "" ]);
+          exports = module.exports = __webpack_require__(2)(), exports.push([ module.i, "\n.vue-modal-resizer {\r\n  display: block;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  width: 12px;\r\n  height: 12px;\r\n  right: 0;\r\n  bottom: 0;\r\n  z-index: 9999999;\r\n  background: transparent;\r\n  cursor: se-resize;\n}\n.vue-modal-resizer::after {\r\n  display: block;\r\n  position: absolute;\r\n  content: '';\r\n  background: transparent;\r\n  left: 0;\r\n  top: 0;\r\n  width: 0;\r\n  height: 0;\r\n  border-bottom: 10px solid #ddd;\r\n  border-left: 10px solid transparent;\n}\n.vue-modal-resizer.clicked::after {\r\n  border-bottom: 10px solid #369be9;\n}\r\n", "" ]);
       }, function(module, exports, __webpack_require__) {
           __webpack_require__(23);
           var Component = __webpack_require__(0)(__webpack_require__(11), __webpack_require__(20), null, null);
-          Component.options.__file = "/Users/yev.vlasenko2/Projects/vue/vue-js-modal/src/Resizer.vue", Component.esModule && Object.keys(Component.esModule).some(function(key) {
+          Component.options.__file = "D:\\Projects\\vue\\vue-js-modal\\src\\Resizer.vue", 
+          Component.esModule && Object.keys(Component.esModule).some(function(key) {
               return "default" !== key && "__esModule" !== key;
-          }) && console.error("named exports are not supported in *.vue files."), Component.options.functional && console.error("[vue-loader] Resizer.vue: functional components are not supported with templates, they should use render functions."), module.exports = Component.exports;
+          }) && console.error("named exports are not supported in *.vue files."), Component.options.functional && console.error("[vue-loader] Resizer.vue: functional components are not supported with templates, they should use render functions."), 
+          module.exports = Component.exports;
       }, function(module, exports, __webpack_require__) {
           module.exports = {
               render: function() {
@@ -12360,12 +12380,14 @@
                       domProps: {
                           innerHTML: _vm._s(_vm.params.title || "")
                       }
-                  }) : _vm._e(), _vm._v(" "), _c("div", {
+                  }) : _vm._e(), _vm._v(" "), _vm.params.component ? _c(_vm.params.component, _vm._b({
+                      tag: "component"
+                  }, "component", _vm.params.props, !1)) : _c("div", {
                       staticClass: "dialog-c-text",
                       domProps: {
                           innerHTML: _vm._s(_vm.params.text || "")
                       }
-                  }) ]), _vm._v(" "), _vm.buttons ? _c("div", {
+                  }) ], 1), _vm._v(" "), _vm.buttons ? _c("div", {
                       staticClass: "vue-dialog-buttons"
                   }, _vm._l(_vm.buttons, function(button, i) {
                       return _c("button", {
@@ -14510,79 +14532,2970 @@
 
   var DialogDrag = unwrapExports(vueDialogDrag_umd);
 
-  function styleInject(css, ref) {
-    if ( ref === void 0 ) ref = {};
-    var insertAt = ref.insertAt;
+  //
+  //
+  //
+  //
+  //
+  //
 
-    if (!css || typeof document === 'undefined') { return; }
+  var script = {
+    name: 'HollowDotsSpinner',
 
-    var head = document.head || document.getElementsByTagName('head')[0];
-    var style = document.createElement('style');
-    style.type = 'text/css';
-
-    if (insertAt === 'top') {
-      if (head.firstChild) {
-        head.insertBefore(style, head.firstChild);
-      } else {
-        head.appendChild(style);
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 1000
+      },
+      dotSize: {
+        type: Number,
+        default: 15
+      },
+      dotsNum: {
+        type: Number,
+        default: 3
+      },
+      color: {
+        type: String,
+        default: '#fff'
       }
-    } else {
-      head.appendChild(style);
+    },
+
+    computed: {
+      horizontalMargin () {
+        return this.dotSize / 2
+      },
+
+      spinnerStyle () {
+        return {
+          height: `${this.dotSize}px`,
+          width: `${(this.dotSize + this.horizontalMargin * 2) * this.dotsNum}px`
+        }
+      },
+
+      dotStyle () {
+        return {
+          animationDuration: `${this.animationDuration}ms`,
+          width: `${this.dotSize}px`,
+          height: `${this.dotSize}px`,
+          margin: `0 ${this.horizontalMargin}px`,
+          borderWidth: `${this.dotSize / 5}px`,
+          borderColor: this.color
+        }
+      },
+
+      dotsStyles () {
+        const dotsStyles = [];
+        const delayModifier = 0.3;
+        const basicDelay = 1000;
+
+        for (let i = 1; i <= this.dotsNum; i++) {
+          const style = Object.assign({
+            animationDelay: `${basicDelay * i * delayModifier}ms`
+          }, this.dotStyle);
+
+          dotsStyles.push(style);
+        }
+
+        return dotsStyles
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__ = script;
+              
+  /* template */
+  var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"hollow-dots-spinner",style:(_vm.spinnerStyle)},_vm._l((_vm.dotsStyles),function(ds,index){return _c('div',{key:index,staticClass:"dot",style:(ds)})}))};
+  var __vue_staticRenderFns__ = [];
+
+    /* style */
+    const __vue_inject_styles__ = function (inject) {
+      if (!inject) return
+      inject("data-v-5d688a10_0", { source: "\n.hollow-dots-spinner[data-v-5d688a10],.hollow-dots-spinner *[data-v-5d688a10]{box-sizing:border-box\n}\n.hollow-dots-spinner[data-v-5d688a10]{height:15px;width:calc(30px * 3)\n}\n.hollow-dots-spinner .dot[data-v-5d688a10]{width:15px;height:15px;margin:0 calc(15px / 2);border:calc(15px / 5) solid #ff1d5e;border-radius:50%;float:left;transform:scale(0);animation:hollow-dots-spinner-animation-data-v-5d688a10 1s ease infinite 0s\n}\n.hollow-dots-spinner .dot[data-v-5d688a10]:nth-child(1){animation-delay:calc(300ms * 1)\n}\n.hollow-dots-spinner .dot[data-v-5d688a10]:nth-child(2){animation-delay:calc(300ms * 2)\n}\n.hollow-dots-spinner .dot[data-v-5d688a10]:nth-child(3){animation-delay:calc(300ms * 3)\n}\n@keyframes hollow-dots-spinner-animation-data-v-5d688a10{\n50%{transform:scale(1);opacity:1\n}\n100%{opacity:0\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__ = "data-v-5d688a10";
+    /* module identifier */
+    const __vue_module_identifier__ = undefined;
+    /* functional template */
+    const __vue_is_functional_template__ = false;
+    /* component normalizer */
+    function __vue_normalize__(
+      template, style, script$$1,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script$$1 === 'function' ? script$$1.options : script$$1) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "HollowDotsSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__.styles || (__vue_create_injector__.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__(
+      { render: __vue_render__, staticRenderFns: __vue_staticRenderFns__ },
+      __vue_inject_styles__,
+      __vue_script__,
+      __vue_scope_id__,
+      __vue_is_functional_template__,
+      __vue_module_identifier__,
+      __vue_create_injector__,
+      undefined
+    );
+
+  var utils$2 = {
+    appendKeyframes: function (name, frames) {
+      var idx = document.styleSheets[0].cssRules.length;
+      document.styleSheets[0].insertRule('@keyframes ' + name + ' { ' + frames + ' }', idx);
+    }
+  };
+
+  //
+
+  var script$1 = {
+    name: 'PixelSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 1500
+      },
+      size: {
+        type: Number,
+        default: 70
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    data () {
+      return {
+        animationBaseName: 'pixel-spinner-animation',
+        currentAnimationName: ''
+      }
+    },
+
+    computed: {
+      pixelSize () {
+        return this.size / 7
+      },
+
+      spinnerStyle () {
+        return {
+          width: `${this.size}px`,
+          height: `${this.size}px`
+        }
+      },
+
+      spinnerInnerStyle () {
+        return {
+          animationDuration: `${this.animationDuration}ms`,
+          animationName: this.currentAnimationName,
+          width: `${this.pixelSize}px`,
+          height: `${this.pixelSize}px`,
+          backgroundColor: this.color,
+          color: this.color,
+          boxShadow: `
+                      ${this.pixelSize * 1.5}px ${this.pixelSize * 1.5}px 0 0,
+                      ${this.pixelSize * -1.5}px ${this.pixelSize * -1.5}px 0 0,
+                      ${this.pixelSize * 1.5}px ${this.pixelSize * -1.5}px 0 0,
+                      ${this.pixelSize * -1.5}px ${this.pixelSize * 1.5}px 0 0,
+                      0 ${this.pixelSize * 1.5}px 0 0,
+                      ${this.pixelSize * 1.5}px 0 0 0,
+                      ${this.pixelSize * -1.5}px 0 0 0,
+                      0 ${this.pixelSize * -1.5}px 0 0
+                    `
+        }
+      }
+    },
+
+    watch: {
+      '$props': {
+        handler () {
+          this.updateAnimation();
+        },
+        deep: true
+      }
+    },
+
+    mounted () {
+      this.updateAnimation();
+    },
+
+    methods: {
+      updateAnimation () {
+        this.updateAnimationName();
+        utils$2.appendKeyframes(this.currentAnimationName, this.generateKeyframes());
+      },
+
+      updateAnimationName () {
+        this.currentAnimationName = `${this.animationBaseName}-${Date.now()}`;
+      },
+
+      generateKeyframes () {
+        return `
+      50% {
+        box-shadow:  ${this.pixelSize * 2}px ${this.pixelSize * 2}px 0 0,
+                     ${this.pixelSize * -2}px ${this.pixelSize * -2}px 0 0,
+                     ${this.pixelSize * 2}px ${this.pixelSize * -2}px 0 0,
+                     ${this.pixelSize * -2}px ${this.pixelSize * 2}px 0 0,
+                     0 ${this.pixelSize}px 0 0,
+                     ${this.pixelSize}px 0 0 0,
+                     ${this.pixelSize * -1}px 0 0 0,
+                     0 ${this.pixelSize * -1}px 0 0;
+      }
+
+
+      75% {
+        box-shadow:  ${this.pixelSize * 2}px ${this.pixelSize * 2}px 0 0,
+                     ${this.pixelSize * -2}px ${this.pixelSize * -2}px 0 0,
+                     ${this.pixelSize * 2}px ${this.pixelSize * -2}px 0 0,
+                     ${this.pixelSize * -2}px ${this.pixelSize * 2}px 0 0,
+                     0 ${this.pixelSize}px 0 0,
+                     ${this.pixelSize}px 0 0 0,
+                     ${this.pixelSize * -1}px 0 0 0,
+                     0 ${this.pixelSize * -1}px 0 0;
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }`
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$1 = script$1;
+              
+  /* template */
+  var __vue_render__$1 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pixel-spinner",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"pixel-spinner-inner",style:(_vm.spinnerInnerStyle)})])};
+  var __vue_staticRenderFns__$1 = [];
+
+    /* style */
+    const __vue_inject_styles__$1 = function (inject) {
+      if (!inject) return
+      inject("data-v-889735bc_0", { source: "\n.pixel-spinner[data-v-889735bc],.pixel-spinner *[data-v-889735bc]{box-sizing:border-box\n}\n.pixel-spinner[data-v-889735bc]{height:70px;width:70px;display:flex;flex-direction:row;justify-content:center;align-items:center\n}\n.pixel-spinner .pixel-spinner-inner[data-v-889735bc]{width:calc(70px / 7);height:calc(70px / 7);background-color:#ff1d5e;color:#ff1d5e;box-shadow:15px 15px 0 0,-15px -15px 0 0,15px -15px 0 0,-15px 15px 0 0,0 15px 0 0,15px 0 0 0,-15px 0 0 0,0 -15px 0 0;animation:pixel-spinner-animation-data-v-889735bc 2s linear infinite\n}\n@keyframes pixel-spinner-animation-data-v-889735bc{\n50%{box-shadow:20px 20px 0 0,-20px -20px 0 0,20px -20px 0 0,-20px 20px 0 0,0 10px 0 0,10px 0 0 0,-10px 0 0 0,0 -10px 0 0\n}\n75%{box-shadow:20px 20px 0 0,-20px -20px 0 0,20px -20px 0 0,-20px 20px 0 0,0 10px 0 0,10px 0 0 0,-10px 0 0 0,0 -10px 0 0\n}\n100%{transform:rotate(360deg)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$1 = "data-v-889735bc";
+    /* module identifier */
+    const __vue_module_identifier__$1 = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$1 = false;
+    /* component normalizer */
+    function __vue_normalize__$1(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "PixelSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$1() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$1.styles || (__vue_create_injector__$1.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$1(
+      { render: __vue_render__$1, staticRenderFns: __vue_staticRenderFns__$1 },
+      __vue_inject_styles__$1,
+      __vue_script__$1,
+      __vue_scope_id__$1,
+      __vue_is_functional_template__$1,
+      __vue_module_identifier__$1,
+      __vue_create_injector__$1,
+      undefined
+    );
+
+  //
+
+  var script$2 = {
+    name: 'FlowerSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 2500
+      },
+      size: {
+        type: Number,
+        default: 70
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    data () {
+      return {
+        smallerDotAnimationBaseName: 'flower-spinner-smaller-dot-animation',
+        biggerDotAnimationBaseName: 'flower-spinner-bigger-dot-animation',
+        currentSmallerDotAnimationBaseName: '',
+        currentBiggerDotAnimationBaseName: ''
+      }
+    },
+
+    computed: {
+      dotSize () {
+        return this.size / 7
+      },
+
+      spinnerStyle () {
+        return {
+          width: `${this.size}px`,
+          height: `${this.size}px`
+        }
+      },
+
+      dotsContainerStyle () {
+        return {
+          width: `${this.dotSize}px`,
+          height: `${this.dotSize}px`
+        }
+      },
+
+      smallerDotStyle () {
+        return {
+          background: this.color,
+          animationDuration: `${this.animationDuration}ms`,
+          animationName: this.currentSmallerDotAnimationBaseName
+        }
+      },
+
+      biggerDotStyle () {
+        return {
+          background: this.color,
+          animationDuration: `${this.animationDuration}ms`,
+          animationName: this.currentBiggerDotAnimationBaseName
+        }
+      }
+    },
+
+    watch: {
+      '$props': {
+        handler () {
+          this.updateAnimation();
+        },
+        deep: true
+      }
+    },
+
+    mounted () {
+      this.updateAnimation();
+    },
+
+    methods: {
+      updateAnimation () {
+        this.updateAnimationName();
+        utils$2.appendKeyframes(this.currentSmallerDotAnimationBaseName, this.generateSmallerDotKeyframes());
+        utils$2.appendKeyframes(this.currentBiggerDotAnimationBaseName, this.generateBiggerDotKeyframes());
+      },
+
+      updateAnimationName () {
+        this.currentSmallerDotAnimationBaseName = `${this.smallerDotAnimationBaseName}-${Date.now()}`;
+        this.currentBiggerDotAnimationBaseName = `${this.biggerDotAnimationBaseName}-${Date.now()}`;
+      },
+
+      generateSmallerDotKeyframes () {
+        return `0%, 100% {
+                  box-shadow: 0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color};
+                }
+                25%, 75% {
+                  box-shadow: ${this.dotSize * 1.4}px 0 0 ${this.color},
+                              -${this.dotSize * 1.4}px 0 0 ${this.color},
+                              0 ${this.dotSize * 1.4}px 0 ${this.color},
+                              0 -${this.dotSize * 1.4}px 0 ${this.color},
+                              ${this.dotSize}px -${this.dotSize}px 0 ${this.color},
+                              ${this.dotSize}px ${this.dotSize}px 0 ${this.color},
+                              -${this.dotSize}px -${this.dotSize}px 0 ${this.color},
+                              -${this.dotSize}px ${this.dotSize}px 0 ${this.color};
+
+                }
+                100% {
+                  box-shadow: 0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color};
+                }`
+      },
+
+      generateBiggerDotKeyframes () {
+        return `0%, 100% {
+                  box-shadow: 0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color};
+                }
+                50% {
+                  transform: rotate(180deg);
+                }
+                25%, 75% {
+                  box-shadow: ${this.dotSize * 2.6}px 0 0 ${this.color},
+                              -${this.dotSize * 2.6}px 0 0 ${this.color},
+                              0 ${this.dotSize * 2.6}px 0 ${this.color},
+                              0 -${this.dotSize * 2.6}px 0 ${this.color},
+                              ${this.dotSize * 1.9}px -${this.dotSize * 1.9}px 0 ${this.color},
+                              ${this.dotSize * 1.9}px ${this.dotSize * 1.9}px 0 ${this.color},
+                              -${this.dotSize * 1.9}px -${this.dotSize * 1.9}px 0 ${this.color},
+                              -${this.dotSize * 1.9}px ${this.dotSize * 1.9}px 0 ${this.color};
+
+                }
+                100% {
+                  transform: rotate(360deg);
+                  box-shadow: 0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color},
+                              0 0 0 ${this.color};
+                }`
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$2 = script$2;
+              
+  /* template */
+  var __vue_render__$2 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"flower-spinner",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"dots-container",style:(_vm.dotsContainerStyle)},[_c('div',{staticClass:"bigger-dot",style:(_vm.biggerDotStyle)},[_c('div',{staticClass:"smaller-dot",style:(_vm.smallerDotStyle)})])])])};
+  var __vue_staticRenderFns__$2 = [];
+
+    /* style */
+    const __vue_inject_styles__$2 = function (inject) {
+      if (!inject) return
+      inject("data-v-6f659c65_0", { source: "\n.flower-spinner[data-v-6f659c65],.flower-spinner *[data-v-6f659c65]{box-sizing:border-box\n}\n.flower-spinner[data-v-6f659c65]{height:70px;width:70px;display:flex;flex-direction:row;align-items:center;justify-content:center\n}\n.flower-spinner .dots-container[data-v-6f659c65]{height:calc(70px / 7);width:calc(70px / 7)\n}\n.flower-spinner .smaller-dot[data-v-6f659c65]{background:#ff1d5e;height:100%;width:100%;border-radius:50%;animation:flower-spinner-smaller-dot-animation-data-v-6f659c65 2.5s 0s infinite both\n}\n.flower-spinner .bigger-dot[data-v-6f659c65]{background:#ff1d5e;height:100%;width:100%;padding:10%;border-radius:50%;animation:flower-spinner-bigger-dot-animation-data-v-6f659c65 2.5s 0s infinite both\n}\n@keyframes flower-spinner-bigger-dot-animation-data-v-6f659c65{\n0%,100%{box-shadow:#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0\n}\n50%{transform:rotate(180deg)\n}\n25%,75%{box-shadow:#ff1d5e 26px 0 0,#ff1d5e -26px 0 0,#ff1d5e 0 26px 0,#ff1d5e 0 -26px 0,#ff1d5e 19px -19px 0,#ff1d5e 19px 19px 0,#ff1d5e -19px -19px 0,#ff1d5e -19px 19px 0\n}\n100%{transform:rotate(360deg);box-shadow:#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0\n}\n}\n@keyframes flower-spinner-smaller-dot-animation-data-v-6f659c65{\n0%,100%{box-shadow:#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0\n}\n25%,75%{box-shadow:#ff1d5e 14px 0 0,#ff1d5e -14px 0 0,#ff1d5e 0 14px 0,#ff1d5e 0 -14px 0,#ff1d5e 10px -10px 0,#ff1d5e 10px 10px 0,#ff1d5e -10px -10px 0,#ff1d5e -10px 10px 0\n}\n100%{box-shadow:#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0,#ff1d5e 0 0 0\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$2 = "data-v-6f659c65";
+    /* module identifier */
+    const __vue_module_identifier__$2 = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$2 = false;
+    /* component normalizer */
+    function __vue_normalize__$2(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "FlowerSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$2() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$2.styles || (__vue_create_injector__$2.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$2(
+      { render: __vue_render__$2, staticRenderFns: __vue_staticRenderFns__$2 },
+      __vue_inject_styles__$2,
+      __vue_script__$2,
+      __vue_scope_id__$2,
+      __vue_is_functional_template__$2,
+      __vue_module_identifier__$2,
+      __vue_create_injector__$2,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$3 = {
+    name: 'IntersectingCirclesSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 1200
+      },
+      size: {
+        type: Number,
+        default: 70
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    computed: {
+      circleSize () {
+        return this.size / 2
+      },
+
+      spinnerStyle () {
+        return {
+          width: `${this.size}px`,
+          height: `${this.size}px`
+        }
+      },
+
+      spinnerBlockStyle () {
+        return {
+          animationDuration: `${this.animationDuration}ms`,
+          width: `${this.circleSize}px`,
+          height: `${this.circleSize}px`
+        }
+      },
+
+      circleStyle () {
+        return {
+          borderColor: this.color
+        }
+      },
+
+      circleStyles () {
+        const circlesPositions = [
+          {top: 0, left: 0},
+          {left: `${this.circleSize * -0.36}px`, top: `${this.circleSize * 0.2}px`},
+          {left: `${this.circleSize * -0.36}px`, top: `${this.circleSize * -0.2}px`},
+          {left: 0, top: `${this.circleSize * -0.36}px`},
+          {left: `${this.circleSize * 0.36}px`, top: `${this.circleSize * -0.2}px`},
+          {left: `${this.circleSize * 0.36}px`, top: `${this.circleSize * 0.2}px`},
+          {left: 0, top: `${this.circleSize * 0.36}px`}
+        ];
+
+        return circlesPositions.map((cp) => Object.assign(cp, this.circleStyle))
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$3 = script$3;
+              
+  /* template */
+  var __vue_render__$3 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"intersecting-circles-spinner",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"spinnerBlock",style:(_vm.spinnerBlockStyle)},_vm._l((_vm.circleStyles),function(cs,index){return _c('span',{key:index,staticClass:"circle",style:(cs)})}))])};
+  var __vue_staticRenderFns__$3 = [];
+
+    /* style */
+    const __vue_inject_styles__$3 = function (inject) {
+      if (!inject) return
+      inject("data-v-3d83b073_0", { source: "\n.intersecting-circles-spinner[data-v-3d83b073],.intersecting-circles-spinner *[data-v-3d83b073]{box-sizing:border-box\n}\n.intersecting-circles-spinner[data-v-3d83b073]{height:70px;width:70px;position:relative;display:flex;flex-direction:row;justify-content:center;align-items:center\n}\n.intersecting-circles-spinner .spinnerBlock[data-v-3d83b073]{animation:intersecting-circles-spinners-animation-data-v-3d83b073 1.2s linear infinite;transform-origin:center;display:block;height:35px;width:35px\n}\n.intersecting-circles-spinner .circle[data-v-3d83b073]{display:block;border:2px solid #ff1d5e;border-radius:50%;height:100%;width:100%;position:absolute;left:0;top:0\n}\n.intersecting-circles-spinner .circle[data-v-3d83b073]:nth-child(1){left:0;top:0\n}\n.intersecting-circles-spinner .circle[data-v-3d83b073]:nth-child(2){left:calc(35px * -.36);top:calc(35px * .2)\n}\n.intersecting-circles-spinner .circle[data-v-3d83b073]:nth-child(3){left:calc(35px * -.36);top:calc(35px * -.2)\n}\n.intersecting-circles-spinner .circle[data-v-3d83b073]:nth-child(4){left:0;top:calc(35px * -.36)\n}\n.intersecting-circles-spinner .circle[data-v-3d83b073]:nth-child(5){left:calc(35px * .36);top:calc(35px * -.2)\n}\n.intersecting-circles-spinner .circle[data-v-3d83b073]:nth-child(6){left:calc(35px * .36);top:calc(35px * .2)\n}\n.intersecting-circles-spinner .circle[data-v-3d83b073]:nth-child(7){left:0;top:calc(35px * .36)\n}\n@keyframes intersecting-circles-spinners-animation-data-v-3d83b073{\nfrom{transform:rotate(0)\n}\nto{transform:rotate(360deg)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$3 = "data-v-3d83b073";
+    /* module identifier */
+    const __vue_module_identifier__$3 = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$3 = false;
+    /* component normalizer */
+    function __vue_normalize__$3(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "IntersectingCirclesSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$3() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$3.styles || (__vue_create_injector__$3.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$3(
+      { render: __vue_render__$3, staticRenderFns: __vue_staticRenderFns__$3 },
+      __vue_inject_styles__$3,
+      __vue_script__$3,
+      __vue_scope_id__$3,
+      __vue_is_functional_template__$3,
+      __vue_module_identifier__$3,
+      __vue_create_injector__$3,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$4 = {
+    name: 'OrbitSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 1000
+      },
+      size: {
+        type: Number,
+        default: 50
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    computed: {
+      spinnerStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`
+        }
+      },
+
+      orbitStyle () {
+        return {
+          borderColor: this.color,
+          animationDuration: `${this.animationDuration}ms`
+        }
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$4 = script$4;
+              
+  /* template */
+  var __vue_render__$4 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"orbit-spinner",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"orbit one",style:(_vm.orbitStyle)}),_vm._v(" "),_c('div',{staticClass:"orbit two",style:(_vm.orbitStyle)}),_vm._v(" "),_c('div',{staticClass:"orbit three",style:(_vm.orbitStyle)})])};
+  var __vue_staticRenderFns__$4 = [];
+
+    /* style */
+    const __vue_inject_styles__$4 = function (inject) {
+      if (!inject) return
+      inject("data-v-1de7f5c8_0", { source: "\n.orbit-spinner[data-v-1de7f5c8],.orbit-spinner *[data-v-1de7f5c8]{box-sizing:border-box\n}\n.orbit-spinner[data-v-1de7f5c8]{height:55px;width:55px;border-radius:50%;perspective:800px\n}\n.orbit-spinner .orbit[data-v-1de7f5c8]{position:absolute;box-sizing:border-box;width:100%;height:100%;border-radius:50%\n}\n.orbit-spinner .orbit[data-v-1de7f5c8]:nth-child(1){left:0;top:0;animation:orbit-spinner-orbit-one-animation-data-v-1de7f5c8 1.2s linear infinite;border-bottom:3px solid #ff1d5e\n}\n.orbit-spinner .orbit[data-v-1de7f5c8]:nth-child(2){right:0;top:0;animation:orbit-spinner-orbit-two-animation-data-v-1de7f5c8 1.2s linear infinite;border-right:3px solid #ff1d5e\n}\n.orbit-spinner .orbit[data-v-1de7f5c8]:nth-child(3){right:0;bottom:0;animation:orbit-spinner-orbit-three-animation-data-v-1de7f5c8 1.2s linear infinite;border-top:3px solid #ff1d5e\n}\n@keyframes orbit-spinner-orbit-one-animation-data-v-1de7f5c8{\n0%{transform:rotateX(35deg) rotateY(-45deg) rotateZ(0)\n}\n100%{transform:rotateX(35deg) rotateY(-45deg) rotateZ(360deg)\n}\n}\n@keyframes orbit-spinner-orbit-two-animation-data-v-1de7f5c8{\n0%{transform:rotateX(50deg) rotateY(10deg) rotateZ(0)\n}\n100%{transform:rotateX(50deg) rotateY(10deg) rotateZ(360deg)\n}\n}\n@keyframes orbit-spinner-orbit-three-animation-data-v-1de7f5c8{\n0%{transform:rotateX(35deg) rotateY(55deg) rotateZ(0)\n}\n100%{transform:rotateX(35deg) rotateY(55deg) rotateZ(360deg)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$4 = "data-v-1de7f5c8";
+    /* module identifier */
+    const __vue_module_identifier__$4 = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$4 = false;
+    /* component normalizer */
+    function __vue_normalize__$4(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "OrbitSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$4() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$4.styles || (__vue_create_injector__$4.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$4(
+      { render: __vue_render__$4, staticRenderFns: __vue_staticRenderFns__$4 },
+      __vue_inject_styles__$4,
+      __vue_script__$4,
+      __vue_scope_id__$4,
+      __vue_is_functional_template__$4,
+      __vue_module_identifier__$4,
+      __vue_create_injector__$4,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$5 = {
+    name: 'FingerprintSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 1500
+      },
+      size: {
+        type: Number,
+        default: 60
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    data () {
+      return {
+        ringsNum: 9,
+        containerPadding: 2
+      }
+    },
+
+    computed: {
+      outerRingSize () {
+        return this.size - this.containerPadding * 2
+      },
+
+      spinnerStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`,
+          padding: `${this.containerPadding}px`
+        }
+      },
+
+      ringStyle () {
+        return {
+          borderTopColor: this.color,
+          animationDuration: `${this.animationDuration}ms`
+        }
+      },
+
+      ringsStyles () {
+        const ringsStyles = [];
+        const ringBase = this.outerRingSize / (this.ringsNum);
+        const ringInc = ringBase;
+
+        for (let i = 1; i <= this.ringsNum; i++) {
+          let style = Object.assign({
+            animationDelay: `${i * 50}ms`,
+            height: `${ringBase + (i - 1) * ringInc}px`,
+            width: `${ringBase + (i - 1) * ringInc}px`
+          }, this.ringStyle);
+          ringsStyles.push(style);
+        }
+
+        return ringsStyles
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$5 = script$5;
+              
+  /* template */
+  var __vue_render__$5 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"fingerprint-spinner",style:(_vm.spinnerStyle)},_vm._l((_vm.ringsStyles),function(rs,index){return _c('div',{key:index,staticClass:"spinner-ring",style:(rs)})}))};
+  var __vue_staticRenderFns__$5 = [];
+
+    /* style */
+    const __vue_inject_styles__$5 = function (inject) {
+      if (!inject) return
+      inject("data-v-4ac2dd21_0", { source: "\n.fingerprint-spinner[data-v-4ac2dd21],.fingerprint-spinner *[data-v-4ac2dd21]{box-sizing:border-box\n}\n.fingerprint-spinner[data-v-4ac2dd21]{height:64px;width:64px;padding:2px;overflow:hidden;position:relative\n}\n.fingerprint-spinner .spinner-ring[data-v-4ac2dd21]{position:absolute;border-radius:50%;border:2px solid transparent;border-top-color:#ff1d5e;animation:fingerprint-spinner-animation-data-v-4ac2dd21 1.5s cubic-bezier(.68,-.75,.265,1.75) infinite forwards;margin:auto;bottom:0;left:0;right:0;top:0\n}\n.fingerprint-spinner .spinner-ring[data-v-4ac2dd21]:nth-child(1){height:calc(60px / 9 + 0 * 60px / 9);width:calc(60px / 9 + 0 * 60px / 9);animation-delay:calc(50ms * 1)\n}\n.fingerprint-spinner .spinner-ring[data-v-4ac2dd21]:nth-child(2){height:calc(60px / 9 + 1 * 60px / 9);width:calc(60px / 9 + 1 * 60px / 9);animation-delay:calc(50ms * 2)\n}\n.fingerprint-spinner .spinner-ring[data-v-4ac2dd21]:nth-child(3){height:calc(60px / 9 + 2 * 60px / 9);width:calc(60px / 9 + 2 * 60px / 9);animation-delay:calc(50ms * 3)\n}\n.fingerprint-spinner .spinner-ring[data-v-4ac2dd21]:nth-child(4){height:calc(60px / 9 + 3 * 60px / 9);width:calc(60px / 9 + 3 * 60px / 9);animation-delay:calc(50ms * 4)\n}\n.fingerprint-spinner .spinner-ring[data-v-4ac2dd21]:nth-child(5){height:calc(60px / 9 + 4 * 60px / 9);width:calc(60px / 9 + 4 * 60px / 9);animation-delay:calc(50ms * 5)\n}\n.fingerprint-spinner .spinner-ring[data-v-4ac2dd21]:nth-child(6){height:calc(60px / 9 + 5 * 60px / 9);width:calc(60px / 9 + 5 * 60px / 9);animation-delay:calc(50ms * 6)\n}\n.fingerprint-spinner .spinner-ring[data-v-4ac2dd21]:nth-child(7){height:calc(60px / 9 + 6 * 60px / 9);width:calc(60px / 9 + 6 * 60px / 9);animation-delay:calc(50ms * 7)\n}\n.fingerprint-spinner .spinner-ring[data-v-4ac2dd21]:nth-child(8){height:calc(60px / 9 + 7 * 60px / 9);width:calc(60px / 9 + 7 * 60px / 9);animation-delay:calc(50ms * 8)\n}\n.fingerprint-spinner .spinner-ring[data-v-4ac2dd21]:nth-child(9){height:calc(60px / 9 + 8 * 60px / 9);width:calc(60px / 9 + 8 * 60px / 9);animation-delay:calc(50ms * 9)\n}\n@keyframes fingerprint-spinner-animation-data-v-4ac2dd21{\n100%{transform:rotate(360deg)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$5 = "data-v-4ac2dd21";
+    /* module identifier */
+    const __vue_module_identifier__$5 = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$5 = false;
+    /* component normalizer */
+    function __vue_normalize__$5(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "FingerprintSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$5() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$5.styles || (__vue_create_injector__$5.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$5(
+      { render: __vue_render__$5, staticRenderFns: __vue_staticRenderFns__$5 },
+      __vue_inject_styles__$5,
+      __vue_script__$5,
+      __vue_scope_id__$5,
+      __vue_is_functional_template__$5,
+      __vue_module_identifier__$5,
+      __vue_create_injector__$5,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$6 = {
+    name: 'TrinityRingsSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 1500
+      },
+      size: {
+        type: Number,
+        default: 60
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    data () {
+      return {
+        containerPadding: 3
+      }
+    },
+
+    computed: {
+      outerRingSize () {
+        return this.size - this.containerPadding * 2
+      },
+
+      spinnerStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`,
+          padding: `${this.containerPadding}px`
+        }
+      },
+
+      ring1Style () {
+        return {
+          height: `${this.outerRingSize}px`,
+          width: `${this.outerRingSize}px`,
+          borderColor: this.color,
+          animationDuration: `${this.animationDuration}ms`
+        }
+      },
+
+      ring2Style () {
+        return {
+          height: `${this.outerRingSize * 0.65}px`,
+          width: `${this.outerRingSize * 0.65}px`,
+          borderColor: this.color,
+          animationDuration: `${this.animationDuration}ms`
+        }
+      },
+
+      ring3Style () {
+        return {
+          height: `${this.outerRingSize * 0.1}px`,
+          width: `${this.outerRingSize * 0.1}px`,
+          borderColor: this.color,
+          animationDuration: `${this.animationDuration}ms`
+        }
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$6 = script$6;
+              
+  /* template */
+  var __vue_render__$6 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"trinity-rings-spinner",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"circle circle1",style:(_vm.ring1Style)}),_vm._v(" "),_c('div',{staticClass:"circle circle2",style:(_vm.ring2Style)}),_vm._v(" "),_c('div',{staticClass:"circle circle3",style:(_vm.ring3Style)})])};
+  var __vue_staticRenderFns__$6 = [];
+
+    /* style */
+    const __vue_inject_styles__$6 = function (inject) {
+      if (!inject) return
+      inject("data-v-e01b9432_0", { source: "\n.trinity-rings-spinner[data-v-e01b9432],.trinity-rings-spinner *[data-v-e01b9432]{box-sizing:border-box\n}\n.trinity-rings-spinner[data-v-e01b9432]{height:66px;width:66px;padding:3px;position:relative;display:flex;justify-content:center;align-items:center;flex-direction:row;overflow:hidden;box-sizing:border-box\n}\n.trinity-rings-spinner .circle[data-v-e01b9432]{position:absolute;display:block;border-radius:50%;border:3px solid #ff1d5e;opacity:1\n}\n.trinity-rings-spinner .circle[data-v-e01b9432]:nth-child(1){height:60px;width:60px;animation:trinity-rings-spinner-circle1-animation-data-v-e01b9432 1.5s infinite linear;border-width:3px\n}\n.trinity-rings-spinner .circle[data-v-e01b9432]:nth-child(2){height:calc(60px * .65);width:calc(60px * .65);animation:trinity-rings-spinner-circle2-animation-data-v-e01b9432 1.5s infinite linear;border-width:2px\n}\n.trinity-rings-spinner .circle[data-v-e01b9432]:nth-child(3){height:calc(60px * .1);width:calc(60px * .1);animation:trinity-rings-spinner-circle3-animation-data-v-e01b9432 1.5s infinite linear;border-width:1px\n}\n@keyframes trinity-rings-spinner-circle1-animation-data-v-e01b9432{\n0%{transform:rotateZ(20deg) rotateY(0)\n}\n100%{transform:rotateZ(100deg) rotateY(360deg)\n}\n}\n@keyframes trinity-rings-spinner-circle2-animation-data-v-e01b9432{\n0%{transform:rotateZ(100deg) rotateX(0)\n}\n100%{transform:rotateZ(0) rotateX(360deg)\n}\n}\n@keyframes trinity-rings-spinner-circle3-animation-data-v-e01b9432{\n0%{transform:rotateZ(100deg) rotateX(-360deg)\n}\n100%{transform:rotateZ(-360deg) rotateX(360deg)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$6 = "data-v-e01b9432";
+    /* module identifier */
+    const __vue_module_identifier__$6 = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$6 = false;
+    /* component normalizer */
+    function __vue_normalize__$6(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "TrinityRingsSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$6() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$6.styles || (__vue_create_injector__$6.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$6(
+      { render: __vue_render__$6, staticRenderFns: __vue_staticRenderFns__$6 },
+      __vue_inject_styles__$6,
+      __vue_script__$6,
+      __vue_scope_id__$6,
+      __vue_is_functional_template__$6,
+      __vue_module_identifier__$6,
+      __vue_create_injector__$6,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$7 = {
+    name: 'FulfillingSquareSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 4000
+      },
+      size: {
+        type: Number,
+        default: 50
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    computed: {
+      spinnerStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`,
+          borderColor: this.color
+        }
+      },
+
+      spinnerInnerStyle () {
+        return {
+          backgroundColor: this.color
+        }
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$7 = script$7;
+              
+  /* template */
+  var __vue_render__$7 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"fulfilling-square-spinner",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"spinner-inner",style:(_vm.spinnerInnerStyle)})])};
+  var __vue_staticRenderFns__$7 = [];
+
+    /* style */
+    const __vue_inject_styles__$7 = function (inject) {
+      if (!inject) return
+      inject("data-v-73dd20a2_0", { source: "\n.fulfilling-square-spinner[data-v-73dd20a2],.fulfilling-square-spinner *[data-v-73dd20a2]{box-sizing:border-box\n}\n.fulfilling-square-spinner[data-v-73dd20a2]{height:50px;width:50px;position:relative;border:4px solid #ff1d5e;animation:fulfilling-square-spinner-animation-data-v-73dd20a2 4s infinite ease\n}\n.fulfilling-square-spinner .spinner-inner[data-v-73dd20a2]{vertical-align:top;display:inline-block;background-color:#ff1d5e;width:100%;opacity:1;animation:fulfilling-square-spinner-inner-animation-data-v-73dd20a2 4s infinite ease-in\n}\n@keyframes fulfilling-square-spinner-animation-data-v-73dd20a2{\n0%{transform:rotate(0)\n}\n25%{transform:rotate(180deg)\n}\n50%{transform:rotate(180deg)\n}\n75%{transform:rotate(360deg)\n}\n100%{transform:rotate(360deg)\n}\n}\n@keyframes fulfilling-square-spinner-inner-animation-data-v-73dd20a2{\n0%{height:0%\n}\n25%{height:0%\n}\n50%{height:100%\n}\n75%{height:100%\n}\n100%{height:0%\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$7 = "data-v-73dd20a2";
+    /* module identifier */
+    const __vue_module_identifier__$7 = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$7 = false;
+    /* component normalizer */
+    function __vue_normalize__$7(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "FulfillingSquareSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$7() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$7.styles || (__vue_create_injector__$7.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$7(
+      { render: __vue_render__$7, staticRenderFns: __vue_staticRenderFns__$7 },
+      __vue_inject_styles__$7,
+      __vue_script__$7,
+      __vue_scope_id__$7,
+      __vue_is_functional_template__$7,
+      __vue_module_identifier__$7,
+      __vue_create_injector__$7,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$8 = {
+    name: 'CirclesToRhombusesSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 1200
+      },
+      circleSize: {
+        type: Number,
+        default: 15
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      },
+      circlesNum: {
+        type: Number,
+        default: 3
+      }
+    },
+
+    computed: {
+      circleMarginLeft () {
+        return this.circleSize * 1.125
+      },
+
+      spinnertStyle () {
+        return {
+          height: `${this.circleSize}px`,
+          width: `${(this.circleSize + this.circleMarginLeft) * this.circlesNum}px`
+        }
+      },
+
+      circleStyle () {
+        return {
+          borderColor: this.color,
+          animationDuration: `${this.animationDuration}ms`,
+          height: `${this.circleSize}px`,
+          width: `${this.circleSize}px`,
+          marginLeft: `${this.circleMarginLeft}px`
+        }
+      },
+
+      circlesStyles () {
+        const circlesStyles = [];
+        const delay = 150;
+
+        for (let i = 1; i <= this.circlesNum; i++) {
+          const style = Object.assign({
+            animationDelay: `${i * delay}ms`
+          }, this.circleStyle);
+
+          if (i === 1) {
+            style.marginLeft = 0;
+          }
+
+          circlesStyles.push(style);
+        }
+
+        return circlesStyles
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$8 = script$8;
+              
+  /* template */
+  var __vue_render__$8 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"circles-to-rhombuses-spinner",style:(_vm.spinnertStyle)},_vm._l((_vm.circlesStyles),function(cs,index){return _c('div',{key:index,staticClass:"circle",style:(cs)})}))};
+  var __vue_staticRenderFns__$8 = [];
+
+    /* style */
+    const __vue_inject_styles__$8 = function (inject) {
+      if (!inject) return
+      inject("data-v-14dd89cf_0", { source: "\n.circles-to-rhombuses-spinner[data-v-14dd89cf],.circles-to-rhombuses-spinner *[data-v-14dd89cf]{box-sizing:border-box\n}\n.circles-to-rhombuses-spinner[data-v-14dd89cf]{height:15px;width:calc((15px + 15px * 1.125) * 3);display:flex;align-items:center;justify-content:center\n}\n.circles-to-rhombuses-spinner .circle[data-v-14dd89cf]{height:15px;width:15px;margin-left:calc(15px * 1.125);transform:rotate(45deg);border-radius:10%;border:3px solid #ff1d5e;overflow:hidden;background:0 0;animation:circles-to-rhombuses-animation-data-v-14dd89cf 1.2s linear infinite\n}\n.circles-to-rhombuses-spinner .circle[data-v-14dd89cf]:nth-child(1){animation-delay:calc(150ms * 1);margin-left:0\n}\n.circles-to-rhombuses-spinner .circle[data-v-14dd89cf]:nth-child(2){animation-delay:calc(150ms * 2)\n}\n.circles-to-rhombuses-spinner .circle[data-v-14dd89cf]:nth-child(3){animation-delay:calc(150ms * 3)\n}\n@keyframes circles-to-rhombuses-animation-data-v-14dd89cf{\n0%{border-radius:10%\n}\n17.5%{border-radius:10%\n}\n50%{border-radius:100%\n}\n93.5%{border-radius:10%\n}\n100%{border-radius:10%\n}\n}\n@keyframes circles-to-rhombuses-background-animation-data-v-14dd89cf{\n50%{opacity:.4\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$8 = "data-v-14dd89cf";
+    /* module identifier */
+    const __vue_module_identifier__$8 = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$8 = false;
+    /* component normalizer */
+    function __vue_normalize__$8(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "CirclesToRhombusesSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$8() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$8.styles || (__vue_create_injector__$8.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$8(
+      { render: __vue_render__$8, staticRenderFns: __vue_staticRenderFns__$8 },
+      __vue_inject_styles__$8,
+      __vue_script__$8,
+      __vue_scope_id__$8,
+      __vue_is_functional_template__$8,
+      __vue_module_identifier__$8,
+      __vue_create_injector__$8,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$9 = {
+    name: 'SemipolarSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 2000
+      },
+      size: {
+        type: Number,
+        default: 65
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    data () {
+      return {
+        ringsNum: 5
+      }
+    },
+
+    computed: {
+      spinnerStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`
+        }
+      },
+      ringStyle () {
+        return {
+          animationDuration: `${this.animationDuration}ms`,
+          borderTopColor: this.color,
+          borderLeftColor: this.color
+        }
+      },
+      ringsStyles () {
+        const ringsStyles = [];
+        const delayModifier = 0.1;
+        const ringWidth = this.size * 0.05;
+        const positionIncrement = ringWidth * 2;
+        const sizeDecrement = this.size * 0.2;
+
+        for (let i = 0; i < this.ringsNum; i++) {
+          const computedSize = `${this.size - sizeDecrement * i}px`;
+          const computedPosition = `${positionIncrement * i}px`;
+          const style = Object.assign({
+            animationDelay: `${this.animationDuration * delayModifier * (this.ringsNum - i - 1)}ms`,
+            height: computedSize,
+            width: computedSize,
+            left: computedPosition,
+            top: computedPosition,
+            borderWidth: `${ringWidth}px`
+          }, this.ringStyle);
+          ringsStyles.push(style);
+        }
+
+        return ringsStyles
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$9 = script$9;
+              
+  /* template */
+  var __vue_render__$9 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"semipolar-spinner",style:(_vm.spinnerStyle)},_vm._l((_vm.ringsStyles),function(rs,index){return _c('div',{key:index,staticClass:"ring",style:(rs)})}))};
+  var __vue_staticRenderFns__$9 = [];
+
+    /* style */
+    const __vue_inject_styles__$9 = function (inject) {
+      if (!inject) return
+      inject("data-v-dd4d2450_0", { source: "\n.semipolar-spinner[data-v-dd4d2450],.semipolar-spinner *[data-v-dd4d2450]{box-sizing:border-box\n}\n.semipolar-spinner[data-v-dd4d2450]{height:65px;width:65px;position:relative\n}\n.semipolar-spinner .ring[data-v-dd4d2450]{border-radius:50%;position:absolute;border:calc(65px * .05) solid transparent;border-top-color:#ff1d5e;border-left-color:#ff1d5e;animation:semipolar-spinner-animation-data-v-dd4d2450 2s infinite\n}\n.semipolar-spinner .ring[data-v-dd4d2450]:nth-child(1){height:calc(65px - 65px * .2 * 0);width:calc(65px - 65px * .2 * 0);top:calc(65px * .1 * 0);left:calc(65px * .1 * 0);animation-delay:calc(2000ms * .1 * 4);z-index:5\n}\n.semipolar-spinner .ring[data-v-dd4d2450]:nth-child(2){height:calc(65px - 65px * .2 * 1);width:calc(65px - 65px * .2 * 1);top:calc(65px * .1 * 1);left:calc(65px * .1 * 1);animation-delay:calc(2000ms * .1 * 3);z-index:4\n}\n.semipolar-spinner .ring[data-v-dd4d2450]:nth-child(3){height:calc(65px - 65px * .2 * 2);width:calc(65px - 65px * .2 * 2);top:calc(65px * .1 * 2);left:calc(65px * .1 * 2);animation-delay:calc(2000ms * .1 * 2);z-index:3\n}\n.semipolar-spinner .ring[data-v-dd4d2450]:nth-child(4){height:calc(65px - 65px * .2 * 3);width:calc(65px - 65px * .2 * 3);top:calc(65px * .1 * 3);left:calc(65px * .1 * 3);animation-delay:calc(2000ms * .1 * 1);z-index:2\n}\n.semipolar-spinner .ring[data-v-dd4d2450]:nth-child(5){height:calc(65px - 65px * .2 * 4);width:calc(65px - 65px * .2 * 4);top:calc(65px * .1 * 4);left:calc(65px * .1 * 4);animation-delay:calc(2000ms * .1 * 0);z-index:1\n}\n@keyframes semipolar-spinner-animation-data-v-dd4d2450{\n50%{transform:rotate(360deg) scale(.7)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$9 = "data-v-dd4d2450";
+    /* module identifier */
+    const __vue_module_identifier__$9 = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$9 = false;
+    /* component normalizer */
+    function __vue_normalize__$9(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "SemipolarSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$9() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$9.styles || (__vue_create_injector__$9.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$9(
+      { render: __vue_render__$9, staticRenderFns: __vue_staticRenderFns__$9 },
+      __vue_inject_styles__$9,
+      __vue_script__$9,
+      __vue_scope_id__$9,
+      __vue_is_functional_template__$9,
+      __vue_module_identifier__$9,
+      __vue_create_injector__$9,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$a = {
+    name: 'BreedingRhombusSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 2000
+      },
+      size: {
+        type: Number,
+        default: 150
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    data () {
+      return {
+        animationBaseName: 'breeding-rhombus-spinner-animation-child',
+        rhombusesNum: 8
+      }
+    },
+
+    computed: {
+      spinnerStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`
+        }
+      },
+
+      rhombusStyle () {
+        return {
+          height: `${this.size / 7.5}px`,
+          width: `${this.size / 7.5}px`,
+          animationDuration: `${this.animationDuration}ms`,
+          top: `${this.size / 2.3077}px`,
+          left: `${this.size / 2.3077}px`,
+          backgroundColor: this.color
+        }
+      },
+
+      rhombusesStyles () {
+        const rhombusesStyles = [];
+        const delayModifier = this.animationDuration * 0.05;
+
+        for (let i = 1; i <= this.rhombusesNum; i++) {
+          rhombusesStyles.push(Object.assign({
+            animationDelay: `${delayModifier * (i + 1)}ms`
+          }, this.rhombusStyle));
+        }
+
+        return rhombusesStyles
+      },
+
+      bigRhombusStyle () {
+        return {
+          height: `${this.size / 3}px`,
+          width: `${this.size / 3}px`,
+          animationDuration: `${this.animationDuration}`,
+          top: `${this.size / 3}px`,
+          left: `${this.size / 3}px`,
+          backgroundColor: this.color
+        }
+      }
     }
 
-    if (style.styleSheet) {
-      style.styleSheet.cssText = css;
-    } else {
-      style.appendChild(document.createTextNode(css));
+  };
+
+  /* script */
+              const __vue_script__$a = script$a;
+              
+  /* template */
+  var __vue_render__$a = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"breeding-rhombus-spinner",style:(_vm.spinnerStyle)},[_vm._l((_vm.rhombusesStyles),function(rs,index){return _c('div',{key:index,staticClass:"rhombus",class:("child-" + (index + 1)),style:(rs)})}),_vm._v(" "),_c('div',{staticClass:"rhombus big",style:(_vm.bigRhombusStyle)})],2)};
+  var __vue_staticRenderFns__$a = [];
+
+    /* style */
+    const __vue_inject_styles__$a = function (inject) {
+      if (!inject) return
+      inject("data-v-2e6fbfee_0", { source: "\n.breeding-rhombus-spinner[data-v-2e6fbfee]{height:65px;width:65px;position:relative;transform:rotate(45deg)\n}\n.breeding-rhombus-spinner[data-v-2e6fbfee],.breeding-rhombus-spinner *[data-v-2e6fbfee]{box-sizing:border-box\n}\n.breeding-rhombus-spinner .rhombus[data-v-2e6fbfee]{height:calc(65px / 7.5);width:calc(65px / 7.5);animation-duration:2s;top:calc(65px / 2.3077);left:calc(65px / 2.3077);background-color:#ff1d5e;position:absolute;animation-iteration-count:infinite\n}\n.breeding-rhombus-spinner .rhombus[data-v-2e6fbfee]:nth-child(2n+0){margin-right:0\n}\n.breeding-rhombus-spinner .rhombus.child-1[data-v-2e6fbfee]{animation-name:breeding-rhombus-spinner-animation-child-1-data-v-2e6fbfee;animation-delay:calc(100ms * 1)\n}\n.breeding-rhombus-spinner .rhombus.child-2[data-v-2e6fbfee]{animation-name:breeding-rhombus-spinner-animation-child-2-data-v-2e6fbfee;animation-delay:calc(100ms * 2)\n}\n.breeding-rhombus-spinner .rhombus.child-3[data-v-2e6fbfee]{animation-name:breeding-rhombus-spinner-animation-child-3-data-v-2e6fbfee;animation-delay:calc(100ms * 3)\n}\n.breeding-rhombus-spinner .rhombus.child-4[data-v-2e6fbfee]{animation-name:breeding-rhombus-spinner-animation-child-4-data-v-2e6fbfee;animation-delay:calc(100ms * 4)\n}\n.breeding-rhombus-spinner .rhombus.child-5[data-v-2e6fbfee]{animation-name:breeding-rhombus-spinner-animation-child-5-data-v-2e6fbfee;animation-delay:calc(100ms * 5)\n}\n.breeding-rhombus-spinner .rhombus.child-6[data-v-2e6fbfee]{animation-name:breeding-rhombus-spinner-animation-child-6-data-v-2e6fbfee;animation-delay:calc(100ms * 6)\n}\n.breeding-rhombus-spinner .rhombus.child-7[data-v-2e6fbfee]{animation-name:breeding-rhombus-spinner-animation-child-7-data-v-2e6fbfee;animation-delay:calc(100ms * 7)\n}\n.breeding-rhombus-spinner .rhombus.child-8[data-v-2e6fbfee]{animation-name:breeding-rhombus-spinner-animation-child-8-data-v-2e6fbfee;animation-delay:calc(100ms * 8)\n}\n.breeding-rhombus-spinner .rhombus.big[data-v-2e6fbfee]{height:calc(65px / 3);width:calc(65px / 3);animation-duration:2s;top:calc(65px / 3);left:calc(65px / 3);background-color:#ff1d5e;animation:breeding-rhombus-spinner-animation-child-big-data-v-2e6fbfee 2s infinite;animation-delay:.5s\n}\n@keyframes breeding-rhombus-spinner-animation-child-1-data-v-2e6fbfee{\n50%{transform:translate(-325%,-325%)\n}\n}\n@keyframes breeding-rhombus-spinner-animation-child-2-data-v-2e6fbfee{\n50%{transform:translate(0,-325%)\n}\n}\n@keyframes breeding-rhombus-spinner-animation-child-3-data-v-2e6fbfee{\n50%{transform:translate(325%,-325%)\n}\n}\n@keyframes breeding-rhombus-spinner-animation-child-4-data-v-2e6fbfee{\n50%{transform:translate(325%,0)\n}\n}\n@keyframes breeding-rhombus-spinner-animation-child-5-data-v-2e6fbfee{\n50%{transform:translate(325%,325%)\n}\n}\n@keyframes breeding-rhombus-spinner-animation-child-6-data-v-2e6fbfee{\n50%{transform:translate(0,325%)\n}\n}\n@keyframes breeding-rhombus-spinner-animation-child-7-data-v-2e6fbfee{\n50%{transform:translate(-325%,325%)\n}\n}\n@keyframes breeding-rhombus-spinner-animation-child-8-data-v-2e6fbfee{\n50%{transform:translate(-325%,0)\n}\n}\n@keyframes breeding-rhombus-spinner-animation-child-big-data-v-2e6fbfee{\n50%{transform:scale(.5)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$a = "data-v-2e6fbfee";
+    /* module identifier */
+    const __vue_module_identifier__$a = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$a = false;
+    /* component normalizer */
+    function __vue_normalize__$a(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "BreedingRhombusSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
     }
-  }
+    /* style inject */
+    function __vue_create_injector__$a() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$a.styles || (__vue_create_injector__$a.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
 
-  var css = ".loader-box {\n  display: flex;\n  justify-content: center; }\n\n.overlay-box {\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  justify-content: space-evenly; }\n";
-  styleInject(css);
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
 
-  var css$1 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.hollow-dots-spinner, .hollow-dots-spinner * {\n  box-sizing: border-box;\n}\n\n.hollow-dots-spinner {\n  height: 15px;\n  width: calc(30px * 3);\n}\n\n.hollow-dots-spinner .dot {\n  width: 15px;\n  height: 15px;\n  margin: 0 calc(15px / 2);\n  border: calc(15px / 5) solid #ff1d5e;\n  border-radius: 50%;\n  float: left;\n  transform: scale(0);\n  animation: hollow-dots-spinner-animation 1000ms ease infinite 0ms;\n}\n\n.hollow-dots-spinner .dot:nth-child(1) {\n  animation-delay: calc(300ms * 1);\n}\n\n.hollow-dots-spinner .dot:nth-child(2) {\n  animation-delay: calc(300ms * 2);\n}\n\n.hollow-dots-spinner .dot:nth-child(3) {\n  animation-delay: calc(300ms * 3);\n\n}\n\n@keyframes hollow-dots-spinner-animation {\n  50% {\n    transform: scale(1);\n    opacity: 1;\n  }\n  100% {\n    opacity: 0;\n  }\n}\n";
-  styleInject(css$1);
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
 
-  var css$2 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.pixel-spinner, .pixel-spinner * {\n  box-sizing: border-box;\n}\n\n.pixel-spinner {\n  height: 70px;\n  width: 70px;\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n  align-items: center;\n}\n\n.pixel-spinner .pixel-spinner-inner {\n  width: calc(70px / 7);\n  height: calc(70px / 7);\n  background-color: #ff1d5e;\n  color: #ff1d5e;\n  box-shadow: 15px 15px  0 0,\n  -15px -15px  0 0,\n  15px -15px  0 0,\n  -15px 15px  0 0,\n  0 15px  0 0,\n  15px 0  0 0,\n  -15px 0  0 0,\n  0 -15px 0 0;\n  animation: pixel-spinner-animation 2000ms linear infinite;\n}\n\n@keyframes pixel-spinner-animation {\n  50% {\n    box-shadow: 20px 20px 0px 0px,\n    -20px -20px 0px 0px,\n    20px -20px 0px 0px,\n    -20px 20px 0px 0px,\n    0px 10px 0px 0px,\n    10px 0px 0px 0px,\n    -10px 0px 0px 0px,\n    0px -10px 0px 0px;\n  }\n  75% {\n    box-shadow: 20px 20px 0px 0px,\n    -20px -20px 0px 0px,\n    20px -20px 0px 0px,\n    -20px 20px 0px 0px,\n    0px 10px 0px 0px,\n    10px 0px 0px 0px,\n    -10px 0px 0px 0px,\n    0px -10px 0px 0px;\n  }\n  100% {\n    transform: rotate(360deg);\n  }\n}\n";
-  styleInject(css$2);
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
 
-  var css$3 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.flower-spinner,  .flower-spinner * {\n  box-sizing: border-box;\n}\n\n.flower-spinner {\n  height: 70px;\n  width: 70px;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n\n.flower-spinner .dots-container {\n  height: calc(70px / 7);\n  width: calc(70px / 7);\n}\n\n.flower-spinner .smaller-dot {\n  background: #ff1d5e;\n  height: 100%;\n  width: 100%;\n  border-radius: 50%;\n  animation: flower-spinner-smaller-dot-animation 2.5s 0s infinite both;\n\n}\n\n.flower-spinner .bigger-dot {\n  background: #ff1d5e;\n  height: 100%;\n  width: 100%;\n  padding: 10%;\n  border-radius: 50%;\n  animation: flower-spinner-bigger-dot-animation 2.5s 0s infinite both;\n}\n\n@keyframes flower-spinner-bigger-dot-animation {\n  0%, 100% {\n    box-shadow: rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px;\n  }\n\n  50% {\n    transform: rotate(180deg);\n  }\n\n  25%, 75% {\n    box-shadow: rgb(255, 29, 94) 26px 0px 0px,\n    rgb(255, 29, 94) -26px 0px 0px,\n    rgb(255, 29, 94) 0px 26px 0px,\n    rgb(255, 29, 94) 0px -26px 0px,\n    rgb(255, 29, 94) 19px -19px 0px,\n    rgb(255, 29, 94) 19px 19px 0px,\n    rgb(255, 29, 94) -19px -19px 0px,\n    rgb(255, 29, 94) -19px 19px 0px;\n  }\n\n  100% {\n    transform: rotate(360deg);\n    box-shadow: rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px;\n  }\n}\n\n@keyframes flower-spinner-smaller-dot-animation {\n  0%, 100% {\n    box-shadow: rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px;\n  }\n\n  25%, 75% {\n    box-shadow: rgb(255, 29, 94) 14px 0px 0px,\n    rgb(255, 29, 94) -14px 0px 0px,\n    rgb(255, 29, 94) 0px 14px 0px,\n    rgb(255, 29, 94) 0px -14px 0px,\n    rgb(255, 29, 94) 10px -10px 0px,\n    rgb(255, 29, 94) 10px 10px 0px,\n    rgb(255, 29, 94) -10px -10px 0px,\n    rgb(255, 29, 94) -10px 10px 0px;\n  }\n\n  100% {\n    box-shadow: rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px,\n    rgb(255, 29, 94) 0px 0px 0px;\n  }\n}\n";
-  styleInject(css$3);
+          style.ids.push(id);
 
-  var css$4 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.intersecting-circles-spinner, .intersecting-circles-spinner * {\n  box-sizing: border-box;\n}\n\n.intersecting-circles-spinner {\n  height: 70px;\n  width: 70px;\n  position: relative;\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n  align-items: center;\n}\n\n.intersecting-circles-spinner .spinnerBlock {\n  animation: intersecting-circles-spinners-animation 1200ms linear infinite;\n  transform-origin: center;\n  display: block;\n  height: 35px;\n  width: 35px;\n}\n\n.intersecting-circles-spinner .circle {\n  display: block;\n  border: 2px solid #ff1d5e;\n  border-radius: 50%;\n  height: 100%;\n  width: 100%;\n  position: absolute;\n  left: 0;\n  top: 0;\n}\n\n.intersecting-circles-spinner .circle:nth-child(1) {\n  left: 0;\n  top: 0;\n}\n\n.intersecting-circles-spinner .circle:nth-child(2) {\n  left: calc(35px * -0.36);\n  top: calc(35px * 0.2);\n}\n\n.intersecting-circles-spinner .circle:nth-child(3) {\n  left: calc(35px * -0.36);\n  top: calc(35px * -0.2);\n}\n\n.intersecting-circles-spinner .circle:nth-child(4) {\n  left: 0;\n  top: calc(35px * -0.36);\n}\n\n.intersecting-circles-spinner .circle:nth-child(5) {\n  left: calc(35px * 0.36);\n  top: calc(35px * -0.2);\n}\n\n.intersecting-circles-spinner .circle:nth-child(6) {\n  left: calc(35px * 0.36);\n  top: calc(35px * 0.2);\n}\n\n.intersecting-circles-spinner .circle:nth-child(7) {\n  left: 0;\n  top: calc(35px * 0.36);\n}\n\n@keyframes intersecting-circles-spinners-animation {\n  from { transform: rotate(0deg); }\n  to { transform: rotate(360deg); }\n}\n";
-  styleInject(css$4);
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
 
-  var css$5 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.orbit-spinner, .orbit-spinner * {\n  box-sizing: border-box;\n}\n\n.orbit-spinner {\n  height: 55px;\n  width: 55px;\n  border-radius: 50%;\n  perspective: 800px;\n}\n\n.orbit-spinner .orbit {\n  position: absolute;\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%;\n  border-radius: 50%;\n}\n\n.orbit-spinner .orbit:nth-child(1) {\n  left: 0%;\n  top: 0%;\n  animation: orbit-spinner-orbit-one-animation 1200ms linear infinite;\n  border-bottom: 3px solid #ff1d5e;\n}\n\n.orbit-spinner .orbit:nth-child(2) {\n  right: 0%;\n  top: 0%;\n  animation: orbit-spinner-orbit-two-animation 1200ms linear infinite;\n  border-right: 3px solid #ff1d5e;\n}\n\n.orbit-spinner .orbit:nth-child(3) {\n  right: 0%;\n  bottom: 0%;\n  animation: orbit-spinner-orbit-three-animation 1200ms linear infinite;\n  border-top: 3px solid #ff1d5e;\n}\n\n@keyframes orbit-spinner-orbit-one-animation {\n  0% {\n    transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg);\n  }\n  100% {\n    transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg);\n  }\n}\n\n@keyframes orbit-spinner-orbit-two-animation {\n  0% {\n    transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg);\n  }\n  100% {\n    transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg);\n  }\n}\n\n@keyframes orbit-spinner-orbit-three-animation {\n  0% {\n    transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg);\n  }\n  100% {\n    transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg);\n  }\n}\n";
-  styleInject(css$5);
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
 
-  var css$6 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.fingerprint-spinner, .fingerprint-spinner * {\n  box-sizing: border-box;\n}\n\n.fingerprint-spinner {\n  height: 64px;\n  width: 64px;\n  padding: 2px;\n  overflow: hidden;\n  position: relative;\n}\n\n.fingerprint-spinner .spinner-ring {\n  position: absolute;\n  border-radius: 50%;\n  border: 2px solid transparent;\n  border-top-color: #ff1d5e;\n  animation: fingerprint-spinner-animation 1500ms cubic-bezier(0.680, -0.750, 0.265, 1.750) infinite forwards;\n  margin: auto;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  top: 0;\n}\n\n.fingerprint-spinner .spinner-ring:nth-child(1) {\n  height: calc(60px / 9 + 0 * 60px / 9);\n  width: calc(60px / 9 + 0 * 60px / 9);\n  animation-delay: calc(50ms * 1);\n}\n\n.fingerprint-spinner .spinner-ring:nth-child(2) {\n  height: calc(60px / 9 + 1 * 60px / 9);\n  width: calc(60px / 9 + 1 * 60px / 9);\n  animation-delay: calc(50ms * 2);\n}\n\n.fingerprint-spinner .spinner-ring:nth-child(3) {\n  height: calc(60px / 9 + 2 * 60px / 9);\n  width: calc(60px / 9 + 2 * 60px / 9);\n  animation-delay: calc(50ms * 3);\n}\n\n.fingerprint-spinner .spinner-ring:nth-child(4) {\n  height: calc(60px / 9 + 3 * 60px / 9);\n  width: calc(60px / 9 + 3 * 60px / 9);\n  animation-delay: calc(50ms * 4);\n}\n\n.fingerprint-spinner .spinner-ring:nth-child(5) {\n  height: calc(60px / 9 + 4 * 60px / 9);\n  width: calc(60px / 9 + 4 * 60px / 9);\n  animation-delay: calc(50ms * 5);\n}\n\n.fingerprint-spinner .spinner-ring:nth-child(6) {\n  height: calc(60px / 9 + 5 * 60px / 9);\n  width: calc(60px / 9 + 5 * 60px / 9);\n  animation-delay: calc(50ms * 6);\n}\n\n.fingerprint-spinner .spinner-ring:nth-child(7) {\n  height: calc(60px / 9 + 6 * 60px / 9);\n  width: calc(60px / 9 + 6 * 60px / 9);\n  animation-delay: calc(50ms * 7);\n}\n\n.fingerprint-spinner .spinner-ring:nth-child(8) {\n  height: calc(60px / 9 + 7 * 60px / 9);\n  width: calc(60px / 9 + 7 * 60px / 9);\n  animation-delay: calc(50ms * 8);\n}\n\n.fingerprint-spinner .spinner-ring:nth-child(9) {\n  height: calc(60px / 9 + 8 * 60px / 9);\n  width: calc(60px / 9 + 8 * 60px / 9);\n  animation-delay: calc(50ms * 9);\n}\n\n@keyframes fingerprint-spinner-animation {\n  100% {\n    transform: rotate( 360deg );\n  }\n}\n";
-  styleInject(css$6);
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
 
-  var css$7 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.trinity-rings-spinner, .trinity-rings-spinner * {\n  box-sizing: border-box;\n}\n\n.trinity-rings-spinner {\n  height: 66px;\n  width: 66px;\n  padding: 3px;\n  position: relative;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  flex-direction: row;\n  overflow: hidden;\n  box-sizing: border-box;\n}\n.trinity-rings-spinner .circle {\n  position:absolute;\n  display:block;\n  border-radius:50%;\n  border: 3px solid #ff1d5e;\n  opacity: 1;\n}\n\n.trinity-rings-spinner .circle:nth-child(1) {\n  height: 60px;\n  width: 60px;\n  animation : trinity-rings-spinner-circle1-animation 1.5s infinite linear;\n  border-width: 3px;\n}\n.trinity-rings-spinner .circle:nth-child(2) {\n  height: calc(60px * 0.65);\n  width: calc(60px * 0.65);\n  animation : trinity-rings-spinner-circle2-animation 1.5s infinite linear;\n  border-width: 2px;\n}\n.trinity-rings-spinner .circle:nth-child(3) {\n  height: calc(60px * 0.1);\n  width: calc(60px * 0.1);\n  animation:trinity-rings-spinner-circle3-animation 1.5s infinite linear;\n  border-width: 1px;\n}\n\n@keyframes trinity-rings-spinner-circle1-animation{\n  0% {\n    transform: rotateZ(20deg) rotateY(0deg);\n  }\n  100% {\n    transform: rotateZ(100deg) rotateY(360deg);\n  }\n}\n@keyframes trinity-rings-spinner-circle2-animation{\n  0% {\n    transform: rotateZ(100deg) rotateX(0deg);\n  }\n  100% {\n    transform: rotateZ(0deg) rotateX(360deg);\n  }\n}\n@keyframes trinity-rings-spinner-circle3-animation{\n  0% {\n    transform: rotateZ(100deg) rotateX(-360deg);\n  }\n  100% {\n    transform: rotateZ(-360deg) rotateX(360deg);\n  }\n}\n";
-  styleInject(css$7);
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
 
-  var css$8 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.fulfilling-square-spinner, .fulfilling-square-spinner * {\n  box-sizing: border-box;\n}\n\n.fulfilling-square-spinner {\n  height: 50px;\n  width: 50px;\n  position: relative;\n  border: 4px solid #ff1d5e;\n  animation: fulfilling-square-spinner-animation 4s infinite ease;\n}\n\n.fulfilling-square-spinner .spinner-inner {\n  vertical-align: top;\n  display: inline-block;\n  background-color: #ff1d5e;\n  width: 100%;\n  opacity: 1;\n  animation: fulfilling-square-spinner-inner-animation 4s infinite ease-in;\n}\n\n@keyframes fulfilling-square-spinner-animation {\n  0% {\n    transform: rotate(0deg);\n  }\n\n  25% {\n    transform: rotate(180deg);\n  }\n\n  50% {\n    transform: rotate(180deg);\n  }\n\n  75% {\n    transform: rotate(360deg);\n  }\n\n  100% {\n    transform: rotate(360deg);\n  }\n}\n\n@keyframes fulfilling-square-spinner-inner-animation {\n  0% {\n    height: 0%;\n  }\n\n  25% {\n    height: 0%;\n  }\n\n  50% {\n    height: 100%;\n  }\n\n  75% {\n    height: 100%;\n  }\n\n  100% {\n    height: 0%;\n  }\n}\n";
-  styleInject(css$8);
+            head.appendChild(el);
+          }
 
-  var css$9 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.circles-to-rhombuses-spinner, .circles-to-rhombuses-spinner * {\n  box-sizing: border-box;\n}\n\n.circles-to-rhombuses-spinner {\n  height: 15px;\n  width: calc( (15px + 15px * 1.125) * 3);\n  display: flex;\n  align-items: center;\n  justify-content: center\n}\n\n.circles-to-rhombuses-spinner .circle {\n  height: 15px;\n  width: 15px;\n  margin-left: calc(15px * 1.125);\n  transform: rotate(45deg);\n  border-radius: 10%;\n  border: 3px solid #ff1d5e;\n  overflow: hidden;\n  background: transparent;\n\n  animation: circles-to-rhombuses-animation 1200ms linear infinite;\n}\n\n.circles-to-rhombuses-spinner .circle:nth-child(1) {\n  animation-delay: calc(150ms * 1);\n  margin-left: 0\n}\n\n.circles-to-rhombuses-spinner .circle:nth-child(2) {\n  animation-delay: calc(150ms * 2);\n}\n\n.circles-to-rhombuses-spinner .circle:nth-child(3) {\n  animation-delay: calc(150ms * 3);\n}\n\n@keyframes circles-to-rhombuses-animation {\n  0% {\n    border-radius: 10%;\n  }\n\n  17.5% {\n    border-radius: 10%;\n  }\n\n  50% {\n    border-radius: 100%;\n  }\n\n\n  93.5% {\n    border-radius: 10%;\n  }\n\n  100% {\n    border-radius: 10%;\n  }\n}\n\n@keyframes circles-to-rhombuses-background-animation {\n  50% {\n    opacity: 0.4;\n  }\n}\n\n";
-  styleInject(css$9);
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
 
-  var css$10 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.semipolar-spinner, .semipolar-spinner * {\n  box-sizing: border-box;\n}\n\n.semipolar-spinner {\n  height: 65px;\n  width: 65px;\n  position: relative;\n}\n\n.semipolar-spinner .ring {\n  border-radius: 50%;\n  position: absolute;\n  border: calc(65px * 0.05) solid transparent;\n  border-top-color: #ff1d5e;\n  border-left-color: #ff1d5e;\n  animation: semipolar-spinner-animation 2s infinite;\n}\n\n.semipolar-spinner .ring:nth-child(1) {\n  height: calc(65px - 65px * 0.2 * 0);\n  width: calc(65px - 65px * 0.2 * 0);\n  top: calc(65px * 0.1 * 0);\n  left: calc(65px * 0.1 * 0);\n  animation-delay: calc(2000ms * 0.1 * 4);\n  z-index: 5;\n}\n\n.semipolar-spinner .ring:nth-child(2) {\n  height: calc(65px - 65px * 0.2 * 1);\n  width: calc(65px - 65px * 0.2 * 1);\n  top: calc(65px * 0.1 * 1);\n  left: calc(65px * 0.1 * 1);\n  animation-delay: calc(2000ms * 0.1 * 3);\n  z-index: 4;\n}\n\n.semipolar-spinner .ring:nth-child(3) {\n  height: calc(65px - 65px * 0.2 * 2);\n  width: calc(65px - 65px * 0.2 * 2);\n  top: calc(65px * 0.1 * 2);\n  left: calc(65px * 0.1 * 2);\n  animation-delay: calc(2000ms * 0.1 * 2);\n  z-index: 3;\n}\n\n.semipolar-spinner .ring:nth-child(4) {\n  height: calc(65px - 65px * 0.2 * 3);\n  width: calc(65px - 65px * 0.2 * 3);\n  top: calc(65px * 0.1 * 3);\n  left: calc(65px * 0.1 * 3);\n  animation-delay: calc(2000ms * 0.1 * 1);\n  z-index: 2;\n}\n\n.semipolar-spinner .ring:nth-child(5) {\n  height: calc(65px - 65px * 0.2 * 4);\n  width: calc(65px - 65px * 0.2 * 4);\n  top: calc(65px * 0.1 * 4);\n  left: calc(65px * 0.1 * 4);\n  animation-delay: calc(2000ms * 0.1 * 0);\n  z-index: 1;\n}\n\n@keyframes semipolar-spinner-animation {\n  50% {\n    transform: rotate(360deg) scale(0.7);\n  }\n}\n";
-  styleInject(css$10);
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
 
-  var css$11 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.breeding-rhombus-spinner {\n  height: 65px;\n  width: 65px;\n  position: relative;\n  transform: rotate(45deg);\n}\n\n.breeding-rhombus-spinner, .breeding-rhombus-spinner * {\n  box-sizing: border-box;\n}\n\n.breeding-rhombus-spinner .rhombus {\n  height: calc(65px / 7.5);\n  width: calc(65px / 7.5);\n  animation-duration: 2000ms;\n  top: calc(65px / 2.3077);\n  left: calc(65px / 2.3077);\n  background-color: #ff1d5e;\n  position: absolute;\n  animation-iteration-count: infinite;\n}\n\n.breeding-rhombus-spinner .rhombus:nth-child(2n+0) {\n  margin-right: 0;\n}\n\n.breeding-rhombus-spinner .rhombus.child-1 {\n  animation-name: breeding-rhombus-spinner-animation-child-1;\n  animation-delay: calc(100ms * 1);\n}\n\n.breeding-rhombus-spinner .rhombus.child-2 {\n  animation-name: breeding-rhombus-spinner-animation-child-2;\n  animation-delay: calc(100ms * 2);\n}\n\n.breeding-rhombus-spinner .rhombus.child-3 {\n  animation-name: breeding-rhombus-spinner-animation-child-3;\n  animation-delay: calc(100ms * 3);\n}\n\n.breeding-rhombus-spinner .rhombus.child-4 {\n  animation-name: breeding-rhombus-spinner-animation-child-4;\n  animation-delay: calc(100ms * 4);\n}\n\n.breeding-rhombus-spinner .rhombus.child-5 {\n  animation-name: breeding-rhombus-spinner-animation-child-5;\n  animation-delay: calc(100ms * 5);\n}\n\n.breeding-rhombus-spinner .rhombus.child-6 {\n  animation-name: breeding-rhombus-spinner-animation-child-6;\n  animation-delay: calc(100ms * 6);\n}\n\n.breeding-rhombus-spinner .rhombus.child-7 {\n  animation-name: breeding-rhombus-spinner-animation-child-7;\n  animation-delay: calc(100ms * 7);\n}\n\n.breeding-rhombus-spinner .rhombus.child-8 {\n  animation-name: breeding-rhombus-spinner-animation-child-8;\n  animation-delay: calc(100ms * 8);\n}\n\n.breeding-rhombus-spinner .rhombus.big {\n  height: calc(65px / 3);\n  width: calc(65px / 3);\n  animation-duration: 2000ms;\n  top: calc(65px / 3);\n  left: calc(65px / 3);\n  background-color: #ff1d5e;\n  animation: breeding-rhombus-spinner-animation-child-big 2s infinite;\n  animation-delay: 0.5s;\n}\n\n\n@keyframes breeding-rhombus-spinner-animation-child-1 {\n  50% {\n    transform: translate(-325%, -325%);\n  }\n}\n\n@keyframes breeding-rhombus-spinner-animation-child-2 {\n  50% {\n    transform: translate(0, -325%);\n  }\n}\n\n@keyframes breeding-rhombus-spinner-animation-child-3 {\n  50% {\n    transform: translate(325%, -325%);\n  }\n}\n\n@keyframes breeding-rhombus-spinner-animation-child-4 {\n  50% {\n    transform: translate(325%, 0);\n  }\n}\n\n@keyframes breeding-rhombus-spinner-animation-child-5 {\n  50% {\n    transform: translate(325%, 325%);\n  }\n}\n\n@keyframes breeding-rhombus-spinner-animation-child-6 {\n  50% {\n    transform: translate(0, 325%);\n  }\n}\n\n@keyframes breeding-rhombus-spinner-animation-child-7 {\n  50% {\n    transform: translate(-325%, 325%);\n  }\n}\n\n@keyframes breeding-rhombus-spinner-animation-child-8 {\n  50% {\n    transform: translate(-325%, 0);\n  }\n}\n\n@keyframes breeding-rhombus-spinner-animation-child-big {\n  50% {\n    transform: scale(0.5);\n  }\n}\n";
-  styleInject(css$11);
+    
+    __vue_normalize__$a(
+      { render: __vue_render__$a, staticRenderFns: __vue_staticRenderFns__$a },
+      __vue_inject_styles__$a,
+      __vue_script__$a,
+      __vue_scope_id__$a,
+      __vue_is_functional_template__$a,
+      __vue_module_identifier__$a,
+      __vue_create_injector__$a,
+      undefined
+    );
 
-  var css$12 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.swapping-squares-spinner, .swapping-squares-spinner * {\n  box-sizing: border-box;\n}\n\n.swapping-squares-spinner {\n  height: 65px;\n  width: 65px;\n  position: relative;\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n  align-items: center;\n}\n\n.swapping-squares-spinner .square {\n  height: calc(65px * 0.25 / 1.3);\n  width:  calc(65px * 0.25 / 1.3);\n  animation-duration: 1000ms;\n  border: calc(65px * 0.04 / 1.3) solid #ff1d5e;\n  margin-right: auto;\n  margin-left: auto;\n  position: absolute;\n  animation-iteration-count: infinite;\n}\n\n.swapping-squares-spinner .square:nth-child(1) {\n  animation-name: swapping-squares-animation-child-1;\n  animation-delay: 500ms;\n}\n\n.swapping-squares-spinner .square:nth-child(2) {\n  animation-name: swapping-squares-animation-child-2;\n  animation-delay: 0ms;\n}\n\n.swapping-squares-spinner .square:nth-child(3) {\n  animation-name: swapping-squares-animation-child-3;\n  animation-delay: 500ms;\n}\n\n.swapping-squares-spinner .square:nth-child(4) {\n  animation-name: swapping-squares-animation-child-4;\n  animation-delay: 0ms;\n}\n\n@keyframes swapping-squares-animation-child-1 {\n  50% {\n    transform: translate(150%,150%) scale(2,2);\n  }\n}\n\n@keyframes swapping-squares-animation-child-2 {\n  50% {\n    transform: translate(-150%,150%) scale(2,2);\n  }\n}\n\n@keyframes swapping-squares-animation-child-3 {\n  50% {\n    transform: translate(-150%,-150%) scale(2,2);\n  }\n}\n\n@keyframes swapping-squares-animation-child-4 {\n  50% {\n    transform: translate(150%,-150%) scale(2,2);\n  }\n}\n";
-  styleInject(css$12);
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
 
-  var css$13 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.scaling-squares-spinner, .scaling-squares-spinner * {\n  box-sizing: border-box;\n}\n\n.scaling-squares-spinner {\n  height: 65px;\n  width: 65px;\n  position: relative;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n  animation: scaling-squares-animation 1250ms;\n  animation-iteration-count: infinite;\n  transform: rotate(0deg);\n}\n\n.scaling-squares-spinner .square {\n  height: calc(65px * 0.25 / 1.3);\n  width: calc(65px * 0.25 / 1.3);\n  margin-right: auto;\n  margin-left: auto;\n  border: calc(65px * 0.04 / 1.3) solid #ff1d5e;\n  position: absolute;\n  animation-duration: 1250ms;\n  animation-iteration-count: infinite;\n}\n\n.scaling-squares-spinner .square:nth-child(1) {\n  animation-name: scaling-squares-spinner-animation-child-1;\n}\n\n.scaling-squares-spinner .square:nth-child(2) {\n  animation-name: scaling-squares-spinner-animation-child-2;\n}\n\n.scaling-squares-spinner .square:nth-child(3) {\n  animation-name: scaling-squares-spinner-animation-child-3;\n}\n\n.scaling-squares-spinner .square:nth-child(4) {\n  animation-name: scaling-squares-spinner-animation-child-4;\n}\n\n\n@keyframes scaling-squares-animation {\n\n  50% {\n    transform: rotate(90deg);\n  }\n\n  100% {\n    transform: rotate(180deg);\n  }\n}\n\n@keyframes scaling-squares-spinner-animation-child-1 {\n  50% {\n    transform: translate(150%,150%) scale(2,2);\n  }\n}\n\n@keyframes scaling-squares-spinner-animation-child-2 {\n  50% {\n    transform: translate(-150%,150%) scale(2,2);\n  }\n}\n\n@keyframes scaling-squares-spinner-animation-child-3 {\n  50% {\n    transform: translate(-150%,-150%) scale(2,2);\n  }\n}\n\n@keyframes scaling-squares-spinner-animation-child-4 {\n  50% {\n    transform: translate(150%,-150%) scale(2,2);\n  }\n}\n";
-  styleInject(css$13);
+  var script$b = {
+    name: 'SwappingSquaresSpinner',
 
-  var css$14 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.fulfilling-bouncing-circle-spinner, .fulfilling-bouncing-circle-spinner * {\n  box-sizing: border-box;\n}\n\n.fulfilling-bouncing-circle-spinner {\n  height: 60px;\n  width: 60px;\n  position: relative;\n  animation: fulfilling-bouncing-circle-spinner-animation infinite 4000ms ease;\n}\n\n.fulfilling-bouncing-circle-spinner .orbit {\n  height: 60px;\n  width: 60px;\n  position: absolute;\n  top: 0;\n  left: 0;\n  border-radius: 50%;\n  border: calc(60px * 0.03) solid #ff1d5e;\n  animation: fulfilling-bouncing-circle-spinner-orbit-animation infinite 4000ms ease;\n}\n\n.fulfilling-bouncing-circle-spinner .circle {\n  height: 60px;\n  width: 60px;\n  color: #ff1d5e;\n  display: block;\n  border-radius: 50%;\n  position: relative;\n  border: calc(60px * 0.1) solid #ff1d5e;\n  animation: fulfilling-bouncing-circle-spinner-circle-animation infinite 4000ms ease;\n  transform: rotate(0deg) scale(1);\n}\n\n@keyframes fulfilling-bouncing-circle-spinner-animation {\n  0% {\n    transform: rotate(0deg);\n  }\n\n  100% {\n    transform: rotate(360deg);\n  }\n}\n\n@keyframes fulfilling-bouncing-circle-spinner-orbit-animation {\n  0% {\n    transform: scale(1);\n  }\n  50% {\n    transform: scale(1);\n  }\n  62.5% {\n    transform: scale(0.8);\n  }\n  75% {\n    transform: scale(1);\n  }\n  87.5% {\n    transform: scale(0.8);\n  }\n  100% {\n    transform: scale(1);\n  }\n}\n\n@keyframes fulfilling-bouncing-circle-spinner-circle-animation {\n  0% {\n    transform: scale(1);\n    border-color: transparent;\n    border-top-color: inherit;\n  }\n  16.7% {\n    border-color: transparent;\n    border-top-color: initial;\n    border-right-color: initial;\n  }\n  33.4% {\n    border-color: transparent;\n    border-top-color: inherit;\n    border-right-color: inherit;\n    border-bottom-color: inherit;\n  }\n  50% {\n    border-color: inherit;\n    transform: scale(1);\n  }\n  62.5% {\n    border-color: inherit;\n    transform: scale(1.4);\n  }\n  75% {\n    border-color: inherit;\n    transform: scale(1);\n    opacity: 1;\n  }\n  87.5% {\n    border-color: inherit;\n    transform: scale(1.4);\n  }\n  100% {\n    border-color: transparent;\n    border-top-color: inherit;\n    transform: scale(1);\n  }\n}\n";
-  styleInject(css$14);
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 1000
+      },
+      size: {
+        type: Number,
+        default: 65
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
 
-  var FulfillingBouncingCircleSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"fulfilling-bouncing-circle-spinner",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"circle",style:(_vm.circleStyle)}),_vm._v(" "),_c('div',{staticClass:"orbit",style:(_vm.orbitStyle)})])},staticRenderFns: [],_scopeId: 'data-v-dd350904',
+    data () {
+      return {
+        animationBaseName: 'swapping-squares-animation-child',
+        squaresNum: 4
+      }
+    },
+
+    computed: {
+      spinnerStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`
+        }
+      },
+
+      squareStyle () {
+        return {
+          height: `${this.size * 0.25 / 1.3}px`,
+          width: `${this.size * 0.25 / 1.3}px`,
+          animationDuration: `${this.animationDuration}ms`,
+          borderWidth: `${this.size * 0.04 / 1.3}px`,
+          borderColor: this.color
+        }
+      },
+
+      squaresStyles () {
+        const squaresStyles = [];
+        const delay = this.animationDuration * 0.5;
+
+        for (let i = 1; i <= this.squaresNum; i++) {
+          squaresStyles.push(Object.assign({
+            animationDelay: `${i % 2 === 0 ? delay : 0}ms`
+          }, this.squareStyle));
+        }
+
+        return squaresStyles
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$b = script$b;
+              
+  /* template */
+  var __vue_render__$b = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"swapping-squares-spinner",style:(_vm.spinnerStyle)},_vm._l((_vm.squaresStyles),function(ss,index){return _c('div',{key:index,staticClass:"square",class:("square-" + (index + 1)),style:(ss)})}))};
+  var __vue_staticRenderFns__$b = [];
+
+    /* style */
+    const __vue_inject_styles__$b = function (inject) {
+      if (!inject) return
+      inject("data-v-e143de4e_0", { source: "\n.swapping-squares-spinner[data-v-e143de4e],.swapping-squares-spinner *[data-v-e143de4e]{box-sizing:border-box\n}\n.swapping-squares-spinner[data-v-e143de4e]{height:65px;width:65px;position:relative;display:flex;flex-direction:row;justify-content:center;align-items:center\n}\n.swapping-squares-spinner .square[data-v-e143de4e]{height:calc(65px * .25 / 1.3);width:calc(65px * .25 / 1.3);animation-duration:1s;border:calc(65px * .04 / 1.3) solid #ff1d5e;margin-right:auto;margin-left:auto;position:absolute;animation-iteration-count:infinite\n}\n.swapping-squares-spinner .square[data-v-e143de4e]:nth-child(1){animation-name:swapping-squares-animation-child-1-data-v-e143de4e;animation-delay:.5s\n}\n.swapping-squares-spinner .square[data-v-e143de4e]:nth-child(2){animation-name:swapping-squares-animation-child-2-data-v-e143de4e;animation-delay:0s\n}\n.swapping-squares-spinner .square[data-v-e143de4e]:nth-child(3){animation-name:swapping-squares-animation-child-3-data-v-e143de4e;animation-delay:.5s\n}\n.swapping-squares-spinner .square[data-v-e143de4e]:nth-child(4){animation-name:swapping-squares-animation-child-4-data-v-e143de4e;animation-delay:0s\n}\n@keyframes swapping-squares-animation-child-1-data-v-e143de4e{\n50%{transform:translate(150%,150%) scale(2,2)\n}\n}\n@keyframes swapping-squares-animation-child-2-data-v-e143de4e{\n50%{transform:translate(-150%,150%) scale(2,2)\n}\n}\n@keyframes swapping-squares-animation-child-3-data-v-e143de4e{\n50%{transform:translate(-150%,-150%) scale(2,2)\n}\n}\n@keyframes swapping-squares-animation-child-4-data-v-e143de4e{\n50%{transform:translate(150%,-150%) scale(2,2)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$b = "data-v-e143de4e";
+    /* module identifier */
+    const __vue_module_identifier__$b = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$b = false;
+    /* component normalizer */
+    function __vue_normalize__$b(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "SwappingSquaresSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$b() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$b.styles || (__vue_create_injector__$b.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$b(
+      { render: __vue_render__$b, staticRenderFns: __vue_staticRenderFns__$b },
+      __vue_inject_styles__$b,
+      __vue_script__$b,
+      __vue_scope_id__$b,
+      __vue_is_functional_template__$b,
+      __vue_module_identifier__$b,
+      __vue_create_injector__$b,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$c = {
+    name: 'ScalingSquaresSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 1250
+      },
+      size: {
+        type: Number,
+        default: 65
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    data () {
+      return {
+        squaresNum: 4
+      }
+    },
+
+    computed: {
+      spinnerStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`,
+          animationDuration: `${this.animationDuration}ms`
+        }
+      },
+
+      squareStyle () {
+        return {
+          height: `${this.size * 0.25 / 1.3}px`,
+          width: `${this.size * 0.25 / 1.3}px`,
+          animationDuration: `${this.animationDuration}ms`,
+          borderWidth: `${this.size * 0.04 / 1.3}px`,
+          borderColor: this.color
+        }
+      },
+
+      squaresStyles () {
+        const squaresStyles = [];
+
+        for (let i = 1; i <= this.squaresNum; i++) {
+          squaresStyles.push(Object.assign({
+          }, this.squareStyle));
+        }
+
+        return squaresStyles
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$c = script$c;
+              
+  /* template */
+  var __vue_render__$c = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"scaling-squares-spinner",style:(_vm.spinnerStyle)},_vm._l((_vm.squaresStyles),function(ss,index){return _c('div',{key:index,staticClass:"square",class:("square-" + (index + 1)),style:(ss)})}))};
+  var __vue_staticRenderFns__$c = [];
+
+    /* style */
+    const __vue_inject_styles__$c = function (inject) {
+      if (!inject) return
+      inject("data-v-62297917_0", { source: "\n.scaling-squares-spinner[data-v-62297917],.scaling-squares-spinner *[data-v-62297917]{box-sizing:border-box\n}\n.scaling-squares-spinner[data-v-62297917]{height:65px;width:65px;position:relative;display:flex;flex-direction:row;align-items:center;justify-content:center;animation:scaling-squares-animation-data-v-62297917 1.25s;animation-iteration-count:infinite;transform:rotate(0)\n}\n.scaling-squares-spinner .square[data-v-62297917]{height:calc(65px * .25 / 1.3);width:calc(65px * .25 / 1.3);margin-right:auto;margin-left:auto;border:calc(65px * .04 / 1.3) solid #ff1d5e;position:absolute;animation-duration:1.25s;animation-iteration-count:infinite\n}\n.scaling-squares-spinner .square[data-v-62297917]:nth-child(1){animation-name:scaling-squares-spinner-animation-child-1-data-v-62297917\n}\n.scaling-squares-spinner .square[data-v-62297917]:nth-child(2){animation-name:scaling-squares-spinner-animation-child-2-data-v-62297917\n}\n.scaling-squares-spinner .square[data-v-62297917]:nth-child(3){animation-name:scaling-squares-spinner-animation-child-3-data-v-62297917\n}\n.scaling-squares-spinner .square[data-v-62297917]:nth-child(4){animation-name:scaling-squares-spinner-animation-child-4-data-v-62297917\n}\n@keyframes scaling-squares-animation-data-v-62297917{\n50%{transform:rotate(90deg)\n}\n100%{transform:rotate(180deg)\n}\n}\n@keyframes scaling-squares-spinner-animation-child-1-data-v-62297917{\n50%{transform:translate(150%,150%) scale(2,2)\n}\n}\n@keyframes scaling-squares-spinner-animation-child-2-data-v-62297917{\n50%{transform:translate(-150%,150%) scale(2,2)\n}\n}\n@keyframes scaling-squares-spinner-animation-child-3-data-v-62297917{\n50%{transform:translate(-150%,-150%) scale(2,2)\n}\n}\n@keyframes scaling-squares-spinner-animation-child-4-data-v-62297917{\n50%{transform:translate(150%,-150%) scale(2,2)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$c = "data-v-62297917";
+    /* module identifier */
+    const __vue_module_identifier__$c = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$c = false;
+    /* component normalizer */
+    function __vue_normalize__$c(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "ScalingSquaresSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$c() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$c.styles || (__vue_create_injector__$c.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$c(
+      { render: __vue_render__$c, staticRenderFns: __vue_staticRenderFns__$c },
+      __vue_inject_styles__$c,
+      __vue_script__$c,
+      __vue_scope_id__$c,
+      __vue_is_functional_template__$c,
+      __vue_module_identifier__$c,
+      __vue_create_injector__$c,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$d = {
     name: 'FulfillingBouncingCircleSpinner',
 
     props: {
@@ -14630,46 +17543,1520 @@
         }
       }
     }
-  }
+  };
 
-  var css$15 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.radar-spinner, .radar-spinner * {\n  box-sizing: border-box;\n}\n\n.radar-spinner {\n  height: 60px;\n  width: 60px;\n  position: relative;\n}\n\n.radar-spinner .circle {\n  position: absolute;\n  height: 100%;\n  width: 100%;\n  top: 0;\n  left: 0;\n  animation: radar-spinner-animation 2s infinite;\n}\n\n.radar-spinner .circle:nth-child(1) {\n  padding: calc(60px * 5 * 2 * 0 / 110);\n  animation-delay: 300ms;\n}\n\n.radar-spinner .circle:nth-child(2) {\n  padding: calc(60px * 5 * 2 * 1 / 110);\n  animation-delay: 300ms;\n}\n\n.radar-spinner .circle:nth-child(3) {\n  padding: calc(60px * 5 * 2 * 2 / 110);\n  animation-delay: 300ms;\n}\n\n.radar-spinner .circle:nth-child(4) {\n  padding: calc(60px * 5 * 2 * 3 / 110);\n  animation-delay: 0ms;\n}\n\n.radar-spinner .circle-inner, .radar-spinner .circle-inner-container {\n  height: 100%;\n  width: 100%;\n  border-radius: 50%;\n  border: calc(60px * 5 / 110) solid transparent;\n}\n\n.radar-spinner .circle-inner {\n  border-left-color: #ff1d5e;\n  border-right-color: #ff1d5e;\n}\n\n@keyframes radar-spinner-animation {\n  50% {\n    transform: rotate(180deg);\n  }\n  100% {\n    transform: rotate(0deg);\n  }\n}\n";
-  styleInject(css$15);
+  /* script */
+              const __vue_script__$d = script$d;
+              
+  /* template */
+  var __vue_render__$d = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"fulfilling-bouncing-circle-spinner",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"circle",style:(_vm.circleStyle)}),_vm._v(" "),_c('div',{staticClass:"orbit",style:(_vm.orbitStyle)})])};
+  var __vue_staticRenderFns__$d = [];
 
-  var css$16 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.self-building-square-spinner, .self-building-square-spinner * {\n  box-sizing: border-box;\n}\n\n.self-building-square-spinner {\n  height: 40px;\n  width: 40px;\n  top: calc( -10px * 2 / 3);\n}\n\n.self-building-square-spinner .square {\n  height: 10px;\n  width: 10px;\n  top: calc( -10px * 2 / 3);\n  margin-right: calc(10px / 3);\n  margin-top: calc(10px / 3);\n  background: #ff1d5e;\n  float: left;\n  position:relative;\n  opacity: 0;\n  animation: self-building-square-spinner 6s infinite;\n}\n\n.self-building-square-spinner .square:nth-child(1) {\n  animation-delay: calc(300ms * 6);\n}\n\n.self-building-square-spinner .square:nth-child(2) {\n  animation-delay: calc(300ms * 7);\n}\n\n.self-building-square-spinner .square:nth-child(3) {\n  animation-delay: calc(300ms * 8);\n}\n\n.self-building-square-spinner .square:nth-child(4) {\n  animation-delay: calc(300ms * 3);\n}\n\n.self-building-square-spinner .square:nth-child(5) {\n  animation-delay: calc(300ms * 4);\n}\n\n.self-building-square-spinner .square:nth-child(6) {\n  animation-delay: calc(300ms * 5);\n}\n\n.self-building-square-spinner .square:nth-child(7) {\n  animation-delay: calc(300ms * 0);\n}\n\n.self-building-square-spinner .square:nth-child(8) {\n  animation-delay: calc(300ms * 1);\n}\n\n.self-building-square-spinner .square:nth-child(9) {\n  animation-delay: calc(300ms * 2);\n}\n\n.self-building-square-spinner .clear{\n  clear: both;\n}\n\n@keyframes self-building-square-spinner {\n  0% {\n    opacity: 0;\n  }\n  5% {\n    opacity: 1;\n    top: 0;\n  }\n  50.9% {\n    opacity: 1;\n    top: 0;\n  }\n  55.9% {\n    opacity: 0;\n    top: inherit;\n  }\n}\n";
-  styleInject(css$16);
+    /* style */
+    const __vue_inject_styles__$d = function (inject) {
+      if (!inject) return
+      inject("data-v-7697d6bc_0", { source: "\n.fulfilling-bouncing-circle-spinner[data-v-7697d6bc],.fulfilling-bouncing-circle-spinner *[data-v-7697d6bc]{box-sizing:border-box\n}\n.fulfilling-bouncing-circle-spinner[data-v-7697d6bc]{height:60px;width:60px;position:relative;animation:fulfilling-bouncing-circle-spinner-animation-data-v-7697d6bc infinite 4s ease\n}\n.fulfilling-bouncing-circle-spinner .orbit[data-v-7697d6bc]{height:60px;width:60px;position:absolute;top:0;left:0;border-radius:50%;border:calc(60px * .03) solid #ff1d5e;animation:fulfilling-bouncing-circle-spinner-orbit-animation-data-v-7697d6bc infinite 4s ease\n}\n.fulfilling-bouncing-circle-spinner .circle[data-v-7697d6bc]{height:60px;width:60px;color:#ff1d5e;display:block;border-radius:50%;position:relative;border:calc(60px * .1) solid #ff1d5e;animation:fulfilling-bouncing-circle-spinner-circle-animation-data-v-7697d6bc infinite 4s ease;transform:rotate(0) scale(1)\n}\n@keyframes fulfilling-bouncing-circle-spinner-animation-data-v-7697d6bc{\n0%{transform:rotate(0)\n}\n100%{transform:rotate(360deg)\n}\n}\n@keyframes fulfilling-bouncing-circle-spinner-orbit-animation-data-v-7697d6bc{\n0%{transform:scale(1)\n}\n50%{transform:scale(1)\n}\n62.5%{transform:scale(.8)\n}\n75%{transform:scale(1)\n}\n87.5%{transform:scale(.8)\n}\n100%{transform:scale(1)\n}\n}\n@keyframes fulfilling-bouncing-circle-spinner-circle-animation-data-v-7697d6bc{\n0%{transform:scale(1);border-color:transparent;border-top-color:inherit\n}\n16.7%{border-color:transparent;border-top-color:initial;border-right-color:initial\n}\n33.4%{border-color:transparent;border-top-color:inherit;border-right-color:inherit;border-bottom-color:inherit\n}\n50%{border-color:inherit;transform:scale(1)\n}\n62.5%{border-color:inherit;transform:scale(1.4)\n}\n75%{border-color:inherit;transform:scale(1);opacity:1\n}\n87.5%{border-color:inherit;transform:scale(1.4)\n}\n100%{border-color:transparent;border-top-color:inherit;transform:scale(1)\n}\n}", map: undefined, media: undefined });
 
-  var css$17 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.spring-spinner, .spring-spinner * {\n  box-sizing: border-box;\n}\n\n.spring-spinner {\n  height: 60px;\n  width: 60px;\n}\n\n.spring-spinner .spring-spinner-part {\n  overflow: hidden;\n  height: calc(60px / 2);\n  width: 60px;\n}\n\n.spring-spinner  .spring-spinner-part.bottom {\n  transform: rotate(180deg) scale(-1, 1);\n}\n\n.spring-spinner .spring-spinner-rotator {\n  width: 60px;\n  height: 60px;\n  border: calc(60px / 7) solid transparent;\n  border-right-color: #ff1d5e;\n  border-top-color: #ff1d5e;\n  border-radius: 50%;\n  box-sizing: border-box;\n  animation: spring-spinner-animation 3s ease-in-out infinite;\n  transform: rotate(-200deg);\n}\n\n@keyframes spring-spinner-animation {\n  0% {\n    border-width: calc(60px / 7);\n  }\n  25% {\n    border-width: calc(60px / 23.33);\n  }\n  50% {\n    transform: rotate(115deg);\n    border-width: calc(60px / 7);\n  }\n  75% {\n    border-width: calc(60px / 23.33);\n  }\n  100% {\n    border-width: calc(60px / 7);\n  }\n}\n";
-  styleInject(css$17);
+    };
+    /* scoped */
+    const __vue_scope_id__$d = "data-v-7697d6bc";
+    /* module identifier */
+    const __vue_module_identifier__$d = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$d = false;
+    /* component normalizer */
+    function __vue_normalize__$d(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
 
-  var css$18 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.looping-rhombuses-spinner, .looping-rhombuses-spinner * {\n  box-sizing: border-box;\n}\n\n.looping-rhombuses-spinner {\n  width: calc(15px * 4);\n  height: 15px;\n  position: relative;\n}\n\n.looping-rhombuses-spinner .rhombus {\n  height: 15px;\n  width: 15px;\n  background-color: #ff1d5e;\n  left: calc(15px * 4);\n  position: absolute;\n  margin: 0 auto;\n  border-radius: 2px;\n  transform: translateY(0) rotate(45deg) scale(0);\n  animation: looping-rhombuses-spinner-animation 2500ms linear infinite;\n}\n\n.looping-rhombuses-spinner .rhombus:nth-child(1) {\n  animation-delay: calc(2500ms * 1 / -1.5);\n}\n\n.looping-rhombuses-spinner .rhombus:nth-child(2) {\n  animation-delay: calc(2500ms * 2 / -1.5);\n}\n\n.looping-rhombuses-spinner .rhombus:nth-child(3) {\n  animation-delay: calc(2500ms * 3 / -1.5);\n}\n\n@keyframes looping-rhombuses-spinner-animation {\n  0% {\n    transform: translateX(0) rotate(45deg) scale(0);\n  }\n  50% {\n    transform: translateX(-233%) rotate(45deg) scale(1);\n  }\n  100% {\n    transform: translateX(-466%) rotate(45deg) scale(0);\n  }\n}\n";
-  styleInject(css$18);
+      // For security concerns, we use only base name in production mode.
+      component.__file = "FulfillingBouncingCircleSpinner.vue";
 
-  var css$19 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.half-circle-spinner, .half-circle-spinner * {\n  box-sizing: border-box;\n}\n\n.half-circle-spinner {\n  width: 60px;\n  height: 60px;\n  border-radius: 100%;\n  position: relative;\n}\n\n.half-circle-spinner .circle {\n  content: \"\";\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  border-radius: 100%;\n  border: calc(60px / 10) solid transparent;\n}\n\n.half-circle-spinner .circle.circle-1 {\n  border-top-color: #ff1d5e;\n  animation: half-circle-spinner-animation 1s infinite;\n}\n\n.half-circle-spinner .circle.circle-2 {\n  border-bottom-color: #ff1d5e;\n  animation: half-circle-spinner-animation 1s infinite alternate;\n}\n\n@keyframes half-circle-spinner-animation {\n  0% {\n    transform: rotate(0deg);\n\n  }\n  100%{\n    transform: rotate(360deg);\n  }\n}\n";
-  styleInject(css$19);
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
 
-  var css$20 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.atom-spinner, .atom-spinner * {\n  box-sizing: border-box;\n}\n\n.atom-spinner {\n  height: 60px;\n  width: 60px;\n  overflow: hidden;\n}\n\n.atom-spinner .spinner-inner {\n  position: relative;\n  display: block;\n  height: 100%;\n  width: 100%;\n}\n\n.atom-spinner .spinner-circle {\n  display: block;\n  position: absolute;\n  color: #ff1d5e;\n  font-size: calc(60px * 0.24);\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n}\n\n.atom-spinner .spinner-line {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  border-radius: 50%;\n  animation-duration: 1s;\n  border-left-width: calc(60px / 25);\n  border-top-width: calc(60px / 25);\n  border-left-color: #ff1d5e;\n  border-left-style: solid;\n  border-top-style: solid;\n  border-top-color: transparent;\n}\n\n.atom-spinner .spinner-line:nth-child(1) {\n  animation: atom-spinner-animation-1 1s linear infinite;\n  transform: rotateZ(120deg) rotateX(66deg) rotateZ(0deg);\n}\n\n.atom-spinner .spinner-line:nth-child(2) {\n  animation: atom-spinner-animation-2 1s linear infinite;\n  transform: rotateZ(240deg) rotateX(66deg) rotateZ(0deg);\n}\n\n.atom-spinner .spinner-line:nth-child(3) {\n  animation: atom-spinner-animation-3 1s linear infinite;\n  transform: rotateZ(360deg) rotateX(66deg) rotateZ(0deg);\n}\n\n@keyframes atom-spinner-animation-1 {\n  100% {\n    transform: rotateZ(120deg) rotateX(66deg) rotateZ(360deg);\n  }\n}\n\n@keyframes atom-spinner-animation-2 {\n  100% {\n    transform: rotateZ(240deg) rotateX(66deg) rotateZ(360deg);\n  }\n}\n\n@keyframes atom-spinner-animation-3 {\n  100% {\n    transform: rotateZ(360deg) rotateX(66deg) rotateZ(360deg);\n  }\n}\n\n\n";
-  styleInject(css$20);
+        if (functional) component.functional = true;
+      }
 
-  var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('modal',{staticStyle:{"opacity":"1.0"},attrs:{"name":"popup-spinner","height":_vm.modalHeight,"width":_vm.modalWidth,"click-to-close":false},on:{"before-open":_vm.beforeOpen,"before-close":_vm.beforeClose}},[_c('div',{staticClass:"overlay-box"},[_c('div',{staticClass:"loader-box"},[_c('fulfilling-bouncing-circle-spinner',{attrs:{"color":_vm.color,"size":_vm.spinnerSize,"animation-duration":2000}})],1),_vm._v(" "),(_vm.title !== '')?_c('div',{style:(_vm.titleStyle)},[_vm._v(" "+_vm._s(_vm.title)+" ")]):_vm._e(),_vm._v(" "),(_vm.hasCancelButton)?_c('div',{staticStyle:{"padding":"13px"}},[_c('button',{style:(_vm.cancelButtonStyle),on:{"click":_vm.cancel}},[_vm._v("Cancel")])]):_vm._e()])])},staticRenderFns: [],_scopeId: 'data-v-3515e57d',
-    name: 'PopupSpinner',
+      component._scopeId = scope;
 
-    components: {
-      FulfillingBouncingCircleSpinner 
-    },
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$d() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$d.styles || (__vue_create_injector__$d.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
     
+
+    
+    var FulfillingBouncingCircleSpinner = __vue_normalize__$d(
+      { render: __vue_render__$d, staticRenderFns: __vue_staticRenderFns__$d },
+      __vue_inject_styles__$d,
+      __vue_script__$d,
+      __vue_scope_id__$d,
+      __vue_is_functional_template__$d,
+      __vue_module_identifier__$d,
+      __vue_create_injector__$d,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$e = {
+    name: 'RadarSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 2000
+      },
+      size: {
+        type: Number,
+        default: 110
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    data () {
+      return {
+        circlesNum: 4
+      }
+    },
+
+    computed: {
+      borderWidth () {
+        return this.size * 5 / 110
+      },
+
+      spinnerStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`
+        }
+      },
+
+      circleStyle () {
+        return {
+          animationDuration: `${this.animationDuration}ms`
+        }
+      },
+
+      circleInnerContainerStyle () {
+        return {
+          borderWidth: `${this.borderWidth}px`
+        }
+      },
+
+      circleInnerStyle () {
+        return {
+          borderLeftColor: this.color,
+          borderRightColor: this.color,
+          borderWidth: `${this.borderWidth}px`
+        }
+      },
+
+      circlesStyles () {
+        const circlesStyles = [];
+        const delay = this.animationDuration * 0.15;
+
+        for (let i = 0; i < this.circlesNum; i++) {
+          circlesStyles.push(Object.assign({
+            padding: `${this.borderWidth * 2 * i}px`,
+            animationDelay: `${i === this.circlesNum - 1 ? 0 : delay}ms`
+          }, this.circleStyle));
+        }
+
+        return circlesStyles
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$e = script$e;
+              
+  /* template */
+  var __vue_render__$e = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"radar-spinner",style:(_vm.spinnerStyle)},_vm._l((_vm.circlesStyles),function(cs,index){return _c('div',{key:index,staticClass:"circle",style:(cs)},[_c('div',{staticClass:"circle-inner-container",style:(_vm.circleInnerContainerStyle)},[_c('div',{staticClass:"circle-inner",style:(_vm.circleInnerStyle)})])])}))};
+  var __vue_staticRenderFns__$e = [];
+
+    /* style */
+    const __vue_inject_styles__$e = function (inject) {
+      if (!inject) return
+      inject("data-v-bda51672_0", { source: "\n.radar-spinner[data-v-bda51672],.radar-spinner *[data-v-bda51672]{box-sizing:border-box\n}\n.radar-spinner[data-v-bda51672]{height:60px;width:60px;position:relative\n}\n.radar-spinner .circle[data-v-bda51672]{position:absolute;height:100%;width:100%;top:0;left:0;animation:radar-spinner-animation-data-v-bda51672 2s infinite\n}\n.radar-spinner .circle[data-v-bda51672]:nth-child(1){padding:calc(60px * 5 * 2 * 0 / 110);animation-delay:.3s\n}\n.radar-spinner .circle[data-v-bda51672]:nth-child(2){padding:calc(60px * 5 * 2 * 1 / 110);animation-delay:.3s\n}\n.radar-spinner .circle[data-v-bda51672]:nth-child(3){padding:calc(60px * 5 * 2 * 2 / 110);animation-delay:.3s\n}\n.radar-spinner .circle[data-v-bda51672]:nth-child(4){padding:calc(60px * 5 * 2 * 3 / 110);animation-delay:0s\n}\n.radar-spinner .circle-inner[data-v-bda51672],.radar-spinner .circle-inner-container[data-v-bda51672]{height:100%;width:100%;border-radius:50%;border:calc(60px * 5 / 110) solid transparent\n}\n.radar-spinner .circle-inner[data-v-bda51672]{border-left-color:#ff1d5e;border-right-color:#ff1d5e\n}\n@keyframes radar-spinner-animation-data-v-bda51672{\n50%{transform:rotate(180deg)\n}\n100%{transform:rotate(0)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$e = "data-v-bda51672";
+    /* module identifier */
+    const __vue_module_identifier__$e = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$e = false;
+    /* component normalizer */
+    function __vue_normalize__$e(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "RadarSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$e() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$e.styles || (__vue_create_injector__$e.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$e(
+      { render: __vue_render__$e, staticRenderFns: __vue_staticRenderFns__$e },
+      __vue_inject_styles__$e,
+      __vue_script__$e,
+      __vue_scope_id__$e,
+      __vue_is_functional_template__$e,
+      __vue_module_identifier__$e,
+      __vue_create_injector__$e,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$f = {
+    name: 'SelfBuildingSquareSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 6000
+      },
+      size: {
+        type: Number,
+        default: 40
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    data () {
+      return {
+        squaresNum: 9
+      }
+    },
+
+    computed: {
+      squareSize () {
+        return this.size / 4
+      },
+
+      initialTopPosition () {
+        return -this.squareSize * 2 / 3
+      },
+
+      spinnerStyle () {
+        return {
+          top: `${-this.initialTopPosition}px`,
+          height: `${this.size}px`,
+          width: `${this.size}px`
+        }
+      },
+
+      squareStyle () {
+        return {
+          height: `${this.squareSize}px`,
+          width: `${this.squareSize}px`,
+          top: `${this.initialTopPosition}px`,
+          marginRight: `${this.squareSize / 3}px`,
+          marginTop: `${this.squareSize / 3}px`,
+          animationDuration: `${this.animationDuration}ms`,
+          background: this.color
+        }
+      },
+
+      squaresStyles () {
+        const squaresStyles = [];
+        const delaysMultipliers = [6, 7, 8, 3, 4, 5, 0, 1, 2];
+        const delayModifier = this.animationDuration * 0.05;
+
+        for (let i = 0; i < this.squaresNum; i++) {
+          squaresStyles.push(Object.assign({
+            animationDelay: `${delayModifier * delaysMultipliers[i]}ms`
+          }, this.squareStyle));
+        }
+
+        return squaresStyles
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$f = script$f;
+              
+  /* template */
+  var __vue_render__$f = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"self-building-square-spinner",style:(_vm.spinnerStyle)},_vm._l((_vm.squaresStyles),function(ss,index){return _c('div',{key:index,staticClass:"square",class:{'clear': index && index % 3 === 0},style:(ss)})}))};
+  var __vue_staticRenderFns__$f = [];
+
+    /* style */
+    const __vue_inject_styles__$f = function (inject) {
+      if (!inject) return
+      inject("data-v-facc71ec_0", { source: "\n.self-building-square-spinner[data-v-facc71ec],.self-building-square-spinner *[data-v-facc71ec]{box-sizing:border-box\n}\n.self-building-square-spinner[data-v-facc71ec]{height:40px;width:40px;top:calc(-10px * 2 / 3)\n}\n.self-building-square-spinner .square[data-v-facc71ec]{height:10px;width:10px;top:calc(-10px * 2 / 3);margin-right:calc(10px / 3);margin-top:calc(10px / 3);background:#ff1d5e;float:left;position:relative;opacity:0;animation:self-building-square-spinner-data-v-facc71ec 6s infinite\n}\n.self-building-square-spinner .square[data-v-facc71ec]:nth-child(1){animation-delay:calc(300ms * 6)\n}\n.self-building-square-spinner .square[data-v-facc71ec]:nth-child(2){animation-delay:calc(300ms * 7)\n}\n.self-building-square-spinner .square[data-v-facc71ec]:nth-child(3){animation-delay:calc(300ms * 8)\n}\n.self-building-square-spinner .square[data-v-facc71ec]:nth-child(4){animation-delay:calc(300ms * 3)\n}\n.self-building-square-spinner .square[data-v-facc71ec]:nth-child(5){animation-delay:calc(300ms * 4)\n}\n.self-building-square-spinner .square[data-v-facc71ec]:nth-child(6){animation-delay:calc(300ms * 5)\n}\n.self-building-square-spinner .square[data-v-facc71ec]:nth-child(7){animation-delay:calc(300ms * 0)\n}\n.self-building-square-spinner .square[data-v-facc71ec]:nth-child(8){animation-delay:calc(300ms * 1)\n}\n.self-building-square-spinner .square[data-v-facc71ec]:nth-child(9){animation-delay:calc(300ms * 2)\n}\n.self-building-square-spinner .clear[data-v-facc71ec]{clear:both\n}\n@keyframes self-building-square-spinner-data-v-facc71ec{\n0%{opacity:0\n}\n5%{opacity:1;top:0\n}\n50.9%{opacity:1;top:0\n}\n55.9%{opacity:0;top:inherit\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$f = "data-v-facc71ec";
+    /* module identifier */
+    const __vue_module_identifier__$f = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$f = false;
+    /* component normalizer */
+    function __vue_normalize__$f(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "SelfBuildingSquareSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$f() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$f.styles || (__vue_create_injector__$f.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$f(
+      { render: __vue_render__$f, staticRenderFns: __vue_staticRenderFns__$f },
+      __vue_inject_styles__$f,
+      __vue_script__$f,
+      __vue_scope_id__$f,
+      __vue_is_functional_template__$f,
+      __vue_module_identifier__$f,
+      __vue_create_injector__$f,
+      undefined
+    );
+
+  //
+
+  var script$g = {
+    name: 'SpringSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 3000
+      },
+      size: {
+        type: Number,
+        default: 70
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    data () {
+      return {
+        animationBaseName: 'spring-spinner-animation',
+        currentAnimationName: ''
+      }
+    },
+
+    computed: {
+      spinnerStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`
+        }
+      },
+
+      spinnerPartStyle () {
+        return {
+          height: `${this.size / 2}px`,
+          width: `${this.size}px`
+        }
+      },
+
+      rotatorStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`,
+          borderRightColor: this.color,
+          borderTopColor: this.color,
+          borderWidth: `${this.size / 7}px`,
+          animationDuration: `${this.animationDuration}ms`,
+          animationName: this.currentAnimationName
+        }
+      }
+    },
+
+    watch: {
+      '$props': {
+        handler () {
+          this.updateAnimation();
+        },
+        deep: true
+      }
+    },
+
+    mounted () {
+      this.updateAnimation();
+    },
+
+    methods: {
+      updateAnimation () {
+        this.updateAnimationName();
+        utils$2.appendKeyframes(this.currentAnimationName, this.generateKeyframes());
+      },
+
+      updateAnimationName () {
+        this.currentAnimationName = `${this.animationBaseName}-${Date.now()}`;
+      },
+
+      generateKeyframes () {
+        return `
+        0% {
+          border-width: ${this.size / 7}px;
+        }
+        25% {
+          border-width: ${this.size / 23.33}px;
+        }
+        50% {
+          transform: rotate(115deg);
+          border-width: ${this.size / 7}px;
+        }
+        75% {
+          border-width: ${this.size / 23.33}px;
+         }
+        100% {
+         border-width: ${this.size / 7}px;
+        }`
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$g = script$g;
+              
+  /* template */
+  var __vue_render__$g = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"spring-spinner",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"spring-spinner-part top",style:(_vm.spinnerPartStyle)},[_c('div',{staticClass:"spring-spinner-rotator",style:(_vm.rotatorStyle)})]),_vm._v(" "),_c('div',{staticClass:"spring-spinner-part bottom",style:(_vm.spinnerPartStyle)},[_c('div',{staticClass:"spring-spinner-rotator",style:(_vm.rotatorStyle)})])])};
+  var __vue_staticRenderFns__$g = [];
+
+    /* style */
+    const __vue_inject_styles__$g = function (inject) {
+      if (!inject) return
+      inject("data-v-2005eb59_0", { source: "\n.spring-spinner[data-v-2005eb59],.spring-spinner *[data-v-2005eb59]{box-sizing:border-box\n}\n.spring-spinner[data-v-2005eb59]{height:60px;width:60px\n}\n.spring-spinner .spring-spinner-part[data-v-2005eb59]{overflow:hidden;height:calc(60px / 2);width:60px\n}\n.spring-spinner .spring-spinner-part.bottom[data-v-2005eb59]{transform:rotate(180deg) scale(-1,1)\n}\n.spring-spinner .spring-spinner-rotator[data-v-2005eb59]{width:60px;height:60px;border:calc(60px / 7) solid transparent;border-right-color:#ff1d5e;border-top-color:#ff1d5e;border-radius:50%;box-sizing:border-box;animation:spring-spinner-animation-data-v-2005eb59 3s ease-in-out infinite;transform:rotate(-200deg)\n}\n@keyframes spring-spinner-animation-data-v-2005eb59{\n0%{border-width:calc(60px / 7)\n}\n25%{border-width:calc(60px / 23.33)\n}\n50%{transform:rotate(115deg);border-width:calc(60px / 7)\n}\n75%{border-width:calc(60px / 23.33)\n}\n100%{border-width:calc(60px / 7)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$g = "data-v-2005eb59";
+    /* module identifier */
+    const __vue_module_identifier__$g = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$g = false;
+    /* component normalizer */
+    function __vue_normalize__$g(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "SpringSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$g() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$g.styles || (__vue_create_injector__$g.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$g(
+      { render: __vue_render__$g, staticRenderFns: __vue_staticRenderFns__$g },
+      __vue_inject_styles__$g,
+      __vue_script__$g,
+      __vue_scope_id__$g,
+      __vue_is_functional_template__$g,
+      __vue_module_identifier__$g,
+      __vue_create_injector__$g,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$h = {
+    name: 'LoopingRhombusesSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 2500
+      },
+      rhombusSize: {
+        type: Number,
+        default: 15
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    data () {
+      return {
+        rhombusesNum: 3
+      }
+    },
+
+    computed: {
+      spinnerStyle () {
+        return {
+          height: `${this.rhombusSize}px`,
+          width: `${this.rhombusSize * 4}px`
+        }
+      },
+
+      rhombusStyle () {
+        return {
+          height: `${this.rhombusSize}px`,
+          width: `${this.rhombusSize}px`,
+          backgroundColor: this.color,
+          animationDuration: `${this.animationDuration}ms`,
+          left: `${this.rhombusSize * 4}px`
+        }
+      },
+
+      rhombusesStyles () {
+        const rhombusesStyles = [];
+        const delay = -this.animationDuration / 1.5;
+
+        for (let i = 1; i <= this.rhombusesNum; i++) {
+          const style = Object.assign({
+            animationDelay: `${i * delay}ms`
+          }, this.rhombusStyle);
+
+          rhombusesStyles.push(style);
+        }
+
+        return rhombusesStyles
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$h = script$h;
+              
+  /* template */
+  var __vue_render__$h = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"looping-rhombuses-spinner",style:(_vm.spinnerStyle)},_vm._l((_vm.rhombusesStyles),function(rs,index){return _c('div',{staticClass:"rhombus",style:(rs),attrs:{"ikey":index}})}))};
+  var __vue_staticRenderFns__$h = [];
+
+    /* style */
+    const __vue_inject_styles__$h = function (inject) {
+      if (!inject) return
+      inject("data-v-6868d2fc_0", { source: "\n.looping-rhombuses-spinner[data-v-6868d2fc],.looping-rhombuses-spinner *[data-v-6868d2fc]{box-sizing:border-box\n}\n.looping-rhombuses-spinner[data-v-6868d2fc]{width:calc(15px * 4);height:15px;position:relative\n}\n.looping-rhombuses-spinner .rhombus[data-v-6868d2fc]{height:15px;width:15px;background-color:#ff1d5e;left:calc(15px * 4);position:absolute;margin:0 auto;border-radius:2px;transform:translateY(0) rotate(45deg) scale(0);animation:looping-rhombuses-spinner-animation-data-v-6868d2fc 2.5s linear infinite\n}\n.looping-rhombuses-spinner .rhombus[data-v-6868d2fc]:nth-child(1){animation-delay:calc(2500ms * 1 / -1.5)\n}\n.looping-rhombuses-spinner .rhombus[data-v-6868d2fc]:nth-child(2){animation-delay:calc(2500ms * 2 / -1.5)\n}\n.looping-rhombuses-spinner .rhombus[data-v-6868d2fc]:nth-child(3){animation-delay:calc(2500ms * 3 / -1.5)\n}\n@keyframes looping-rhombuses-spinner-animation-data-v-6868d2fc{\n0%{transform:translateX(0) rotate(45deg) scale(0)\n}\n50%{transform:translateX(-233%) rotate(45deg) scale(1)\n}\n100%{transform:translateX(-466%) rotate(45deg) scale(0)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$h = "data-v-6868d2fc";
+    /* module identifier */
+    const __vue_module_identifier__$h = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$h = false;
+    /* component normalizer */
+    function __vue_normalize__$h(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "LoopingRhombusesSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$h() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$h.styles || (__vue_create_injector__$h.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$h(
+      { render: __vue_render__$h, staticRenderFns: __vue_staticRenderFns__$h },
+      __vue_inject_styles__$h,
+      __vue_script__$h,
+      __vue_scope_id__$h,
+      __vue_is_functional_template__$h,
+      __vue_module_identifier__$h,
+      __vue_create_injector__$h,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$i = {
+    name: 'HalfCircleSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 1000
+      },
+      size: {
+        type: Number,
+        default: 60
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
+    },
+
+    computed: {
+      spinnerStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`
+        }
+      },
+
+      circleStyle () {
+        return {
+          borderWidth: `${this.size / 10}px`,
+          animationDuration: `${this.animationDuration}ms`
+        }
+      },
+
+      circle1Style () {
+        return Object.assign({
+          borderTopColor: this.color
+        }, this.circleStyle)
+      },
+
+      circle2Style () {
+        return Object.assign({
+          borderBottomColor: this.color
+        }, this.circleStyle)
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$i = script$i;
+              
+  /* template */
+  var __vue_render__$i = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"half-circle-spinner",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"circle circle-1",style:(_vm.circle1Style)}),_vm._v(" "),_c('div',{staticClass:"circle circle-2",style:(_vm.circle2Style)})])};
+  var __vue_staticRenderFns__$i = [];
+
+    /* style */
+    const __vue_inject_styles__$i = function (inject) {
+      if (!inject) return
+      inject("data-v-0c839feb_0", { source: "\n.half-circle-spinner[data-v-0c839feb],.half-circle-spinner *[data-v-0c839feb]{box-sizing:border-box\n}\n.half-circle-spinner[data-v-0c839feb]{width:60px;height:60px;border-radius:100%;position:relative\n}\n.half-circle-spinner .circle[data-v-0c839feb]{content:\"\";position:absolute;width:100%;height:100%;border-radius:100%;border:calc(60px / 10) solid transparent\n}\n.half-circle-spinner .circle.circle-1[data-v-0c839feb]{border-top-color:#ff1d5e;animation:half-circle-spinner-animation-data-v-0c839feb 1s infinite\n}\n.half-circle-spinner .circle.circle-2[data-v-0c839feb]{border-bottom-color:#ff1d5e;animation:half-circle-spinner-animation-data-v-0c839feb 1s infinite alternate\n}\n@keyframes half-circle-spinner-animation-data-v-0c839feb{\n0%{transform:rotate(0)\n}\n100%{transform:rotate(360deg)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$i = "data-v-0c839feb";
+    /* module identifier */
+    const __vue_module_identifier__$i = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$i = false;
+    /* component normalizer */
+    function __vue_normalize__$i(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "HalfCircleSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$i() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$i.styles || (__vue_create_injector__$i.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$i(
+      { render: __vue_render__$i, staticRenderFns: __vue_staticRenderFns__$i },
+      __vue_inject_styles__$i,
+      __vue_script__$i,
+      __vue_scope_id__$i,
+      __vue_is_functional_template__$i,
+      __vue_module_identifier__$i,
+      __vue_create_injector__$i,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  var script$j = {
+    name: 'AtomSpinner',
+
+    props: {
+      animationDuration: {
+        type: Number,
+        default: 1000
+      },
+      size: {
+        type: Number,
+        default: 60
+      },
+      color: {
+        type: String,
+        default: 'red'
+      }
+    },
+
+    computed: {
+      spinnerStyle () {
+        return {
+          height: `${this.size}px`,
+          width: `${this.size}px`
+        }
+      },
+
+      circleStyle () {
+        return {
+          color: this.color,
+          fontSize: `${this.size * 0.24}px`
+        }
+      },
+
+      lineStyle () {
+        return {
+          animationDuration: `${this.animationDuration}ms`,
+          borderLeftWidth: `${this.size / 25}px`,
+          borderTopWidth: `${this.size / 25}px`,
+          borderLeftColor: this.color
+        }
+      }
+    }
+  };
+
+  /* script */
+              const __vue_script__$j = script$j;
+              
+  /* template */
+  var __vue_render__$j = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"atom-spinner",style:(_vm.spinnerStyle)},[_c('div',{staticClass:"spinner-inner"},[_c('div',{staticClass:"spinner-line",style:(_vm.lineStyle)}),_vm._v(" "),_c('div',{staticClass:"spinner-line",style:(_vm.lineStyle)}),_vm._v(" "),_c('div',{staticClass:"spinner-line",style:(_vm.lineStyle)}),_vm._v(" "),_c('div',{staticClass:"spinner-circle",style:(_vm.circleStyle)},[_vm._v("\n      ●\n    ")])])])};
+  var __vue_staticRenderFns__$j = [];
+
+    /* style */
+    const __vue_inject_styles__$j = function (inject) {
+      if (!inject) return
+      inject("data-v-bfc79e28_0", { source: "\n.atom-spinner[data-v-bfc79e28],.atom-spinner *[data-v-bfc79e28]{box-sizing:border-box\n}\n.atom-spinner[data-v-bfc79e28]{height:60px;width:60px;overflow:hidden\n}\n.atom-spinner .spinner-inner[data-v-bfc79e28]{position:relative;display:block;height:100%;width:100%\n}\n.atom-spinner .spinner-circle[data-v-bfc79e28]{display:block;position:absolute;color:#ff1d5e;font-size:calc(60px * .24);top:50%;left:50%;transform:translate(-50%,-50%)\n}\n.atom-spinner .spinner-line[data-v-bfc79e28]{position:absolute;width:100%;height:100%;border-radius:50%;animation-duration:1s;border-left-width:calc(60px / 25);border-top-width:calc(60px / 25);border-left-color:#ff1d5e;border-left-style:solid;border-top-style:solid;border-top-color:transparent\n}\n.atom-spinner .spinner-line[data-v-bfc79e28]:nth-child(1){animation:atom-spinner-animation-1-data-v-bfc79e28 1s linear infinite;transform:rotateZ(120deg) rotateX(66deg) rotateZ(0)\n}\n.atom-spinner .spinner-line[data-v-bfc79e28]:nth-child(2){animation:atom-spinner-animation-2-data-v-bfc79e28 1s linear infinite;transform:rotateZ(240deg) rotateX(66deg) rotateZ(0)\n}\n.atom-spinner .spinner-line[data-v-bfc79e28]:nth-child(3){animation:atom-spinner-animation-3-data-v-bfc79e28 1s linear infinite;transform:rotateZ(360deg) rotateX(66deg) rotateZ(0)\n}\n@keyframes atom-spinner-animation-1-data-v-bfc79e28{\n100%{transform:rotateZ(120deg) rotateX(66deg) rotateZ(360deg)\n}\n}\n@keyframes atom-spinner-animation-2-data-v-bfc79e28{\n100%{transform:rotateZ(240deg) rotateX(66deg) rotateZ(360deg)\n}\n}\n@keyframes atom-spinner-animation-3-data-v-bfc79e28{\n100%{transform:rotateZ(360deg) rotateX(66deg) rotateZ(360deg)\n}\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$j = "data-v-bfc79e28";
+    /* module identifier */
+    const __vue_module_identifier__$j = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$j = false;
+    /* component normalizer */
+    function __vue_normalize__$j(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "AtomSpinner.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$j() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$j.styles || (__vue_create_injector__$j.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    __vue_normalize__$j(
+      { render: __vue_render__$j, staticRenderFns: __vue_staticRenderFns__$j },
+      __vue_inject_styles__$j,
+      __vue_script__$j,
+      __vue_scope_id__$j,
+      __vue_is_functional_template__$j,
+      __vue_module_identifier__$j,
+      __vue_create_injector__$j,
+      undefined
+    );
+
+  //
+  var script$k = {
+    name: 'PopupSpinner',
+    components: {
+      FulfillingBouncingCircleSpinner
+    },
     props: {
       loading: {
         type: Boolean,
         default: true
       },
-     title: {
+      title: {
         type: String,
-        default: ''      
+        default: ''
       },
       hasCancelButton: {
         type: Boolean,
-        default: false      
-      }, 
+        default: false
+      },
       color: {
         type: String,
         default: '#0000ff'
@@ -14684,14 +19071,14 @@
       },
       padding: {
         type: String,
-        default: '15px'      
+        default: '15px'
       },
       radius: {
         type: String,
         default: '100%'
       }
     },
-    
+
     data() {
       return {
         titleStyle: {
@@ -14699,93 +19086,272 @@
         },
         cancelButtonStyle: {
           padding: '2px'
-        },          
+        },
         opened: false
-      }
+      };
     },
-    
+
     beforeMount() {
       // Create listener for start event.
       EventBus.$on('spinner:start', () => {
         this.show();
-      });
-      
-      // Create listener for stop event.
+      }); // Create listener for stop event.
+
       EventBus.$on('spinner:stop', () => {
         this.hide();
-      });      
+      });
     },
-    
+
     computed: {
-      spinnerSize(){
-        return parseFloat(this.size) - 25; 
+      spinnerSize() {
+        return parseFloat(this.size) - 25;
       },
+
       modalHeight() {
         // Start with the height of the spinner wrapper.
-        let fullHeight = parseFloat(this.size) + 2 * parseFloat(this.padding); 
-        
-        // If there is a title there, add space for the text.
+        let fullHeight = parseFloat(this.size) + 2 * parseFloat(this.padding); // If there is a title there, add space for the text.
+
         if (this.title !== '') {
-          fullHeight = fullHeight + 20 + parseFloat(this.padding);        
-        }
-        
-        // If there is a cancel button there, add space for it.
+          fullHeight = fullHeight + 20 + parseFloat(this.padding);
+        } // If there is a cancel button there, add space for it.
+
+
         if (this.hasCancelButton) {
           fullHeight = fullHeight + 20 + parseFloat(this.padding);
         }
-        
-        return fullHeight + 'px'
+
+        return fullHeight + 'px';
       },
-      
+
       modalWidth() {
-        return parseFloat(this.size) + 2 * parseFloat(this.padding) + 'px'
-      },
-    }, 
-    
+        return parseFloat(this.size) + 2 * parseFloat(this.padding) + 'px';
+      }
+
+    },
     methods: {
       beforeOpen() {
         window.addEventListener('keyup', this.onKey);
         this.opened = true;
-      }, 
-      
+      },
+
       beforeClose() {
         window.removeEventListener('keyup', this.onKey);
         this.opened = false;
-      }, 
-      
+      },
+
       onKey(event) {
         if (event.keyCode == 27) {
           console.log('Exited spinner through Esc key');
           this.cancel();
         }
-      }, 
-      
+      },
+
       cancel() {
         this.$emit('spinner-cancel');
-        this.hide();      
+        this.hide();
       },
-      
+
       show() {
         this.$modal.show('popup-spinner'); // Bring up the spinner modal.
       },
-      
+
       hide() {
         this.$modal.hide('popup-spinner'); // Dispel the spinner modal.
       }
+
     }
+  };
 
-  }
+  /* script */
+              const __vue_script__$k = script$k;
+              
+  /* template */
+  var __vue_render__$k = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('modal',{staticStyle:{"opacity":"1.0"},attrs:{"name":"popup-spinner","height":_vm.modalHeight,"width":_vm.modalWidth,"click-to-close":false},on:{"before-open":_vm.beforeOpen,"before-close":_vm.beforeClose}},[_c('div',{staticClass:"overlay-box"},[_c('div',{staticClass:"loader-box"},[_c('fulfilling-bouncing-circle-spinner',{attrs:{"color":_vm.color,"size":_vm.spinnerSize,"animation-duration":2000}})],1),_vm._v(" "),(_vm.title !== '')?_c('div',{style:(_vm.titleStyle)},[_vm._v("\n      "+_vm._s(_vm.title)+"\n    ")]):_vm._e(),_vm._v(" "),(_vm.hasCancelButton)?_c('div',{staticStyle:{"padding":"13px"}},[_c('button',{style:(_vm.cancelButtonStyle),on:{"click":_vm.cancel}},[_vm._v("Cancel")])]):_vm._e()])])};
+  var __vue_staticRenderFns__$k = [];
 
-  var css$21 = ".list-item {\n  display: inline-block;\n  margin-right: 10px; }\n\n.list-enter-active,\n.list-leave-active {\n  transition: all 1s; }\n\n.list-enter,\n.list-leave-to {\n  opacity: 0;\n  transform: translateY(-30px); }\n";
-  styleInject(css$21);
+    /* style */
+    const __vue_inject_styles__$k = function (inject) {
+      if (!inject) return
+      inject("data-v-3bb427d4_0", { source: "\n.loader-box[data-v-3bb427d4]{display:flex;justify-content:center\n}\n.overlay-box[data-v-3bb427d4]{display:flex;flex-direction:column;height:100%;justify-content:space-evenly\n}", map: undefined, media: undefined });
 
-  var css$22 = ".fade-enter-active,\n.fade-leave-active {\n  transition: opacity .3s; }\n\n.fade-enter,\n.fade-leave-to {\n  opacity: 0; }\n\n.close-button,\n.close-button:hover {\n  background: none;\n  line-height: 0em;\n  padding: 5px 5px;\n  margin-left: 10px;\n  border-radius: 3px; }\n\n.close-button:hover {\n  background: #ffffff63;\n  color: #737373; }\n\n.alert {\n  border: 0;\n  border-radius: 0;\n  color: #FFFFFF;\n  padding: 20px 15px;\n  font-size: 14px;\n  z-index: 100;\n  display: inline-block;\n  position: fixed;\n  transition: all 0.5s ease-in-out; }\n  .container .alert {\n    border-radius: 4px; }\n  .alert.center {\n    left: 0px;\n    right: 0px;\n    margin: 0 auto; }\n  .alert.left {\n    left: 20px; }\n  .alert.right {\n    right: 20px; }\n  .container .alert {\n    border-radius: 0px; }\n  .alert .alert-icon {\n    font-size: 30px;\n    margin-right: 5px; }\n  .alert .close ~ span {\n    display: inline-block;\n    max-width: 89%; }\n  .alert[data-notify=\"container\"] {\n    padding: 0;\n    border-radius: 2px; }\n  .alert span[data-notify=\"icon\"] {\n    font-size: 30px;\n    display: block;\n    left: 15px;\n    position: absolute;\n    top: 50%;\n    margin-top: -20px; }\n\n.alert-info {\n  background-color: #7CE4FE;\n  color: #3091B2; }\n\n.alert-success {\n  background-color: #008800;\n  color: #fff; }\n\n.alert-warning {\n  background-color: #e29722;\n  color: #fff; }\n\n.alert-danger {\n  background-color: #FF8F5E;\n  color: #B33C12; }\n\n.message-box {\n  font-size: 15px;\n  align-content: center;\n  max-width: 400px;\n  min-width: 150px;\n  padding-left: 10px;\n  flex-grow: 1; }\n\n.message-box .message {\n  line-height: 1.5em;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  width: 100%; }\n\n.notification-box {\n  display: flex;\n  justify-content: flex-start;\n  padding: 10px 15px; }\n\n.notification-box > div {\n  align-self: center; }\n\n.btn__trans {\n  font-size: 18px;\n  color: white;\n  background-color: transparent;\n  background-repeat: no-repeat;\n  border: none;\n  cursor: pointer;\n  overflow: hidden;\n  background-image: none;\n  outline: none; }\n";
-  styleInject(css$22);
+    };
+    /* scoped */
+    const __vue_scope_id__$k = "data-v-3bb427d4";
+    /* module identifier */
+    const __vue_module_identifier__$k = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$k = false;
+    /* component normalizer */
+    function __vue_normalize__$k(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
 
-  var css$23 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n \n@import \"https://cdn.jsdelivr.net/gh/lykmapipo/themify-icons@0.1.2/css/themify-icons.css\";\n";
-  styleInject(css$23);
+      // For security concerns, we use only base name in production mode.
+      component.__file = "PopupSpinner.vue";
 
-  var Notification = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"alert open alert-with-icon",class:[_vm.verticalAlign, _vm.horizontalAlign, _vm.alertType],style:(_vm.customPosition),attrs:{"role":"alert","data-notify":"container","data-notify-position":"top-center"}},[_c('div',{staticClass:"notification-box"},[_c('div',[_c('span',{staticClass:"alert-icon",class:_vm.icon,attrs:{"data-notify":"message"}})]),_vm._v(" "),_c('div',{staticClass:"message-box"},[_c('div',{staticClass:"message",attrs:{"data-notify":"message"},domProps:{"innerHTML":_vm._s(_vm.message)}})]),_vm._v(" "),_c('div',[_c('button',{staticClass:"btn__trans close-button",attrs:{"aria-hidden":"true","data-notify":"dismiss"},on:{"click":_vm.close}},[_c('i',{staticClass:"ti-close"})])])])])},staticRenderFns: [],_scopeId: 'data-v-9084a0ca',
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$k() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$k.styles || (__vue_create_injector__$k.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    var PopupSpinner = __vue_normalize__$k(
+      { render: __vue_render__$k, staticRenderFns: __vue_staticRenderFns__$k },
+      __vue_inject_styles__$k,
+      __vue_script__$k,
+      __vue_scope_id__$k,
+      __vue_is_functional_template__$k,
+      __vue_module_identifier__$k,
+      __vue_create_injector__$k,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  var script$l = {
     name: 'notification',
     props: {
       message: String,
@@ -14812,97 +19378,587 @@
       timestamp: {
         type: Date,
         default: () => new Date()
-      },      
+      }
     },
-    data () {
-      return {}
+
+    data() {
+      return {};
     },
+
     computed: {
-      hasIcon () {
-        return this.icon && this.icon.length > 0
+      hasIcon() {
+        return this.icon && this.icon.length > 0;
       },
-      alertType () {
-        return `alert-${this.type}`
+
+      alertType() {
+        return `alert-${this.type}`;
       },
-      customPosition () {
+
+      customPosition() {
         let initialMargin = 20;
         let alertHeight = 60;
-        let sameAlertsCount = this.$notifications.state.filter((alert) => {
-          return alert.horizontalAlign === this.horizontalAlign && alert.verticalAlign === this.verticalAlign
+        let sameAlertsCount = this.$notifications.state.filter(alert => {
+          return alert.horizontalAlign === this.horizontalAlign && alert.verticalAlign === this.verticalAlign;
         }).length;
         let pixels = (sameAlertsCount - 1) * alertHeight + initialMargin;
         let styles = {};
+
         if (this.verticalAlign === 'top') {
           styles.top = `${pixels}px`;
         } else {
           styles.bottom = `${pixels}px`;
         }
-        return styles
+
+        return styles;
       }
+
     },
     methods: {
-      close () {
-        this.$parent.$emit('on-close', this.timestamp);  
+      close() {
+        this.$parent.$emit('on-close', this.timestamp);
       }
+
     },
-    mounted () {
+
+    mounted() {
       if (this.timeout) {
         setTimeout(this.close, this.timeout);
       }
     }
-  }
 
-  var Notifications = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"notifications"},[_c('transition-group',{attrs:{"name":"list"},on:{"on-close":_vm.removeNotification}},_vm._l((_vm.notifications),function(notification,index){return _c('notification',{key:index,attrs:{"message":notification.message,"icon":notification.icon,"type":notification.type,"vertical-align":notification.verticalAlign,"horizontal-align":notification.horizontalAlign,"timeout":notification.timeout,"timestamp":notification.timestamp}})}))],1)},staticRenderFns: [],
+  };
+
+  /* script */
+              const __vue_script__$l = script$l;
+              
+  /* template */
+  var __vue_render__$l = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"alert open alert-with-icon",class:[_vm.verticalAlign, _vm.horizontalAlign, _vm.alertType],style:(_vm.customPosition),attrs:{"role":"alert","data-notify":"container","data-notify-position":"top-center"}},[_c('div',{staticClass:"notification-box"},[_c('div',[_c('span',{staticClass:"alert-icon",class:_vm.icon,attrs:{"data-notify":"message"}})]),_vm._v(" "),_c('div',{staticClass:"message-box"},[_c('div',{staticClass:"message",attrs:{"data-notify":"message"},domProps:{"innerHTML":_vm._s(_vm.message)}})]),_vm._v(" "),_c('div',[_c('button',{staticClass:"btn__trans close-button",attrs:{"aria-hidden":"true","data-notify":"dismiss"},on:{"click":_vm.close}},[_c('i',{staticClass:"ti-close"})])])])])};
+  var __vue_staticRenderFns__$l = [];
+
+    /* style */
+    const __vue_inject_styles__$l = function (inject) {
+      if (!inject) return
+      inject("data-v-61be677e_0", { source: "\n@import url(https://cdn.jsdelivr.net/gh/lykmapipo/themify-icons@0.1.2/css/themify-icons.css);", map: undefined, media: undefined })
+  ,inject("data-v-61be677e_1", { source: "\n.fade-enter-active[data-v-61be677e],.fade-leave-active[data-v-61be677e]{transition:opacity .3s\n}\n.fade-enter[data-v-61be677e],.fade-leave-to[data-v-61be677e]{opacity:0\n}\n.close-button[data-v-61be677e],.close-button[data-v-61be677e]:hover{background:0 0;line-height:0;padding:5px 5px;margin-left:10px;border-radius:3px\n}\n.close-button[data-v-61be677e]:hover{background:#ffffff63;color:#737373\n}\n.alert[data-v-61be677e]{border:0;border-radius:0;color:#fff;padding:20px 15px;font-size:14px;z-index:100;display:inline-block;position:fixed;transition:all .5s ease-in-out\n}\n.container .alert[data-v-61be677e]{border-radius:4px\n}\n.alert.center[data-v-61be677e]{left:0;right:0;margin:0 auto\n}\n.alert.left[data-v-61be677e]{left:20px\n}\n.alert.right[data-v-61be677e]{right:20px\n}\n.container .alert[data-v-61be677e]{border-radius:0\n}\n.alert .alert-icon[data-v-61be677e]{font-size:30px;margin-right:5px\n}\n.alert .close~span[data-v-61be677e]{display:inline-block;max-width:89%\n}\n.alert[data-notify=container][data-v-61be677e]{padding:0;border-radius:2px\n}\n.alert span[data-notify=icon][data-v-61be677e]{font-size:30px;display:block;left:15px;position:absolute;top:50%;margin-top:-20px\n}\n.alert-info[data-v-61be677e]{background-color:#7ce4fe;color:#3091b2\n}\n.alert-success[data-v-61be677e]{background-color:#080;color:#fff\n}\n.alert-warning[data-v-61be677e]{background-color:#e29722;color:#fff\n}\n.alert-danger[data-v-61be677e]{background-color:#ff8f5e;color:#b33c12\n}\n.message-box[data-v-61be677e]{font-size:15px;align-content:center;max-width:400px;min-width:150px;padding-left:10px;flex-grow:1\n}\n.message-box .message[data-v-61be677e]{line-height:1.5em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;width:100%\n}\n.notification-box[data-v-61be677e]{display:flex;justify-content:flex-start;padding:10px 15px\n}\n.notification-box>div[data-v-61be677e]{align-self:center\n}\n.btn__trans[data-v-61be677e]{font-size:18px;color:#fff;background-color:transparent;background-repeat:no-repeat;border:none;cursor:pointer;overflow:hidden;background-image:none;outline:0\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$l = "data-v-61be677e";
+    /* module identifier */
+    const __vue_module_identifier__$l = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$l = false;
+    /* component normalizer */
+    function __vue_normalize__$l(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "Notification.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$l() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$l.styles || (__vue_create_injector__$l.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    var Notification = __vue_normalize__$l(
+      { render: __vue_render__$l, staticRenderFns: __vue_staticRenderFns__$l },
+      __vue_inject_styles__$l,
+      __vue_script__$l,
+      __vue_scope_id__$l,
+      __vue_is_functional_template__$l,
+      __vue_module_identifier__$l,
+      __vue_create_injector__$l,
+      undefined
+    );
+
+  //
+  var script$m = {
     components: {
       Notification
     },
-    data () {
+
+    data() {
       return {
         notifications: this.$notifications.state
-      }
+      };
     },
+
     methods: {
-      removeNotification (timestamp) {
+      removeNotification(timestamp) {
         this.$notifications.removeNotification(timestamp);
       },
-      
-      clearAllNotifications () {
+
+      clearAllNotifications() {
         this.$notifications.clear();
       }
+
     }
-  }
+  };
 
-  var css$24 = ".dropdown-toggle {\n  cursor: pointer;\n  display: flex;\n  justify-content: space-evenly;\n  text-transform: initial; }\n\n.dropdown-toggle:after {\n  position: absolute;\n  right: 10px;\n  top: 50%;\n  margin-top: -2px; }\n\n.dropdown-menu {\n  margin-top: 20px; }\n";
-  styleInject(css$24);
+  /* script */
+              const __vue_script__$m = script$m;
+              
+  /* template */
+  var __vue_render__$m = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"notifications"},[_c('transition-group',{attrs:{"name":"list"},on:{"on-close":_vm.removeNotification}},_vm._l((_vm.notifications),function(notification,index){return _c('notification',{key:index,attrs:{"message":notification.message,"icon":notification.icon,"type":notification.type,"vertical-align":notification.verticalAlign,"horizontal-align":notification.horizontalAlign,"timeout":notification.timeout,"timestamp":notification.timestamp}})}))],1)};
+  var __vue_staticRenderFns__$m = [];
 
-  var Dropdown = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{directives:[{name:"click-outside",rawName:"v-click-outside",value:(_vm.closeDropDown),expression:"closeDropDown"}],staticClass:"dropdown",class:{open:_vm.isOpen}},[_c('a',{staticClass:"dropdown-toggle btn-rotate",style:(_vm.style),attrs:{"href":"javascript:void(0)","data-toggle":"dropdown"},on:{"click":_vm.toggleDropDown}},[_vm._t("title",[_c('i',{class:_vm.icon}),_vm._v(" "),_c('div',{staticClass:"dropdown-title"},[_vm._v(_vm._s(_vm.title)+" "),_c('b',{staticClass:"caret"})])])],2),_vm._v(" "),_c('ul',{staticClass:"dropdown-menu"},[_vm._t("default")],2)])},staticRenderFns: [],
+    /* style */
+    const __vue_inject_styles__$m = function (inject) {
+      if (!inject) return
+      inject("data-v-0b2671ed_0", { source: "\n.list-item{display:inline-block;margin-right:10px\n}\n.list-enter-active,.list-leave-active{transition:all 1s\n}\n.list-enter,.list-leave-to{opacity:0;transform:translateY(-30px)\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$m = undefined;
+    /* module identifier */
+    const __vue_module_identifier__$m = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$m = false;
+    /* component normalizer */
+    function __vue_normalize__$m(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "Notifications.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$m() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$m.styles || (__vue_create_injector__$m.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    var Notifications = __vue_normalize__$m(
+      { render: __vue_render__$m, staticRenderFns: __vue_staticRenderFns__$m },
+      __vue_inject_styles__$m,
+      __vue_script__$m,
+      __vue_scope_id__$m,
+      __vue_is_functional_template__$m,
+      __vue_module_identifier__$m,
+      __vue_create_injector__$m,
+      undefined
+    );
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  var script$n = {
     props: {
       title: String,
       icon: String,
       width: {
         type: String,
         default: "170px"
-      },
+      }
     },
-    data () {
+
+    data() {
       return {
         isOpen: false
-      }
+      };
     },
+
     computed: {
-      style () {
+      style() {
         return 'width: ' + this.width;
       }
+
     },
     methods: {
-      toggleDropDown () {
+      toggleDropDown() {
         this.isOpen = !this.isOpen;
       },
-      closeDropDown () {
+
+      closeDropDown() {
         this.isOpen = false;
       }
+
     }
-  }
+  };
+
+  /* script */
+              const __vue_script__$n = script$n;
+              
+  /* template */
+  var __vue_render__$n = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{directives:[{name:"click-outside",rawName:"v-click-outside",value:(_vm.closeDropDown),expression:"closeDropDown"}],staticClass:"dropdown",class:{open:_vm.isOpen}},[_c('a',{staticClass:"dropdown-toggle btn-rotate",style:(_vm.style),attrs:{"href":"javascript:void(0)","data-toggle":"dropdown"},on:{"click":_vm.toggleDropDown}},[_vm._t("title",[_c('i',{class:_vm.icon}),_vm._v(" "),_c('div',{staticClass:"dropdown-title"},[_vm._v(_vm._s(_vm.title)+"\n        "),_c('b',{staticClass:"caret"})])])],2),_vm._v(" "),_c('ul',{staticClass:"dropdown-menu"},[_vm._t("default")],2)])};
+  var __vue_staticRenderFns__$n = [];
+
+    /* style */
+    const __vue_inject_styles__$n = function (inject) {
+      if (!inject) return
+      inject("data-v-73a696f8_0", { source: "\n.dropdown-toggle{cursor:pointer;display:flex;justify-content:space-evenly;text-transform:initial\n}\n.dropdown-toggle:after{position:absolute;right:10px;top:50%;margin-top:-2px\n}\n.dropdown-menu{margin-top:20px\n}", map: undefined, media: undefined });
+
+    };
+    /* scoped */
+    const __vue_scope_id__$n = undefined;
+    /* module identifier */
+    const __vue_module_identifier__$n = undefined;
+    /* functional template */
+    const __vue_is_functional_template__$n = false;
+    /* component normalizer */
+    function __vue_normalize__$n(
+      template, style, script,
+      scope, functional, moduleIdentifier,
+      createInjector, createInjectorSSR
+    ) {
+      const component = (typeof script === 'function' ? script.options : script) || {};
+
+      // For security concerns, we use only base name in production mode.
+      component.__file = "Dropdown.vue";
+
+      if (!component.render) {
+        component.render = template.render;
+        component.staticRenderFns = template.staticRenderFns;
+        component._compiled = true;
+
+        if (functional) component.functional = true;
+      }
+
+      component._scopeId = scope;
+
+      {
+        let hook;
+        if (style) {
+          hook = function(context) {
+            style.call(this, createInjector(context));
+          };
+        }
+
+        if (hook !== undefined) {
+          if (component.functional) {
+            // register for functional component in vue file
+            const originalRender = component.render;
+            component.render = function renderWithStyleInjection(h, context) {
+              hook.call(context);
+              return originalRender(h, context)
+            };
+          } else {
+            // inject component registration as beforeCreate hook
+            const existing = component.beforeCreate;
+            component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+        }
+      }
+
+      return component
+    }
+    /* style inject */
+    function __vue_create_injector__$n() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const styles = __vue_create_injector__$n.styles || (__vue_create_injector__$n.styles = {});
+      const isOldIE =
+        typeof navigator !== 'undefined' &&
+        /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+      return function addStyle(id, css) {
+        if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+        const group = isOldIE ? css.media || 'default' : id;
+        const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+        if (!style.ids.includes(id)) {
+          let code = css.source;
+          let index = style.ids.length;
+
+          style.ids.push(id);
+
+          if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+              '\n/*# sourceMappingURL=data:application/json;base64,' +
+              btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+              ' */';
+          }
+
+          if (isOldIE) {
+            style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+          }
+
+          if (!style.element) {
+            const el = style.element = document.createElement('style');
+            el.type = 'text/css';
+
+            if (css.media) el.setAttribute('media', css.media);
+            if (isOldIE) {
+              el.setAttribute('data-group', group);
+              el.setAttribute('data-next-index', '0');
+            }
+
+            head.appendChild(el);
+          }
+
+          if (isOldIE) {
+            index = parseInt(style.element.getAttribute('data-next-index'));
+            style.element.setAttribute('data-next-index', index + 1);
+          }
+
+          if (style.element.styleSheet) {
+            style.parts.push(code);
+            style.element.styleSheet.cssText = style.parts
+              .filter(Boolean)
+              .join('\n');
+          } else {
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index]) style.element.removeChild(nodes[index]);
+            if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+            else style.element.appendChild(textNode);
+          }
+        }
+      }
+    }
+    /* style inject SSR */
+    
+
+    
+    var Dropdown = __vue_normalize__$n(
+      { render: __vue_render__$n, staticRenderFns: __vue_staticRenderFns__$n },
+      __vue_inject_styles__$n,
+      __vue_script__$n,
+      __vue_scope_id__$n,
+      __vue_is_functional_template__$n,
+      __vue_module_identifier__$n,
+      __vue_create_injector__$n,
+      undefined
+    );
 
   const NotificationStore = {
     state: [],

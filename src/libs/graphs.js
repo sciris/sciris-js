@@ -44,7 +44,7 @@ function clearGraphs(vm) {
   for (let index = 0; index <= 100; index++) {
     let divlabel = 'fig' + index
     let div = document.getElementById(divlabel); // CK: Not sure if this is necessary? To ensure the div is clear first
-    while (div.firstChild) {
+    while (div && div.firstChild) {
       div.removeChild(div.firstChild);
     }
     vm.hasGraphs = false

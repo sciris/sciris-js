@@ -542,7 +542,7 @@ function clearGraphs(vm) {
     let divlabel = 'fig' + index;
     let div = document.getElementById(divlabel); // CK: Not sure if this is necessary? To ensure the div is clear first
 
-    while (div.firstChild) {
+    while (div && div.firstChild) {
       div.removeChild(div.firstChild);
     }
 
@@ -1142,56 +1142,25 @@ var shared = {
   exportResults
 };
 
-function styleInject(css, ref) {
-  if ( ref === void 0 ) ref = {};
-  var insertAt = ref.insertAt;
-
-  if (!css || typeof document === 'undefined') { return; }
-
-  var head = document.head || document.getElementsByTagName('head')[0];
-  var style = document.createElement('style');
-  style.type = 'text/css';
-
-  if (insertAt === 'top') {
-    if (head.firstChild) {
-      head.insertBefore(style, head.firstChild);
-    } else {
-      head.appendChild(style);
-    }
-  } else {
-    head.appendChild(style);
-  }
-
-  if (style.styleSheet) {
-    style.styleSheet.cssText = css;
-  } else {
-    style.appendChild(document.createTextNode(css));
-  }
-}
-
-var css = ".loader-box {\n  display: flex;\n  justify-content: center; }\n\n.overlay-box {\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  justify-content: space-evenly; }\n";
-styleInject(css);
-
-var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('modal',{staticStyle:{"opacity":"1.0"},attrs:{"name":"popup-spinner","height":_vm.modalHeight,"width":_vm.modalWidth,"click-to-close":false},on:{"before-open":_vm.beforeOpen,"before-close":_vm.beforeClose}},[_c('div',{staticClass:"overlay-box"},[_c('div',{staticClass:"loader-box"},[_c('fulfilling-bouncing-circle-spinner',{attrs:{"color":_vm.color,"size":_vm.spinnerSize,"animation-duration":2000}})],1),_vm._v(" "),(_vm.title !== '')?_c('div',{style:(_vm.titleStyle)},[_vm._v(" "+_vm._s(_vm.title)+" ")]):_vm._e(),_vm._v(" "),(_vm.hasCancelButton)?_c('div',{staticStyle:{"padding":"13px"}},[_c('button',{style:(_vm.cancelButtonStyle),on:{"click":_vm.cancel}},[_vm._v("Cancel")])]):_vm._e()])])},staticRenderFns: [],_scopeId: 'data-v-3515e57d',
+//
+var script = {
   name: 'PopupSpinner',
-
   components: {
-    FulfillingBouncingCircleSpinner: epicSpinners.FulfillingBouncingCircleSpinner 
+    FulfillingBouncingCircleSpinner: epicSpinners.FulfillingBouncingCircleSpinner
   },
-  
   props: {
     loading: {
       type: Boolean,
       default: true
     },
-   title: {
+    title: {
       type: String,
-      default: ''      
+      default: ''
     },
     hasCancelButton: {
       type: Boolean,
-      default: false      
-    }, 
+      default: false
+    },
     color: {
       type: String,
       default: '#0000ff'
@@ -1206,14 +1175,14 @@ var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;va
     },
     padding: {
       type: String,
-      default: '15px'      
+      default: '15px'
     },
     radius: {
       type: String,
       default: '100%'
     }
   },
-  
+
   data() {
     return {
       titleStyle: {
@@ -1221,93 +1190,272 @@ var PopupSpinner = {render: function(){var _vm=this;var _h=_vm.$createElement;va
       },
       cancelButtonStyle: {
         padding: '2px'
-      },          
+      },
       opened: false
-    }
+    };
   },
-  
+
   beforeMount() {
     // Create listener for start event.
     EventBus.$on('spinner:start', () => {
       this.show();
-    });
-    
-    // Create listener for stop event.
+    }); // Create listener for stop event.
+
     EventBus.$on('spinner:stop', () => {
       this.hide();
-    });      
+    });
   },
-  
+
   computed: {
-    spinnerSize(){
-      return parseFloat(this.size) - 25; 
+    spinnerSize() {
+      return parseFloat(this.size) - 25;
     },
+
     modalHeight() {
       // Start with the height of the spinner wrapper.
-      let fullHeight = parseFloat(this.size) + 2 * parseFloat(this.padding); 
-      
-      // If there is a title there, add space for the text.
+      let fullHeight = parseFloat(this.size) + 2 * parseFloat(this.padding); // If there is a title there, add space for the text.
+
       if (this.title !== '') {
-        fullHeight = fullHeight + 20 + parseFloat(this.padding);        
-      }
-      
-      // If there is a cancel button there, add space for it.
+        fullHeight = fullHeight + 20 + parseFloat(this.padding);
+      } // If there is a cancel button there, add space for it.
+
+
       if (this.hasCancelButton) {
         fullHeight = fullHeight + 20 + parseFloat(this.padding);
       }
-      
-      return fullHeight + 'px'
+
+      return fullHeight + 'px';
     },
-    
+
     modalWidth() {
-      return parseFloat(this.size) + 2 * parseFloat(this.padding) + 'px'
-    },
-  }, 
-  
+      return parseFloat(this.size) + 2 * parseFloat(this.padding) + 'px';
+    }
+
+  },
   methods: {
     beforeOpen() {
       window.addEventListener('keyup', this.onKey);
       this.opened = true;
-    }, 
-    
+    },
+
     beforeClose() {
       window.removeEventListener('keyup', this.onKey);
       this.opened = false;
-    }, 
-    
+    },
+
     onKey(event) {
       if (event.keyCode == 27) {
         console.log('Exited spinner through Esc key');
         this.cancel();
       }
-    }, 
-    
+    },
+
     cancel() {
       this.$emit('spinner-cancel');
-      this.hide();      
+      this.hide();
     },
-    
+
     show() {
       this.$modal.show('popup-spinner'); // Bring up the spinner modal.
     },
-    
+
     hide() {
       this.$modal.hide('popup-spinner'); // Dispel the spinner modal.
     }
+
   }
+};
 
-}
+/* script */
+            const __vue_script__ = script;
+            
+/* template */
+var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('modal',{staticStyle:{"opacity":"1.0"},attrs:{"name":"popup-spinner","height":_vm.modalHeight,"width":_vm.modalWidth,"click-to-close":false},on:{"before-open":_vm.beforeOpen,"before-close":_vm.beforeClose}},[_c('div',{staticClass:"overlay-box"},[_c('div',{staticClass:"loader-box"},[_c('fulfilling-bouncing-circle-spinner',{attrs:{"color":_vm.color,"size":_vm.spinnerSize,"animation-duration":2000}})],1),_vm._v(" "),(_vm.title !== '')?_c('div',{style:(_vm.titleStyle)},[_vm._v("\n      "+_vm._s(_vm.title)+"\n    ")]):_vm._e(),_vm._v(" "),(_vm.hasCancelButton)?_c('div',{staticStyle:{"padding":"13px"}},[_c('button',{style:(_vm.cancelButtonStyle),on:{"click":_vm.cancel}},[_vm._v("Cancel")])]):_vm._e()])])};
+var __vue_staticRenderFns__ = [];
 
-var css$1 = ".list-item {\n  display: inline-block;\n  margin-right: 10px; }\n\n.list-enter-active,\n.list-leave-active {\n  transition: all 1s; }\n\n.list-enter,\n.list-leave-to {\n  opacity: 0;\n  transform: translateY(-30px); }\n";
-styleInject(css$1);
+  /* style */
+  const __vue_inject_styles__ = function (inject) {
+    if (!inject) return
+    inject("data-v-3bb427d4_0", { source: "\n.loader-box[data-v-3bb427d4]{display:flex;justify-content:center\n}\n.overlay-box[data-v-3bb427d4]{display:flex;flex-direction:column;height:100%;justify-content:space-evenly\n}", map: undefined, media: undefined });
 
-var css$2 = ".fade-enter-active,\n.fade-leave-active {\n  transition: opacity .3s; }\n\n.fade-enter,\n.fade-leave-to {\n  opacity: 0; }\n\n.close-button,\n.close-button:hover {\n  background: none;\n  line-height: 0em;\n  padding: 5px 5px;\n  margin-left: 10px;\n  border-radius: 3px; }\n\n.close-button:hover {\n  background: #ffffff63;\n  color: #737373; }\n\n.alert {\n  border: 0;\n  border-radius: 0;\n  color: #FFFFFF;\n  padding: 20px 15px;\n  font-size: 14px;\n  z-index: 100;\n  display: inline-block;\n  position: fixed;\n  transition: all 0.5s ease-in-out; }\n  .container .alert {\n    border-radius: 4px; }\n  .alert.center {\n    left: 0px;\n    right: 0px;\n    margin: 0 auto; }\n  .alert.left {\n    left: 20px; }\n  .alert.right {\n    right: 20px; }\n  .container .alert {\n    border-radius: 0px; }\n  .alert .alert-icon {\n    font-size: 30px;\n    margin-right: 5px; }\n  .alert .close ~ span {\n    display: inline-block;\n    max-width: 89%; }\n  .alert[data-notify=\"container\"] {\n    padding: 0;\n    border-radius: 2px; }\n  .alert span[data-notify=\"icon\"] {\n    font-size: 30px;\n    display: block;\n    left: 15px;\n    position: absolute;\n    top: 50%;\n    margin-top: -20px; }\n\n.alert-info {\n  background-color: #7CE4FE;\n  color: #3091B2; }\n\n.alert-success {\n  background-color: #008800;\n  color: #fff; }\n\n.alert-warning {\n  background-color: #e29722;\n  color: #fff; }\n\n.alert-danger {\n  background-color: #FF8F5E;\n  color: #B33C12; }\n\n.message-box {\n  font-size: 15px;\n  align-content: center;\n  max-width: 400px;\n  min-width: 150px;\n  padding-left: 10px;\n  flex-grow: 1; }\n\n.message-box .message {\n  line-height: 1.5em;\n  overflow: hidden;\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  width: 100%; }\n\n.notification-box {\n  display: flex;\n  justify-content: flex-start;\n  padding: 10px 15px; }\n\n.notification-box > div {\n  align-self: center; }\n\n.btn__trans {\n  font-size: 18px;\n  color: white;\n  background-color: transparent;\n  background-repeat: no-repeat;\n  border: none;\n  cursor: pointer;\n  overflow: hidden;\n  background-image: none;\n  outline: none; }\n";
-styleInject(css$2);
+  };
+  /* scoped */
+  const __vue_scope_id__ = "data-v-3bb427d4";
+  /* module identifier */
+  const __vue_module_identifier__ = undefined;
+  /* functional template */
+  const __vue_is_functional_template__ = false;
+  /* component normalizer */
+  function __vue_normalize__(
+    template, style, script$$1,
+    scope, functional, moduleIdentifier,
+    createInjector, createInjectorSSR
+  ) {
+    const component = (typeof script$$1 === 'function' ? script$$1.options : script$$1) || {};
 
-var css$3 = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n \n@import \"https://cdn.jsdelivr.net/gh/lykmapipo/themify-icons@0.1.2/css/themify-icons.css\";\n";
-styleInject(css$3);
+    // For security concerns, we use only base name in production mode.
+    component.__file = "PopupSpinner.vue";
 
-var Notification = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"alert open alert-with-icon",class:[_vm.verticalAlign, _vm.horizontalAlign, _vm.alertType],style:(_vm.customPosition),attrs:{"role":"alert","data-notify":"container","data-notify-position":"top-center"}},[_c('div',{staticClass:"notification-box"},[_c('div',[_c('span',{staticClass:"alert-icon",class:_vm.icon,attrs:{"data-notify":"message"}})]),_vm._v(" "),_c('div',{staticClass:"message-box"},[_c('div',{staticClass:"message",attrs:{"data-notify":"message"},domProps:{"innerHTML":_vm._s(_vm.message)}})]),_vm._v(" "),_c('div',[_c('button',{staticClass:"btn__trans close-button",attrs:{"aria-hidden":"true","data-notify":"dismiss"},on:{"click":_vm.close}},[_c('i',{staticClass:"ti-close"})])])])])},staticRenderFns: [],_scopeId: 'data-v-9084a0ca',
+    if (!component.render) {
+      component.render = template.render;
+      component.staticRenderFns = template.staticRenderFns;
+      component._compiled = true;
+
+      if (functional) component.functional = true;
+    }
+
+    component._scopeId = scope;
+
+    {
+      let hook;
+      if (style) {
+        hook = function(context) {
+          style.call(this, createInjector(context));
+        };
+      }
+
+      if (hook !== undefined) {
+        if (component.functional) {
+          // register for functional component in vue file
+          const originalRender = component.render;
+          component.render = function renderWithStyleInjection(h, context) {
+            hook.call(context);
+            return originalRender(h, context)
+          };
+        } else {
+          // inject component registration as beforeCreate hook
+          const existing = component.beforeCreate;
+          component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+        }
+      }
+    }
+
+    return component
+  }
+  /* style inject */
+  function __vue_create_injector__() {
+    const head = document.head || document.getElementsByTagName('head')[0];
+    const styles = __vue_create_injector__.styles || (__vue_create_injector__.styles = {});
+    const isOldIE =
+      typeof navigator !== 'undefined' &&
+      /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+    return function addStyle(id, css) {
+      if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+      const group = isOldIE ? css.media || 'default' : id;
+      const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+      if (!style.ids.includes(id)) {
+        let code = css.source;
+        let index = style.ids.length;
+
+        style.ids.push(id);
+
+        if (css.map) {
+          // https://developer.chrome.com/devtools/docs/javascript-debugging
+          // this makes source maps inside style tags work properly in Chrome
+          code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+          // http://stackoverflow.com/a/26603875
+          code +=
+            '\n/*# sourceMappingURL=data:application/json;base64,' +
+            btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+            ' */';
+        }
+
+        if (isOldIE) {
+          style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+        }
+
+        if (!style.element) {
+          const el = style.element = document.createElement('style');
+          el.type = 'text/css';
+
+          if (css.media) el.setAttribute('media', css.media);
+          if (isOldIE) {
+            el.setAttribute('data-group', group);
+            el.setAttribute('data-next-index', '0');
+          }
+
+          head.appendChild(el);
+        }
+
+        if (isOldIE) {
+          index = parseInt(style.element.getAttribute('data-next-index'));
+          style.element.setAttribute('data-next-index', index + 1);
+        }
+
+        if (style.element.styleSheet) {
+          style.parts.push(code);
+          style.element.styleSheet.cssText = style.parts
+            .filter(Boolean)
+            .join('\n');
+        } else {
+          const textNode = document.createTextNode(code);
+          const nodes = style.element.childNodes;
+          if (nodes[index]) style.element.removeChild(nodes[index]);
+          if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+          else style.element.appendChild(textNode);
+        }
+      }
+    }
+  }
+  /* style inject SSR */
+  
+
+  
+  var PopupSpinner = __vue_normalize__(
+    { render: __vue_render__, staticRenderFns: __vue_staticRenderFns__ },
+    __vue_inject_styles__,
+    __vue_script__,
+    __vue_scope_id__,
+    __vue_is_functional_template__,
+    __vue_module_identifier__,
+    __vue_create_injector__,
+    undefined
+  );
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+var script$1 = {
   name: 'notification',
   props: {
     message: String,
@@ -1334,97 +1482,587 @@ var Notification = {render: function(){var _vm=this;var _h=_vm.$createElement;va
     timestamp: {
       type: Date,
       default: () => new Date()
-    },      
+    }
   },
-  data () {
-    return {}
+
+  data() {
+    return {};
   },
+
   computed: {
-    hasIcon () {
-      return this.icon && this.icon.length > 0
+    hasIcon() {
+      return this.icon && this.icon.length > 0;
     },
-    alertType () {
-      return `alert-${this.type}`
+
+    alertType() {
+      return `alert-${this.type}`;
     },
-    customPosition () {
+
+    customPosition() {
       let initialMargin = 20;
       let alertHeight = 60;
-      let sameAlertsCount = this.$notifications.state.filter((alert) => {
-        return alert.horizontalAlign === this.horizontalAlign && alert.verticalAlign === this.verticalAlign
+      let sameAlertsCount = this.$notifications.state.filter(alert => {
+        return alert.horizontalAlign === this.horizontalAlign && alert.verticalAlign === this.verticalAlign;
       }).length;
       let pixels = (sameAlertsCount - 1) * alertHeight + initialMargin;
       let styles = {};
+
       if (this.verticalAlign === 'top') {
         styles.top = `${pixels}px`;
       } else {
         styles.bottom = `${pixels}px`;
       }
-      return styles
+
+      return styles;
     }
+
   },
   methods: {
-    close () {
-      this.$parent.$emit('on-close', this.timestamp);  
+    close() {
+      this.$parent.$emit('on-close', this.timestamp);
     }
+
   },
-  mounted () {
+
+  mounted() {
     if (this.timeout) {
       setTimeout(this.close, this.timeout);
     }
   }
-}
 
-var Notifications = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"notifications"},[_c('transition-group',{attrs:{"name":"list"},on:{"on-close":_vm.removeNotification}},_vm._l((_vm.notifications),function(notification,index){return _c('notification',{key:index,attrs:{"message":notification.message,"icon":notification.icon,"type":notification.type,"vertical-align":notification.verticalAlign,"horizontal-align":notification.horizontalAlign,"timeout":notification.timeout,"timestamp":notification.timestamp}})}))],1)},staticRenderFns: [],
+};
+
+/* script */
+            const __vue_script__$1 = script$1;
+            
+/* template */
+var __vue_render__$1 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"alert open alert-with-icon",class:[_vm.verticalAlign, _vm.horizontalAlign, _vm.alertType],style:(_vm.customPosition),attrs:{"role":"alert","data-notify":"container","data-notify-position":"top-center"}},[_c('div',{staticClass:"notification-box"},[_c('div',[_c('span',{staticClass:"alert-icon",class:_vm.icon,attrs:{"data-notify":"message"}})]),_vm._v(" "),_c('div',{staticClass:"message-box"},[_c('div',{staticClass:"message",attrs:{"data-notify":"message"},domProps:{"innerHTML":_vm._s(_vm.message)}})]),_vm._v(" "),_c('div',[_c('button',{staticClass:"btn__trans close-button",attrs:{"aria-hidden":"true","data-notify":"dismiss"},on:{"click":_vm.close}},[_c('i',{staticClass:"ti-close"})])])])])};
+var __vue_staticRenderFns__$1 = [];
+
+  /* style */
+  const __vue_inject_styles__$1 = function (inject) {
+    if (!inject) return
+    inject("data-v-61be677e_0", { source: "\n@import url(https://cdn.jsdelivr.net/gh/lykmapipo/themify-icons@0.1.2/css/themify-icons.css);", map: undefined, media: undefined })
+,inject("data-v-61be677e_1", { source: "\n.fade-enter-active[data-v-61be677e],.fade-leave-active[data-v-61be677e]{transition:opacity .3s\n}\n.fade-enter[data-v-61be677e],.fade-leave-to[data-v-61be677e]{opacity:0\n}\n.close-button[data-v-61be677e],.close-button[data-v-61be677e]:hover{background:0 0;line-height:0;padding:5px 5px;margin-left:10px;border-radius:3px\n}\n.close-button[data-v-61be677e]:hover{background:#ffffff63;color:#737373\n}\n.alert[data-v-61be677e]{border:0;border-radius:0;color:#fff;padding:20px 15px;font-size:14px;z-index:100;display:inline-block;position:fixed;transition:all .5s ease-in-out\n}\n.container .alert[data-v-61be677e]{border-radius:4px\n}\n.alert.center[data-v-61be677e]{left:0;right:0;margin:0 auto\n}\n.alert.left[data-v-61be677e]{left:20px\n}\n.alert.right[data-v-61be677e]{right:20px\n}\n.container .alert[data-v-61be677e]{border-radius:0\n}\n.alert .alert-icon[data-v-61be677e]{font-size:30px;margin-right:5px\n}\n.alert .close~span[data-v-61be677e]{display:inline-block;max-width:89%\n}\n.alert[data-notify=container][data-v-61be677e]{padding:0;border-radius:2px\n}\n.alert span[data-notify=icon][data-v-61be677e]{font-size:30px;display:block;left:15px;position:absolute;top:50%;margin-top:-20px\n}\n.alert-info[data-v-61be677e]{background-color:#7ce4fe;color:#3091b2\n}\n.alert-success[data-v-61be677e]{background-color:#080;color:#fff\n}\n.alert-warning[data-v-61be677e]{background-color:#e29722;color:#fff\n}\n.alert-danger[data-v-61be677e]{background-color:#ff8f5e;color:#b33c12\n}\n.message-box[data-v-61be677e]{font-size:15px;align-content:center;max-width:400px;min-width:150px;padding-left:10px;flex-grow:1\n}\n.message-box .message[data-v-61be677e]{line-height:1.5em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;width:100%\n}\n.notification-box[data-v-61be677e]{display:flex;justify-content:flex-start;padding:10px 15px\n}\n.notification-box>div[data-v-61be677e]{align-self:center\n}\n.btn__trans[data-v-61be677e]{font-size:18px;color:#fff;background-color:transparent;background-repeat:no-repeat;border:none;cursor:pointer;overflow:hidden;background-image:none;outline:0\n}", map: undefined, media: undefined });
+
+  };
+  /* scoped */
+  const __vue_scope_id__$1 = "data-v-61be677e";
+  /* module identifier */
+  const __vue_module_identifier__$1 = undefined;
+  /* functional template */
+  const __vue_is_functional_template__$1 = false;
+  /* component normalizer */
+  function __vue_normalize__$1(
+    template, style, script,
+    scope, functional, moduleIdentifier,
+    createInjector, createInjectorSSR
+  ) {
+    const component = (typeof script === 'function' ? script.options : script) || {};
+
+    // For security concerns, we use only base name in production mode.
+    component.__file = "Notification.vue";
+
+    if (!component.render) {
+      component.render = template.render;
+      component.staticRenderFns = template.staticRenderFns;
+      component._compiled = true;
+
+      if (functional) component.functional = true;
+    }
+
+    component._scopeId = scope;
+
+    {
+      let hook;
+      if (style) {
+        hook = function(context) {
+          style.call(this, createInjector(context));
+        };
+      }
+
+      if (hook !== undefined) {
+        if (component.functional) {
+          // register for functional component in vue file
+          const originalRender = component.render;
+          component.render = function renderWithStyleInjection(h, context) {
+            hook.call(context);
+            return originalRender(h, context)
+          };
+        } else {
+          // inject component registration as beforeCreate hook
+          const existing = component.beforeCreate;
+          component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+        }
+      }
+    }
+
+    return component
+  }
+  /* style inject */
+  function __vue_create_injector__$1() {
+    const head = document.head || document.getElementsByTagName('head')[0];
+    const styles = __vue_create_injector__$1.styles || (__vue_create_injector__$1.styles = {});
+    const isOldIE =
+      typeof navigator !== 'undefined' &&
+      /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+    return function addStyle(id, css) {
+      if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+      const group = isOldIE ? css.media || 'default' : id;
+      const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+      if (!style.ids.includes(id)) {
+        let code = css.source;
+        let index = style.ids.length;
+
+        style.ids.push(id);
+
+        if (css.map) {
+          // https://developer.chrome.com/devtools/docs/javascript-debugging
+          // this makes source maps inside style tags work properly in Chrome
+          code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+          // http://stackoverflow.com/a/26603875
+          code +=
+            '\n/*# sourceMappingURL=data:application/json;base64,' +
+            btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+            ' */';
+        }
+
+        if (isOldIE) {
+          style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+        }
+
+        if (!style.element) {
+          const el = style.element = document.createElement('style');
+          el.type = 'text/css';
+
+          if (css.media) el.setAttribute('media', css.media);
+          if (isOldIE) {
+            el.setAttribute('data-group', group);
+            el.setAttribute('data-next-index', '0');
+          }
+
+          head.appendChild(el);
+        }
+
+        if (isOldIE) {
+          index = parseInt(style.element.getAttribute('data-next-index'));
+          style.element.setAttribute('data-next-index', index + 1);
+        }
+
+        if (style.element.styleSheet) {
+          style.parts.push(code);
+          style.element.styleSheet.cssText = style.parts
+            .filter(Boolean)
+            .join('\n');
+        } else {
+          const textNode = document.createTextNode(code);
+          const nodes = style.element.childNodes;
+          if (nodes[index]) style.element.removeChild(nodes[index]);
+          if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+          else style.element.appendChild(textNode);
+        }
+      }
+    }
+  }
+  /* style inject SSR */
+  
+
+  
+  var Notification = __vue_normalize__$1(
+    { render: __vue_render__$1, staticRenderFns: __vue_staticRenderFns__$1 },
+    __vue_inject_styles__$1,
+    __vue_script__$1,
+    __vue_scope_id__$1,
+    __vue_is_functional_template__$1,
+    __vue_module_identifier__$1,
+    __vue_create_injector__$1,
+    undefined
+  );
+
+//
+var script$2 = {
   components: {
     Notification
   },
-  data () {
+
+  data() {
     return {
       notifications: this.$notifications.state
-    }
+    };
   },
+
   methods: {
-    removeNotification (timestamp) {
+    removeNotification(timestamp) {
       this.$notifications.removeNotification(timestamp);
     },
-    
-    clearAllNotifications () {
+
+    clearAllNotifications() {
       this.$notifications.clear();
     }
+
   }
-}
+};
 
-var css$4 = ".dropdown-toggle {\n  cursor: pointer;\n  display: flex;\n  justify-content: space-evenly;\n  text-transform: initial; }\n\n.dropdown-toggle:after {\n  position: absolute;\n  right: 10px;\n  top: 50%;\n  margin-top: -2px; }\n\n.dropdown-menu {\n  margin-top: 20px; }\n";
-styleInject(css$4);
+/* script */
+            const __vue_script__$2 = script$2;
+            
+/* template */
+var __vue_render__$2 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"notifications"},[_c('transition-group',{attrs:{"name":"list"},on:{"on-close":_vm.removeNotification}},_vm._l((_vm.notifications),function(notification,index){return _c('notification',{key:index,attrs:{"message":notification.message,"icon":notification.icon,"type":notification.type,"vertical-align":notification.verticalAlign,"horizontal-align":notification.horizontalAlign,"timeout":notification.timeout,"timestamp":notification.timestamp}})}))],1)};
+var __vue_staticRenderFns__$2 = [];
 
-var Dropdown = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{directives:[{name:"click-outside",rawName:"v-click-outside",value:(_vm.closeDropDown),expression:"closeDropDown"}],staticClass:"dropdown",class:{open:_vm.isOpen}},[_c('a',{staticClass:"dropdown-toggle btn-rotate",style:(_vm.style),attrs:{"href":"javascript:void(0)","data-toggle":"dropdown"},on:{"click":_vm.toggleDropDown}},[_vm._t("title",[_c('i',{class:_vm.icon}),_vm._v(" "),_c('div',{staticClass:"dropdown-title"},[_vm._v(_vm._s(_vm.title)+" "),_c('b',{staticClass:"caret"})])])],2),_vm._v(" "),_c('ul',{staticClass:"dropdown-menu"},[_vm._t("default")],2)])},staticRenderFns: [],
+  /* style */
+  const __vue_inject_styles__$2 = function (inject) {
+    if (!inject) return
+    inject("data-v-0b2671ed_0", { source: "\n.list-item{display:inline-block;margin-right:10px\n}\n.list-enter-active,.list-leave-active{transition:all 1s\n}\n.list-enter,.list-leave-to{opacity:0;transform:translateY(-30px)\n}", map: undefined, media: undefined });
+
+  };
+  /* scoped */
+  const __vue_scope_id__$2 = undefined;
+  /* module identifier */
+  const __vue_module_identifier__$2 = undefined;
+  /* functional template */
+  const __vue_is_functional_template__$2 = false;
+  /* component normalizer */
+  function __vue_normalize__$2(
+    template, style, script,
+    scope, functional, moduleIdentifier,
+    createInjector, createInjectorSSR
+  ) {
+    const component = (typeof script === 'function' ? script.options : script) || {};
+
+    // For security concerns, we use only base name in production mode.
+    component.__file = "Notifications.vue";
+
+    if (!component.render) {
+      component.render = template.render;
+      component.staticRenderFns = template.staticRenderFns;
+      component._compiled = true;
+
+      if (functional) component.functional = true;
+    }
+
+    component._scopeId = scope;
+
+    {
+      let hook;
+      if (style) {
+        hook = function(context) {
+          style.call(this, createInjector(context));
+        };
+      }
+
+      if (hook !== undefined) {
+        if (component.functional) {
+          // register for functional component in vue file
+          const originalRender = component.render;
+          component.render = function renderWithStyleInjection(h, context) {
+            hook.call(context);
+            return originalRender(h, context)
+          };
+        } else {
+          // inject component registration as beforeCreate hook
+          const existing = component.beforeCreate;
+          component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+        }
+      }
+    }
+
+    return component
+  }
+  /* style inject */
+  function __vue_create_injector__$2() {
+    const head = document.head || document.getElementsByTagName('head')[0];
+    const styles = __vue_create_injector__$2.styles || (__vue_create_injector__$2.styles = {});
+    const isOldIE =
+      typeof navigator !== 'undefined' &&
+      /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+    return function addStyle(id, css) {
+      if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+      const group = isOldIE ? css.media || 'default' : id;
+      const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+      if (!style.ids.includes(id)) {
+        let code = css.source;
+        let index = style.ids.length;
+
+        style.ids.push(id);
+
+        if (css.map) {
+          // https://developer.chrome.com/devtools/docs/javascript-debugging
+          // this makes source maps inside style tags work properly in Chrome
+          code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+          // http://stackoverflow.com/a/26603875
+          code +=
+            '\n/*# sourceMappingURL=data:application/json;base64,' +
+            btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+            ' */';
+        }
+
+        if (isOldIE) {
+          style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+        }
+
+        if (!style.element) {
+          const el = style.element = document.createElement('style');
+          el.type = 'text/css';
+
+          if (css.media) el.setAttribute('media', css.media);
+          if (isOldIE) {
+            el.setAttribute('data-group', group);
+            el.setAttribute('data-next-index', '0');
+          }
+
+          head.appendChild(el);
+        }
+
+        if (isOldIE) {
+          index = parseInt(style.element.getAttribute('data-next-index'));
+          style.element.setAttribute('data-next-index', index + 1);
+        }
+
+        if (style.element.styleSheet) {
+          style.parts.push(code);
+          style.element.styleSheet.cssText = style.parts
+            .filter(Boolean)
+            .join('\n');
+        } else {
+          const textNode = document.createTextNode(code);
+          const nodes = style.element.childNodes;
+          if (nodes[index]) style.element.removeChild(nodes[index]);
+          if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+          else style.element.appendChild(textNode);
+        }
+      }
+    }
+  }
+  /* style inject SSR */
+  
+
+  
+  var Notifications = __vue_normalize__$2(
+    { render: __vue_render__$2, staticRenderFns: __vue_staticRenderFns__$2 },
+    __vue_inject_styles__$2,
+    __vue_script__$2,
+    __vue_scope_id__$2,
+    __vue_is_functional_template__$2,
+    __vue_module_identifier__$2,
+    __vue_create_injector__$2,
+    undefined
+  );
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+var script$3 = {
   props: {
     title: String,
     icon: String,
     width: {
       type: String,
       default: "170px"
-    },
+    }
   },
-  data () {
+
+  data() {
     return {
       isOpen: false
-    }
+    };
   },
+
   computed: {
-    style () {
+    style() {
       return 'width: ' + this.width;
     }
+
   },
   methods: {
-    toggleDropDown () {
+    toggleDropDown() {
       this.isOpen = !this.isOpen;
     },
-    closeDropDown () {
+
+    closeDropDown() {
       this.isOpen = false;
     }
+
   }
-}
+};
+
+/* script */
+            const __vue_script__$3 = script$3;
+            
+/* template */
+var __vue_render__$3 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{directives:[{name:"click-outside",rawName:"v-click-outside",value:(_vm.closeDropDown),expression:"closeDropDown"}],staticClass:"dropdown",class:{open:_vm.isOpen}},[_c('a',{staticClass:"dropdown-toggle btn-rotate",style:(_vm.style),attrs:{"href":"javascript:void(0)","data-toggle":"dropdown"},on:{"click":_vm.toggleDropDown}},[_vm._t("title",[_c('i',{class:_vm.icon}),_vm._v(" "),_c('div',{staticClass:"dropdown-title"},[_vm._v(_vm._s(_vm.title)+"\n        "),_c('b',{staticClass:"caret"})])])],2),_vm._v(" "),_c('ul',{staticClass:"dropdown-menu"},[_vm._t("default")],2)])};
+var __vue_staticRenderFns__$3 = [];
+
+  /* style */
+  const __vue_inject_styles__$3 = function (inject) {
+    if (!inject) return
+    inject("data-v-73a696f8_0", { source: "\n.dropdown-toggle{cursor:pointer;display:flex;justify-content:space-evenly;text-transform:initial\n}\n.dropdown-toggle:after{position:absolute;right:10px;top:50%;margin-top:-2px\n}\n.dropdown-menu{margin-top:20px\n}", map: undefined, media: undefined });
+
+  };
+  /* scoped */
+  const __vue_scope_id__$3 = undefined;
+  /* module identifier */
+  const __vue_module_identifier__$3 = undefined;
+  /* functional template */
+  const __vue_is_functional_template__$3 = false;
+  /* component normalizer */
+  function __vue_normalize__$3(
+    template, style, script,
+    scope, functional, moduleIdentifier,
+    createInjector, createInjectorSSR
+  ) {
+    const component = (typeof script === 'function' ? script.options : script) || {};
+
+    // For security concerns, we use only base name in production mode.
+    component.__file = "Dropdown.vue";
+
+    if (!component.render) {
+      component.render = template.render;
+      component.staticRenderFns = template.staticRenderFns;
+      component._compiled = true;
+
+      if (functional) component.functional = true;
+    }
+
+    component._scopeId = scope;
+
+    {
+      let hook;
+      if (style) {
+        hook = function(context) {
+          style.call(this, createInjector(context));
+        };
+      }
+
+      if (hook !== undefined) {
+        if (component.functional) {
+          // register for functional component in vue file
+          const originalRender = component.render;
+          component.render = function renderWithStyleInjection(h, context) {
+            hook.call(context);
+            return originalRender(h, context)
+          };
+        } else {
+          // inject component registration as beforeCreate hook
+          const existing = component.beforeCreate;
+          component.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+        }
+      }
+    }
+
+    return component
+  }
+  /* style inject */
+  function __vue_create_injector__$3() {
+    const head = document.head || document.getElementsByTagName('head')[0];
+    const styles = __vue_create_injector__$3.styles || (__vue_create_injector__$3.styles = {});
+    const isOldIE =
+      typeof navigator !== 'undefined' &&
+      /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+
+    return function addStyle(id, css) {
+      if (document.querySelector('style[data-vue-ssr-id~="' + id + '"]')) return // SSR styles are present.
+
+      const group = isOldIE ? css.media || 'default' : id;
+      const style = styles[group] || (styles[group] = { ids: [], parts: [], element: undefined });
+
+      if (!style.ids.includes(id)) {
+        let code = css.source;
+        let index = style.ids.length;
+
+        style.ids.push(id);
+
+        if (css.map) {
+          // https://developer.chrome.com/devtools/docs/javascript-debugging
+          // this makes source maps inside style tags work properly in Chrome
+          code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+          // http://stackoverflow.com/a/26603875
+          code +=
+            '\n/*# sourceMappingURL=data:application/json;base64,' +
+            btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+            ' */';
+        }
+
+        if (isOldIE) {
+          style.element = style.element || document.querySelector('style[data-group=' + group + ']');
+        }
+
+        if (!style.element) {
+          const el = style.element = document.createElement('style');
+          el.type = 'text/css';
+
+          if (css.media) el.setAttribute('media', css.media);
+          if (isOldIE) {
+            el.setAttribute('data-group', group);
+            el.setAttribute('data-next-index', '0');
+          }
+
+          head.appendChild(el);
+        }
+
+        if (isOldIE) {
+          index = parseInt(style.element.getAttribute('data-next-index'));
+          style.element.setAttribute('data-next-index', index + 1);
+        }
+
+        if (style.element.styleSheet) {
+          style.parts.push(code);
+          style.element.styleSheet.cssText = style.parts
+            .filter(Boolean)
+            .join('\n');
+        } else {
+          const textNode = document.createTextNode(code);
+          const nodes = style.element.childNodes;
+          if (nodes[index]) style.element.removeChild(nodes[index]);
+          if (nodes.length) style.element.insertBefore(textNode, nodes[index]);
+          else style.element.appendChild(textNode);
+        }
+      }
+    }
+  }
+  /* style inject SSR */
+  
+
+  
+  var Dropdown = __vue_normalize__$3(
+    { render: __vue_render__$3, staticRenderFns: __vue_staticRenderFns__$3 },
+    __vue_inject_styles__$3,
+    __vue_script__$3,
+    __vue_scope_id__$3,
+    __vue_is_functional_template__$3,
+    __vue_module_identifier__$3,
+    __vue_create_injector__$3,
+    undefined
+  );
 
 const NotificationStore = {
   state: [],
