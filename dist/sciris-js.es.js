@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.1.0
+ * sciris-js v0.1.1
  * (c) 2018-present Optima Consortium <info@ocds.co>
  */
 import Vue from 'vue';

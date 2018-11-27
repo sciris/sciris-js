@@ -2,7 +2,7 @@
 
 ## Project setup
 ```
-npm install --save git+https://github.com/sciris/sciris-js.git
+npm install --save sciris-js 
 ```
 
 ## Rebuild after updates during development
