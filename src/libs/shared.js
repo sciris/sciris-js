@@ -78,9 +78,32 @@ function exportResults(vm, serverDatastoreId) {
   })
 }
 
+function updateDatasets(vm) {
+  return new Promise((resolve, reject) => {
+    console.log('updateDatasets() called')
+    rpcs.rpc('get_dataset_keys', [vm.projectID]) // Get the current user's datasets from the server.
+      .then(response => {
+        vm.datasetOptions = response.data // Set the scenarios to what we received.
+        if (vm.datasetOptions.indexOf(vm.activeDataset) === -1) {
+          console.log('Dataset ' + vm.activeDataset + ' no longer found')
+          vm.activeDataset = vm.datasetOptions[0] // If the active dataset no longer exists in the array, reset it
+        } else {
+          console.log('Dataset ' + vm.activeDataset + ' still found')
+        }
+        vm.newDatsetName = vm.activeDataset // WARNING, KLUDGY
+        console.log('Datset options: ' + vm.datasetOptions)
+        console.log('Active dataset: ' + vm.activeDataset)
+      })
+      .catch(error => {
+        status.fail(this, 'Could not get dataset info', error)
+        reject(error)
+      })
+  })
+}
 
 export default {
   updateSets,
+  updateDatasets,
   exportGraphs,
   exportResults,
 }

@@ -11482,8 +11482,34 @@
     });
   }
 
+  function updateDatasets(vm) {
+    return new Promise((resolve, reject) => {
+      console.log('updateDatasets() called');
+      rpcs.rpc('get_dataset_keys', [vm.projectID]) // Get the current user's datasets from the server.
+      .then(response => {
+        vm.datasetOptions = response.data; // Set the scenarios to what we received.
+
+        if (vm.datasetOptions.indexOf(vm.activeDataset) === -1) {
+          console.log('Dataset ' + vm.activeDataset + ' no longer found');
+          vm.activeDataset = vm.datasetOptions[0]; // If the active dataset no longer exists in the array, reset it
+        } else {
+          console.log('Dataset ' + vm.activeDataset + ' still found');
+        }
+
+        vm.newDatsetName = vm.activeDataset; // WARNING, KLUDGY
+
+        console.log('Datset options: ' + vm.datasetOptions);
+        console.log('Active dataset: ' + vm.activeDataset);
+      }).catch(error => {
+        status.fail(this, 'Could not get dataset info', error);
+        reject(error);
+      });
+    });
+  }
+
   var shared = {
     updateSets,
+    updateDatasets,
     exportGraphs,
     exportResults
   };
@@ -20060,6 +20086,7 @@
   const fail$1 = status.fail;
   const start$1 = status.start;
   const updateSets$1 = shared.updateSets;
+  const updateDatasets$1 = shared.updateDatasets;
   const exportGraphs$1 = shared.exportGraphs;
   const exportResults$1 = shared.exportResults;
   const placeholders$1 = graphs.placeholders;
@@ -20119,6 +20146,7 @@
     upload,
     // shared.js
     updateSets: updateSets$1,
+    updateDatasets: updateDatasets$1,
     exportGraphs: exportGraphs$1,
     exportResults: exportResults$1,
     // graphs.js

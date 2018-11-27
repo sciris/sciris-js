@@ -17,6 +17,7 @@ const fail = status.fail;
 const start = status.start;
 
 const updateSets = shared.updateSets; 
+const updateDatasets = shared.updateDatasets;
 const exportGraphs = shared.exportGraphs;
 const exportResults = shared.exportResults;
 
@@ -82,6 +83,7 @@ const sciris = {
 
   // shared.js
   updateSets,
+  updateDatasets,
   exportGraphs,
   exportResults,
 
