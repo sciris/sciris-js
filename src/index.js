@@ -162,3 +162,6 @@ const sciris = {
 }
 
 export default sciris
+export { 
+  sciris
+}

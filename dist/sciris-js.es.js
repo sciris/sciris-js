@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.1.2
+ * sciris-js v0.1.3
  * (c) 2018-present Optima Consortium <info@ocds.co>
  */
 import Vue from 'vue';
@@ -2317,3 +2317,4 @@ const sciris = {
 };
 
 export default sciris;
+export { sciris };

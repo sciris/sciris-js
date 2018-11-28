@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.1.2
+ * sciris-js v0.1.3
  * (c) 2018-present Optima Consortium <info@ocds.co>
  */
 'use strict';
@@ -2323,3 +2323,4 @@ const sciris = {
 };
 
 exports.default = sciris;
+exports.sciris = sciris;

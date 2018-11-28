@@ -1,7 +1,7 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.sciris = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 (function (process,global,setImmediate){
 /*!
- * sciris-js v0.1.2
+ * sciris-js v0.1.3
  * (c) 2018-present Optima Consortium <info@ocds.co>
  */
 (function (global, factory) {
@@ -20221,13 +20221,17 @@
   };
 
   exports.default = sciris;
+  exports.sciris = sciris;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"_process":2,"timers":3}],2:[function(require,module,exports){
+},{"_process":3,"timers":4}],2:[function(require,module,exports){
+module.exports = require('./dist/sciris-js.js').default;
+
+},{"./dist/sciris-js.js":1}],3:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -20413,7 +20417,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 (function (setImmediate,clearImmediate){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -20492,5 +20496,5 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":2,"timers":3}]},{},[1])(1)
+},{"process/browser.js":3,"timers":4}]},{},[2])(2)
 });
