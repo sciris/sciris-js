@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.1.1
+ * scirisjs v0.1.2
  * (c) 2018-present Optima Consortium <info@ocds.co>
  */
 'use strict';

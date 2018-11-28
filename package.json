@@ -1,9 +1,11 @@
 {
-  "name": "sciris-js",
-  "version": "0.1.1",
+  "name": "scirisjs",
+  "version": "0.1.2",
   "author": "Optima Consortium <info@ocds.co>",
   "scripts": {
-    "build": "bili"
+    "build": "bili && npm run export && npm run exportmin",
+    "export": "npx browserify dist/sciris-js.js --standalone sciris -o dist/sciris-js.js",
+    "exportmin": "npx browserify dist/sciris-js.min.js --standalone sciris -o dist/sciris-js.min.js"
   },
   "main": "dist/sciris-js.cjs.js",
   "module": "dist/sciris-js.es.js",
@@ -67,6 +69,8 @@
   },
   "devDependencies": {
     "bili": "^3.1.2",
+    "browserify": "^16.2.3",
+    "esmify": "^2.0.0",
     "node-sass": "^4.10.0",
     "parse5": "^2.2.3",
     "rollup": "^0.47.6",
