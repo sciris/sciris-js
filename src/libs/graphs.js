@@ -5,7 +5,7 @@
 import utils from './utils.js'
 import rpcs from './rpc-service.js'
 import status from './status-service.js'
-import mpld3 from './mpld3.js';
+import mpld3 from './mpld3.js'
 
 function getPlotOptions(vm, project_id) {
   return new Promise((resolve, reject) => {
@@ -54,7 +54,7 @@ function clearGraphs(vm) {
 
 function makeGraphs(vm, data, routepath) {
   console.log('makeGraphs() called')
-  if (routepath !== vm.$route.path) { // Don't render graphs if we've changed page
+  if (routepath && routepath !== vm.$route.path) { // Don't render graphs if we've changed page
     console.log('Not rendering graphs since route changed: ' + routepath + ' vs. ' + vm.$route.path)
   }
   else { // Proceed...
