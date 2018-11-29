@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.1.5
+ * sciris-js v0.1.6
  * (c) 2018-present Optima Consortium <info@ocds.co>
  */
 import Vue from 'vue';
@@ -1660,7 +1660,7 @@ function clearGraphs(vm) {
 }
 
 function makeGraphs(vm, data, routepath) {
-  console.log('makeGraphs() called');
+  console.log('makeGraphs() called.');
 
   if (routepath && routepath !== vm.$route.path) {
     // Don't render graphs if we've changed page

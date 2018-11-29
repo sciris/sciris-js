@@ -1,6 +1,6 @@
 {
   "name": "sciris-js",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "author": "Optima Consortium <info@ocds.co>",
   "scripts": {
     "build": "bili && npm run export",
