@@ -7,6 +7,7 @@ import utils from './libs/utils.js';
 import shared from './libs/shared.js';
 import EventBus from './eventbus.js';
 import ScirisVue from './plugins.js';
+import mpld3 from './vendor/mpld3.v0.4.1.min.js';
 
 const rpc = rpcs.rpc;
 const download = rpcs.download;
@@ -159,6 +160,7 @@ const sciris = {
   utils,
   ScirisVue, 
   EventBus, 
+  mpld3
 }
 
 export default sciris
