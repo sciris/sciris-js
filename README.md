@@ -1,11 +1,26 @@
 # sciris-js
 
 ## Project setup
+
+`d3` is required to be added in the global scope by includeing the following in your html.
+
+```
+<script src="http://d3js.org/d3.v5.min.js"></script>
+```
+
+To install in the browser also include:
+
+```
+<script src="https://unpkg.com/sciris-js/dist/sciris-js.js"></script>
+```
+
+Using NPM in your node based projects:
+
 ```
 npm install --save sciris-js 
 ```
 
-## Rebuild after updates during development
+## Rebuild project for release
 
 ```
 npm run build
@@ -60,7 +75,10 @@ sciris.status
 sciris.user
 sciris.tasks
 sciris.utils
+sciris.mpld3
 ```
+
+You can access `sciris.mpld3.draw_figure` directly via `mpld3.draw_figure`
 
 You can refrence the functions provided by sciris directly via the shorthands: 
 
