@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.1.10
+ * sciris-js v0.1.11
  * (c) 2018-present Optima Consortium <info@ocds.co>
  * Released under the MIT License.
  */
@@ -1674,9 +1674,6 @@ function clearGraphs(vm) {
 }
 
 function makeGraphs(vm, data, routepath) {
-  console.log("hlakjsdhflkjasdhfljkahsfjklsad", mpld3);
-  console.log('makeGraphs() called.');
-
   if (routepath && routepath !== vm.$route.path) {
     // Don't render graphs if we've changed page
     console.log('Not rendering graphs since route changed: ' + routepath + ' vs. ' + vm.$route.path);
@@ -1938,7 +1935,8 @@ var graphs = {
   newDialog,
   findDialog,
   maximize,
-  minimize
+  minimize,
+  mpld3
 };
 
 // task-service.js -- task queuing functions for Vue to call
@@ -3332,6 +3330,8 @@ const newDialog$1 = graphs.newDialog;
 const findDialog$1 = graphs.findDialog;
 const maximize$1 = graphs.maximize;
 const minimize$1 = graphs.minimize;
+const mpld3$1 = graphs.mpld3;
+const draw_figure = mpld3$1.draw_figure;
 const getTaskResultWaiting$1 = tasks.getTaskResultWaiting;
 const getTaskResultPolling$1 = tasks.getTaskResultPolling;
 const loginCall$1 = user.loginCall;
@@ -3393,6 +3393,8 @@ const sciris = {
   findDialog: findDialog$1,
   maximize: maximize$1,
   minimize: minimize$1,
+  mpld3: mpld3$1,
+  draw_figure,
   // status-service.js
   succeed: succeed$1,
   fail: fail$1,

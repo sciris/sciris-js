@@ -36,6 +36,8 @@ const newDialog = graphs.newDialog;
 const findDialog = graphs.findDialog; 
 const maximize = graphs.maximize; 
 const minimize = graphs.minimize; 
+const mpld3 = graphs.mpld3; 
+const draw_figure = mpld3.draw_figure;
 
 const getTaskResultWaiting = tasks.getTaskResultWaiting;
 const getTaskResultPolling = tasks.getTaskResultPolling;
@@ -103,6 +105,8 @@ const sciris = {
   findDialog, 
   maximize,
   minimize,
+  mpld3,
+  draw_figure, 
 
   // status-service.js
   succeed,
