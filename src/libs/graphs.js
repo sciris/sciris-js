@@ -53,6 +53,8 @@ function clearGraphs(vm) {
 }
 
 function makeGraphs(vm, data, routepath) {
+
+  console.log("hlakjsdhflkjasdhfljkahsfjklsad", mpld3)
   console.log('makeGraphs() called.')
   if (routepath && routepath !== vm.$route.path) { // Don't render graphs if we've changed page
     console.log('Not rendering graphs since route changed: ' + routepath + ' vs. ' + vm.$route.path)

@@ -1,6 +1,7 @@
 /*!
- * sciris-js v0.1.6
+ * sciris-js v0.1.9
  * (c) 2018-present Optima Consortium <info@ocds.co>
+ * Released under the MIT License.
  */
 'use strict';
 
@@ -674,8 +675,10 @@ var mpld3 = createCommonjsModule(function (module) {
   function f(s, i) {
     F.call(this, s, i);
     var o = this.props;
+    o.facecolor = "none", o.edgecolor = o.color, delete o.color, o.edgewidth = o.linewidth, delete o.linewidth;
+    const e = o.drawstyle;
 
-    switch (o.facecolor = "none", o.edgecolor = o.color, delete o.color, o.edgewidth = o.linewidth, delete o.linewidth, drawstyle = o.drawstyle, delete o.drawstyle, this.defaultProps = u.prototype.defaultProps, u.call(this, s, o), drawstyle) {
+    switch (delete o.drawstyle, this.defaultProps = u.prototype.defaultProps, u.call(this, s, o), e) {
       case "steps":
       case "steps-pre":
         this.datafunc = t.line().curve(t.curveStepBefore);
@@ -1112,6 +1115,7 @@ var mpld3 = createCommonjsModule(function (module) {
     offset: null,
     offsetcoordinates: "data",
     alpha: 1,
+    drawstyle: "none",
     zorder: 1
   }, u.prototype.finiteFilter = function (t, s) {
     return isFinite(this.pathcoords.x(t[this.props.xindex])) && isFinite(this.pathcoords.y(t[this.props.yindex]));
@@ -1134,6 +1138,7 @@ var mpld3 = createCommonjsModule(function (module) {
     offsetcoordinates: "data",
     offsetorder: "before",
     edgecolors: ["#000000"],
+    drawstyle: "none",
     edgewidths: [1],
     facecolors: ["#0000FF"],
     alphas: [1],
@@ -1188,6 +1193,7 @@ var mpld3 = createCommonjsModule(function (module) {
     alpha: 1,
     markersize: 6,
     markername: "circle",
+    drawstyle: "none",
     markerpath: null,
     zorder: 3
   }, y.prototype.pathFunc = function (t, s) {
@@ -1195,6 +1201,7 @@ var mpld3 = createCommonjsModule(function (module) {
   }, M.Image = m, m.prototype = Object.create(F.prototype), m.prototype.constructor = m, m.prototype.requiredProps = ["data", "extent"], m.prototype.defaultProps = {
     alpha: 1,
     coordinates: "data",
+    drawstyle: "none",
     zorder: 1
   }, m.prototype.draw = function () {
     this.image = this.ax.paths.append("svg:image"), this.image = this.image.attr("class", "mpld3-image").attr("xlink:href", "data:image/png;base64," + this.props.data).style("opacity", this.props.alpha).attr("preserveAspectRatio", "none"), this.updateDimensions();
@@ -1209,6 +1216,7 @@ var mpld3 = createCommonjsModule(function (module) {
     v_baseline: "auto",
     rotation: 0,
     fontsize: 11,
+    drawstyle: "none",
     color: "black",
     alpha: 1,
     zorder: 3
@@ -1666,6 +1674,7 @@ function clearGraphs(vm) {
 }
 
 function makeGraphs(vm, data, routepath) {
+  console.log("hlakjsdhflkjasdhfljkahsfjklsad", mpld3);
   console.log('makeGraphs() called.');
 
   if (routepath && routepath !== vm.$route.path) {
@@ -3434,8 +3443,7 @@ const sciris = {
   tasks,
   utils,
   ScirisVue,
-  EventBus,
-  mpld3
+  EventBus
 };
 
 exports.default = sciris;

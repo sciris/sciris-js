@@ -1,7 +1,12 @@
 {
   "name": "sciris-js",
-  "version": "0.1.6",
+  "version": "0.1.9",
+  "license": "MIT",
   "author": "Optima Consortium <info@ocds.co>",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/sciris/sciris-js"
+  },
   "scripts": {
     "build": "bili && npm run export",
     "export": "npx browserify main.js --standalone sciris -o dist/sciris-js.js"
@@ -33,8 +38,7 @@
     "format": [
       "cjs",
       "es",
-      "umd",
-      "umd-min"
+      "umd"
     ],
     "banner": true,
     "name": "sciris-js",
@@ -63,12 +67,12 @@
     "vue-dialog-drag": "^0.1.29",
     "vue-js-modal": "^1.3.26",
     "vue-progressbar": "git+https://github.com/sciris/vue-progressbar.git",
-    "epic-spinners": "^1.0.4",
     "vue2-simplert-plugin": "^0.5.3"
   },
   "devDependencies": {
     "bili": "^3.1.2",
     "browserify": "^16.2.3",
+    "epic-spinners": "^1.0.4",
     "esmify": "^2.0.0",
     "node-sass": "^4.10.0",
     "parse5": "^2.2.3",
