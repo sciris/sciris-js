@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.1.9
+ * sciris-js v0.1.10
  * (c) 2018-present Optima Consortium <info@ocds.co>
  * Released under the MIT License.
  */
