@@ -1,6 +1,6 @@
 /*!
- * sciris-js v0.1.12
- * (c) 2018-present Optima Consortium <info@ocds.co>
+ * sciris-js v0.1.13
+ * (c) 2019-present Optima Consortium <info@ocds.co>
  * Released under the MIT License.
  */
 import Vue from 'vue';
@@ -8,8 +8,6 @@ import axios from 'axios';
 import saveAs from 'file-saver';
 import sha224 from 'crypto-js/sha224';
 import { FulfillingBouncingCircleSpinner } from 'epic-spinners';
-import __vue_normalize__ from 'vue-runtime-helpers/normalize-component.js';
-import __vue_create_injector__ from 'vue-runtime-helpers/inject-style/browser.js';
 import VueProgressBar from 'vue-progressbar';
 import VModal from 'vue-js-modal';
 import { directive } from 'vue-clickaway';
@@ -510,25 +508,25 @@ var mpld3 = createCommonjsModule(function (module) {
   function i(t, s) {
     t = "undefined" != typeof t ? t : 10, s = "undefined" != typeof s ? s : "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-    for (var i = s.charAt(Math.round(Math.random() * (s.length - 11))), o = 1; t > o; o++) i += s.charAt(Math.round(Math.random() * (s.length - 1)));
+    for (var i = s.charAt(Math.round(Math.random() * (s.length - 11))), e = 1; t > e; e++) i += s.charAt(Math.round(Math.random() * (s.length - 1)));
 
     return i;
   }
 
-  function o(s, i) {
-    var o = t.interpolate([s[0].valueOf(), s[1].valueOf()], [i[0].valueOf(), i[1].valueOf()]);
+  function e(s, i) {
+    var e = t.interpolate([s[0].valueOf(), s[1].valueOf()], [i[0].valueOf(), i[1].valueOf()]);
     return function (t) {
-      var s = o(t);
+      var s = e(t);
       return [new Date(s[0]), new Date(s[1])];
     };
   }
 
-  function e(t) {
+  function o(t) {
     return "undefined" == typeof t;
   }
 
   function r(t) {
-    return null == t || e(t);
+    return null == t || o(t);
   }
 
   function n(t, s) {
@@ -543,7 +541,7 @@ var mpld3 = createCommonjsModule(function (module) {
         };
       },
           a = n(i),
-          p = n(o),
+          p = n(e),
           h = [],
           l = [],
           c = 0,
@@ -558,7 +556,7 @@ var mpld3 = createCommonjsModule(function (module) {
       }
 
       for (; ++u < s.length;) {
-        for (d = c + r[s[u]], h = []; d > c;) e.call(this, t[c], c) ? (h.push(a.call(this, t[c], c), p.call(this, t[c], c)), c++) : (h = null, c = d);
+        for (d = c + r[s[u]], h = []; d > c;) o.call(this, t[c], c) ? (h.push(a.call(this, t[c], c), p.call(this, t[c], c)), c++) : (h = null, c = d);
 
         h ? f && h.length > 0 ? (l.push("M", h[0], h[1]), f = !1) : (l.push(s[u]), l = l.concat(h)) : f = !0;
       }
@@ -569,10 +567,10 @@ var mpld3 = createCommonjsModule(function (module) {
     var i = function (t, s) {
       return t[0];
     },
-        o = function (t, s) {
+        e = function (t, s) {
       return t[1];
     },
-        e = function (t, s) {
+        o = function (t, s) {
       return !0;
     },
         r = {
@@ -595,9 +593,9 @@ var mpld3 = createCommonjsModule(function (module) {
     return s.x = function (t) {
       return arguments.length ? (i = t, s) : i;
     }, s.y = function (t) {
-      return arguments.length ? (o = t, s) : o;
-    }, s.defined = function (t) {
       return arguments.length ? (e = t, s) : e;
+    }, s.defined = function (t) {
+      return arguments.length ? (o = t, s) : o;
     }, s.call = s, s;
   }
 
@@ -609,38 +607,38 @@ var mpld3 = createCommonjsModule(function (module) {
     }
 
     var i = Array.prototype.slice.call(arguments, 0),
-        o = i.length;
+        e = i.length;
     return s.domain = function (t) {
       return arguments.length ? (i[0].domain(t), s) : i[0].domain();
     }, s.range = function (t) {
-      return arguments.length ? (i[o - 1].range(t), s) : i[o - 1].range();
+      return arguments.length ? (i[e - 1].range(t), s) : i[e - 1].range();
     }, s.step = function (t) {
       return i[t];
     }, s;
   }
 
   function h(t, s) {
-    if (F.call(this, t, s), this.cssclass = "mpld3-" + this.props.xy + "grid", "x" == this.props.xy) this.transform = "translate(0," + this.ax.height + ")", this.position = "bottom", this.scale = this.ax.xdom, this.tickSize = -this.ax.height;else {
+    if (M.call(this, t, s), this.cssclass = "mpld3-" + this.props.xy + "grid", "x" == this.props.xy) this.transform = "translate(0," + this.ax.height + ")", this.position = "bottom", this.scale = this.ax.xdom, this.tickSize = -this.ax.height;else {
       if ("y" != this.props.xy) throw "unrecognized grid xy specifier: should be 'x' or 'y'";
       this.transform = "translate(0,0)", this.position = "left", this.scale = this.ax.ydom, this.tickSize = -this.ax.width;
     }
   }
 
   function l(t, s) {
-    F.call(this, t, s);
+    M.call(this, t, s);
     var i = {
       bottom: [0, this.ax.height],
       top: [0, 0],
       left: [0, 0],
       right: [this.ax.width, 0]
     },
-        o = {
+        e = {
       bottom: "x",
       top: "x",
       left: "y",
       right: "y"
     };
-    this.transform = "translate(" + i[this.props.position] + ")", this.props.xy = o[this.props.position], this.cssclass = "mpld3-" + this.props.xy + "axis", this.scale = this.ax[this.props.xy + "dom"], this.tickNr = null, this.tickFormat = null;
+    this.transform = "translate(" + i[this.props.position] + ")", this.props.xy = e[this.props.position], this.cssclass = "mpld3-" + this.props.xy + "axis", this.scale = this.ax[this.props.xy + "dom"], this.tickNr = null, this.tickFormat = null;
   }
 
   function c(t, s) {
@@ -652,29 +650,27 @@ var mpld3 = createCommonjsModule(function (module) {
   }
 
   function u(t, s) {
-    F.call(this, t, s), this.data = t.fig.get_data(this.props.data), this.pathcodes = this.props.pathcodes, this.pathcoords = new c(this.props.coordinates, this.ax), this.offsetcoords = new c(this.props.offsetcoordinates, this.ax), this.datafunc = a();
+    M.call(this, t, s), this.data = t.fig.get_data(this.props.data), this.pathcodes = this.props.pathcodes, this.pathcoords = new c(this.props.coordinates, this.ax), this.offsetcoords = new c(this.props.offsetcoordinates, this.ax), this.datafunc = a();
   }
 
   function d(t, s) {
-    F.call(this, t, s), (null == this.props.facecolors || 0 == this.props.facecolors.length) && (this.props.facecolors = ["none"]), (null == this.props.edgecolors || 0 == this.props.edgecolors.length) && (this.props.edgecolors = ["none"]);
+    M.call(this, t, s), (null == this.props.facecolors || 0 == this.props.facecolors.length) && (this.props.facecolors = ["none"]), (null == this.props.edgecolors || 0 == this.props.edgecolors.length) && (this.props.edgecolors = ["none"]);
     var i = this.ax.fig.get_data(this.props.offsets);
     (null === i || 0 === i.length) && (i = [null]);
-    var o = Math.max(this.props.paths.length, i.length);
-    if (i.length === o) this.offsets = i;else {
+    var e = Math.max(this.props.paths.length, i.length);
+    if (i.length === e) this.offsets = i;else {
       this.offsets = [];
 
-      for (var e = 0; o > e; e++) this.offsets.push(n(i, e));
+      for (var o = 0; e > o; o++) this.offsets.push(n(i, o));
     }
     this.pathcoords = new c(this.props.pathcoordinates, this.ax), this.offsetcoords = new c(this.props.offsetcoordinates, this.ax);
   }
 
   function f(s, i) {
-    F.call(this, s, i);
-    var o = this.props;
-    o.facecolor = "none", o.edgecolor = o.color, delete o.color, o.edgewidth = o.linewidth, delete o.linewidth;
-    const e = o.drawstyle;
+    M.call(this, s, i);
+    var e = this.props;
 
-    switch (delete o.drawstyle, this.defaultProps = u.prototype.defaultProps, u.call(this, s, o), e) {
+    switch (e.facecolor = "none", e.edgecolor = e.color, delete e.color, e.edgewidth = e.linewidth, delete e.linewidth, drawstyle = e.drawstyle, delete e.drawstyle, this.defaultProps = u.prototype.defaultProps, u.call(this, s, e), drawstyle) {
       case "steps":
       case "steps-pre":
         this.datafunc = t.line().curve(t.curveStepBefore);
@@ -694,8 +690,8 @@ var mpld3 = createCommonjsModule(function (module) {
   }
 
   function y(s, i) {
-    F.call(this, s, i), null !== this.props.markerpath ? this.marker = 0 == this.props.markerpath[0].length ? null : M.path().call(this.props.markerpath[0], this.props.markerpath[1]) : this.marker = null === this.props.markername ? null : t.svg.symbol(this.props.markername).size(Math.pow(this.props.markersize, 2))();
-    var o = {
+    M.call(this, s, i), null !== this.props.markerpath ? this.marker = 0 == this.props.markerpath[0].length ? null : F.path().call(this.props.markerpath[0], this.props.markerpath[1]) : this.marker = null === this.props.markername ? null : t.svg.symbol(this.props.markername).size(Math.pow(this.props.markersize, 2))();
+    var e = {
       paths: [this.props.markerpath],
       offsets: s.fig.get_data(this.props.data),
       xindex: this.props.xindex,
@@ -708,51 +704,51 @@ var mpld3 = createCommonjsModule(function (module) {
       zorder: this.props.zorder,
       id: this.props.id
     };
-    this.requiredProps = d.prototype.requiredProps, this.defaultProps = d.prototype.defaultProps, d.call(this, s, o);
-  }
-
-  function m(t, s) {
-    F.call(this, t, s), this.coords = new c(this.props.coordinates, this.ax);
+    this.requiredProps = d.prototype.requiredProps, this.defaultProps = d.prototype.defaultProps, d.call(this, s, e);
   }
 
   function g(t, s) {
-    F.call(this, t, s), this.text = this.props.text, this.position = this.props.position, this.coords = new c(this.props.coordinates, this.ax);
+    M.call(this, t, s), this.coords = new c(this.props.coordinates, this.ax);
+  }
+
+  function m(t, s) {
+    M.call(this, t, s), this.text = this.props.text, this.position = this.props.position, this.coords = new c(this.props.coordinates, this.ax);
   }
 
   function x(s, i) {
-    function o(t) {
+    function e(t) {
       return new Date(t[0], t[1], t[2], t[3], t[4], t[5]);
     }
 
-    function e(t, s) {
-      return "date" !== t ? s : [o(s[0]), o(s[1])];
+    function o(t, s) {
+      return "date" !== t ? s : [e(s[0]), e(s[1])];
     }
 
-    function r(s, i, o) {
-      var e = "date" === s ? t.scaleTime() : "log" === s ? t.scaleLog() : t.scaleLinear();
-      return e.domain(i).range(o);
+    function r(s, i, e) {
+      var o = "date" === s ? t.scaleTime() : "log" === s ? t.scaleLog() : t.scaleLinear();
+      return o.domain(i).range(e);
     }
 
-    F.call(this, s, i), this.axnum = this.fig.axes.length, this.axid = this.fig.figid + "_ax" + (this.axnum + 1), this.clipid = this.axid + "_clip", this.props.xdomain = this.props.xdomain || this.props.xlim, this.props.ydomain = this.props.ydomain || this.props.ylim, this.sharex = [], this.sharey = [], this.elements = [], this.axisList = [];
+    M.call(this, s, i), this.axnum = this.fig.axes.length, this.axid = this.fig.figid + "_ax" + (this.axnum + 1), this.clipid = this.axid + "_clip", this.props.xdomain = this.props.xdomain || this.props.xlim, this.props.ydomain = this.props.ydomain || this.props.ylim, this.sharex = [], this.sharey = [], this.elements = [], this.axisList = [];
     var n = this.props.bbox;
-    this.position = [n[0] * this.fig.width, (1 - n[1] - n[3]) * this.fig.height], this.width = n[2] * this.fig.width, this.height = n[3] * this.fig.height, this.isZoomEnabled = null, this.zoom = null, this.lastTransform = t.zoomIdentity, this.isBoxzoomEnabled = null, this.isLinkedBrushEnabled = null, this.isCurrentLinkedBrushTarget = !1, this.brushG = null, this.props.xdomain = e(this.props.xscale, this.props.xdomain), this.props.ydomain = e(this.props.yscale, this.props.ydomain), this.x = this.xdom = r(this.props.xscale, this.props.xdomain, [0, this.width]), this.y = this.ydom = r(this.props.yscale, this.props.ydomain, [this.height, 0]), "date" === this.props.xscale && (this.x = M.multiscale(t.scaleLinear().domain(this.props.xlim).range(this.props.xdomain.map(Number)), this.xdom)), "date" === this.props.yscale && (this.y = M.multiscale(t.scaleLinear().domain(this.props.ylim).range(this.props.ydomain.map(Number)), this.ydom));
+    this.position = [n[0] * this.fig.width, (1 - n[1] - n[3]) * this.fig.height], this.width = n[2] * this.fig.width, this.height = n[3] * this.fig.height, this.isZoomEnabled = null, this.zoom = null, this.lastTransform = t.zoomIdentity, this.isBoxzoomEnabled = null, this.isLinkedBrushEnabled = null, this.isCurrentLinkedBrushTarget = !1, this.brushG = null, this.props.xdomain = o(this.props.xscale, this.props.xdomain), this.props.ydomain = o(this.props.yscale, this.props.ydomain), this.x = this.xdom = r(this.props.xscale, this.props.xdomain, [0, this.width]), this.y = this.ydom = r(this.props.yscale, this.props.ydomain, [this.height, 0]), "date" === this.props.xscale && (this.x = F.multiscale(t.scaleLinear().domain(this.props.xlim).range(this.props.xdomain.map(Number)), this.xdom)), "date" === this.props.yscale && (this.y = F.multiscale(t.scaleLinear().domain(this.props.ylim).range(this.props.ydomain.map(Number)), this.ydom));
 
     for (var a = this.props.axes, p = 0; p < a.length; p++) {
-      var h = new M.Axis(this, a[p]);
+      var h = new F.Axis(this, a[p]);
       this.axisList.push(h), this.elements.push(h), (this.props.gridOn || h.props.grid.gridOn) && this.elements.push(h.getGrid());
     }
 
-    for (var l = this.props.paths, p = 0; p < l.length; p++) this.elements.push(new M.Path(this, l[p]));
+    for (var l = this.props.paths, p = 0; p < l.length; p++) this.elements.push(new F.Path(this, l[p]));
 
-    for (var c = this.props.lines, p = 0; p < c.length; p++) this.elements.push(new M.Line(this, c[p]));
+    for (var c = this.props.lines, p = 0; p < c.length; p++) this.elements.push(new F.Line(this, c[p]));
 
-    for (var u = this.props.markers, p = 0; p < u.length; p++) this.elements.push(new M.Markers(this, u[p]));
+    for (var u = this.props.markers, p = 0; p < u.length; p++) this.elements.push(new F.Markers(this, u[p]));
 
-    for (var d = this.props.texts, p = 0; p < d.length; p++) this.elements.push(new M.Text(this, d[p]));
+    for (var d = this.props.texts, p = 0; p < d.length; p++) this.elements.push(new F.Text(this, d[p]));
 
-    for (var f = this.props.collections, p = 0; p < f.length; p++) this.elements.push(new M.PathCollection(this, f[p]));
+    for (var f = this.props.collections, p = 0; p < f.length; p++) this.elements.push(new F.PathCollection(this, f[p]));
 
-    for (var y = this.props.images, p = 0; p < y.length; p++) this.elements.push(new M.Image(this, y[p]));
+    for (var y = this.props.images, p = 0; p < y.length; p++) this.elements.push(new F.Image(this, y[p]));
 
     this.elements.sort(function (t, s) {
       return t.props.zorder - s.props.zorder;
@@ -760,27 +756,27 @@ var mpld3 = createCommonjsModule(function (module) {
   }
 
   function b(t, s) {
-    F.call(this, t, s), this.buttons = [], this.props.buttons.forEach(this.addButton.bind(this));
+    M.call(this, t, s), this.buttons = [], this.props.buttons.forEach(this.addButton.bind(this));
   }
 
   function v(t, s) {
-    F.call(this, t), this.toolbar = t, this.fig = this.toolbar.fig, this.cssclass = "mpld3-" + s + "button", this.active = !1;
+    M.call(this, t), this.toolbar = t, this.fig = this.toolbar.fig, this.cssclass = "mpld3-" + s + "button", this.active = !1;
   }
 
   function A(t, s) {
-    F.call(this, t, s);
+    M.call(this, t, s);
   }
 
   function k(t, s) {
     A.call(this, t, s);
-    var i = M.ButtonFactory({
+    var i = F.ButtonFactory({
       buttonID: "reset",
       sticky: !1,
       onActivate: function () {
         this.toolbar.fig.reset();
       },
       icon: function () {
-        return M.icons.reset;
+        return F.icons.reset;
       }
     });
     this.fig.buttons.push(i);
@@ -791,7 +787,7 @@ var mpld3 = createCommonjsModule(function (module) {
     var i = this.props.enabled;
 
     if (this.props.button) {
-      var o = M.ButtonFactory({
+      var e = F.ButtonFactory({
         buttonID: "zoom",
         sticky: !0,
         actions: ["scroll", "drag"],
@@ -801,10 +797,10 @@ var mpld3 = createCommonjsModule(function (module) {
           this.setState(i);
         },
         icon: function () {
-          return M.icons.move;
+          return F.icons.move;
         }
       });
-      this.fig.buttons.push(o);
+      this.fig.buttons.push(e);
     }
   }
 
@@ -813,7 +809,7 @@ var mpld3 = createCommonjsModule(function (module) {
     var i = this.props.enabled;
 
     if (this.props.button) {
-      var o = M.ButtonFactory({
+      var e = F.ButtonFactory({
         buttonID: "boxzoom",
         sticky: !0,
         actions: ["drag"],
@@ -823,10 +819,10 @@ var mpld3 = createCommonjsModule(function (module) {
           this.setState(i);
         },
         icon: function () {
-          return M.icons.zoom;
+          return F.icons.zoom;
         }
       });
-      this.fig.buttons.push(o);
+      this.fig.buttons.push(e);
     }
 
     this.extentClass = "boxzoombrush";
@@ -837,11 +833,11 @@ var mpld3 = createCommonjsModule(function (module) {
   }
 
   function E(t, s) {
-    M.Plugin.call(this, t, s), null === this.props.enabled && (this.props.enabled = !this.props.button);
+    F.Plugin.call(this, t, s), null === this.props.enabled && (this.props.enabled = !this.props.button);
     var i = this.props.enabled;
 
     if (this.props.button) {
-      var o = M.ButtonFactory({
+      var e = F.ButtonFactory({
         buttonID: "linkedbrush",
         sticky: !0,
         actions: ["drag"],
@@ -851,66 +847,66 @@ var mpld3 = createCommonjsModule(function (module) {
           this.setState(i);
         },
         icon: function () {
-          return M.icons.brush;
+          return F.icons.brush;
         }
       });
-      this.fig.buttons.push(o);
+      this.fig.buttons.push(e);
     }
 
     this.pathCollectionsByAxes = [], this.objectsByAxes = [], this.allObjects = [], this.extentClass = "linkedbrush", this.dataKey = "offsets", this.objectClass = null;
   }
 
   function P(t, s) {
-    M.Plugin.call(this, t, s);
+    F.Plugin.call(this, t, s);
   }
 
   function O(s, i) {
-    F.call(this, null, i), this.figid = s, this.width = this.props.width, this.height = this.props.height, this.data = this.props.data, this.buttons = [], this.root = t.select("#" + s).append("div").style("position", "relative"), this.axes = [];
+    M.call(this, null, i), this.figid = s, this.width = this.props.width, this.height = this.props.height, this.data = this.props.data, this.buttons = [], this.root = t.select("#" + s).append("div").style("position", "relative"), this.axes = [];
 
-    for (var o = 0; o < this.props.axes.length; o++) this.axes.push(new x(this, this.props.axes[o]));
+    for (var e = 0; e < this.props.axes.length; e++) this.axes.push(new x(this, this.props.axes[e]));
 
     this.plugins = [], this.pluginsByType = {}, this.props.plugins.forEach(function (t) {
       this.addPlugin(t);
-    }.bind(this)), this.toolbar = new M.Toolbar(this, {
+    }.bind(this)), this.toolbar = new F.Toolbar(this, {
       buttons: this.buttons
     });
   }
 
-  function F(t, s) {
+  function M(t, s) {
     this.parent = r(t) ? null : t, this.props = r(s) ? {} : this.processProps(s), this.fig = t instanceof O ? t : t && "fig" in t ? t.fig : null, this.ax = t instanceof x ? t : t && "ax" in t ? t.ax : null;
   }
 
-  var M = {
+  var F = {
     _mpld3IsLoaded: !0,
     figures: [],
     plugin_map: {}
   };
-  M.version = "0.4.1", M.register_plugin = function (t, s) {
-    M.plugin_map[t] = s;
-  }, M.draw_figure = function (t, s, i) {
-    var o = document.getElementById(t);
-    if (null === o) throw t + " is not a valid id";
-    var e = new M.Figure(t, s);
-    return i && i(e, o), M.figures.push(e), e.draw(), e;
-  }, M.cloneObj = s, M.boundsToTransform = function (t, s) {
+  F.version = "0.4.1", F.register_plugin = function (t, s) {
+    F.plugin_map[t] = s;
+  }, F.draw_figure = function (t, s, i) {
+    var e = document.getElementById(t);
+    if (null === e) throw t + " is not a valid id";
+    var o = new F.Figure(t, s);
+    return i && i(o, e), F.figures.push(o), o.draw(), o;
+  }, F.cloneObj = s, F.boundsToTransform = function (t, s) {
     var i = t.width,
-        o = t.height,
-        e = s[1][0] - s[0][0],
+        e = t.height,
+        o = s[1][0] - s[0][0],
         r = s[1][1] - s[0][1],
         n = (s[0][0] + s[1][0]) / 2,
         a = (s[0][1] + s[1][1]) / 2,
-        p = Math.max(1, Math.min(8, .9 / Math.max(e / i, r / o))),
-        h = [i / 2 - p * n, o / 2 - p * a];
+        p = Math.max(1, Math.min(8, .9 / Math.max(o / i, r / e))),
+        h = [i / 2 - p * n, e / 2 - p * a];
     return {
       translate: h,
       scale: p
     };
-  }, M.getTransformation = function (t) {
+  }, F.getTransformation = function (t) {
     var s = document.createElementNS("http://www.w3.org/2000/svg", "g");
     s.setAttributeNS(null, "transform", t);
     var i,
-        o,
         e,
+        o,
         r = s.transform.baseVal.consolidate().matrix,
         n = r.a,
         a = r.b,
@@ -918,66 +914,66 @@ var mpld3 = createCommonjsModule(function (module) {
         h = r.d,
         l = r.e,
         c = r.f;
-    (i = Math.sqrt(n * n + a * a)) && (n /= i, a /= i), (e = n * p + a * h) && (p -= n * e, h -= a * e), (o = Math.sqrt(p * p + h * h)) && (p /= o, h /= o, e /= o), a * p > n * h && (n = -n, a = -a, e = -e, i = -i);
+    (i = Math.sqrt(n * n + a * a)) && (n /= i, a /= i), (o = n * p + a * h) && (p -= n * o, h -= a * o), (e = Math.sqrt(p * p + h * h)) && (p /= e, h /= e, o /= e), a * p > n * h && (n = -n, a = -a, o = -o, i = -i);
     var u = {
       translateX: l,
       translateY: c,
       rotate: 180 * Math.atan2(a, n) / Math.PI,
-      skewX: 180 * Math.atan(e) / Math.PI,
+      skewX: 180 * Math.atan(o) / Math.PI,
       scaleX: i,
-      scaleY: o
+      scaleY: e
     },
         d = "translate(" + u.translateX + "," + u.translateY + ")rotate(" + u.rotate + ")skewX(" + u.skewX + ")scale(" + u.scaleX + "," + u.scaleY + ")";
     return d;
-  }, M.merge_objects = function (t) {
-    for (var s, i = {}, o = 0; o < arguments.length; o++) {
-      s = arguments[o];
+  }, F.merge_objects = function (t) {
+    for (var s, i = {}, e = 0; e < arguments.length; e++) {
+      s = arguments[e];
 
-      for (var e in s) i[e] = s[e];
+      for (var o in s) i[o] = s[o];
     }
 
     return i;
-  }, M.generate_id = function (t, s) {
+  }, F.generate_id = function (t, s) {
     return console.warn("mpld3.generate_id is deprecated. Use mpld3.generateId instead."), i(t, s);
-  }, M.generateId = i, M.get_element = function (t, s) {
-    var i, o, e;
-    i = "undefined" == typeof s ? M.figures : "undefined" == typeof s.length ? [s] : s;
+  }, F.generateId = i, F.get_element = function (t, s) {
+    var i, e, o;
+    i = "undefined" == typeof s ? F.figures : "undefined" == typeof s.length ? [s] : s;
 
     for (var r = 0; r < i.length; r++) {
       if (s = i[r], s.props.id === t) return s;
 
       for (var n = 0; n < s.axes.length; n++) {
-        if (o = s.axes[n], o.props.id === t) return o;
+        if (e = s.axes[n], e.props.id === t) return e;
 
-        for (var a = 0; a < o.elements.length; a++) if (e = o.elements[a], e.props.id === t) return e;
+        for (var a = 0; a < e.elements.length; a++) if (o = e.elements[a], o.props.id === t) return o;
       }
     }
 
     return null;
-  }, M.insert_css = function (t, s) {
+  }, F.insert_css = function (t, s) {
     var i = document.head || document.getElementsByTagName("head")[0],
-        o = document.createElement("style"),
-        e = t + " {";
+        e = document.createElement("style"),
+        o = t + " {";
 
-    for (var r in s) e += r + ":" + s[r] + "; ";
+    for (var r in s) o += r + ":" + s[r] + "; ";
 
-    e += "}", o.type = "text/css", o.styleSheet ? o.styleSheet.cssText = e : o.appendChild(document.createTextNode(e)), i.appendChild(o);
-  }, M.process_props = function (t, s, i, o) {
-    function e(t) {
-      F.call(this, null, t);
+    o += "}", e.type = "text/css", e.styleSheet ? e.styleSheet.cssText = o : e.appendChild(document.createTextNode(o)), i.appendChild(e);
+  }, F.process_props = function (t, s, i, e) {
+    function o(t) {
+      M.call(this, null, t);
     }
 
-    console.warn("mpld3.process_props is deprecated. Plot elements should derive from mpld3.PlotElement"), e.prototype = Object.create(F.prototype), e.prototype.constructor = e, e.prototype.requiredProps = o, e.prototype.defaultProps = i;
-    var r = new e(s);
+    console.warn("mpld3.process_props is deprecated. Plot elements should derive from mpld3.PlotElement"), o.prototype = Object.create(M.prototype), o.prototype.constructor = o, o.prototype.requiredProps = e, o.prototype.defaultProps = i;
+    var r = new o(s);
     return r.props;
-  }, M.interpolateDates = o, M.path = function () {
+  }, F.interpolateDates = e, F.path = function () {
     return a();
-  }, M.multiscale = p, M.icons = {
+  }, F.multiscale = p, F.icons = {
     reset: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gIcACMoD/OzIwAAAJhJREFUOMtjYKAx4KDUgNsMDAx7\nyNV8i4GB4T8U76VEM8mGYNNMtCH4NBM0hBjNMIwSsMzQ0MamcDkDA8NmQi6xggpUoikwQbIkHk2u\nE0rLI7vCBknBSyxeRDZAE6qHgQkq+ZeBgYERSfFPAoHNDNUDN4BswIRmKgxwEasP2dlsDAwMYlA/\n/mVgYHiBpkkGKscIDaPfVMmuAGnOTaGsXF0MAAAAAElFTkSuQmCC\n",
     move: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gIcACQMfLHBNQAAANZJREFUOMud07FKA0EQBuAviaKB\nlFr7COJrpAyYRlKn8hECEkFEn8ROCCm0sBMRYgh5EgVFtEhsRjiO27vkBoZd/vn5d3b+XcrjFI9q\nxgXWkc8pUjOB93GMd3zgB9d1unjDSxmhWSHQqOJki+MtOuv/b3ZifUqctIrMxwhHuG1gim4Ma5kR\nWuEkXFgU4B0MW1Ho4TeyjX3s4TDq3zn8ALvZ7q5wX9DqLOHCDA95cFBAnOO1AL/ZdNopgY3fQcqF\nyriMe37hM9w521ZkkvlMo7o/8g7nZYQ/QDctp1nTCf0AAAAASUVORK5CYII=\n",
     zoom: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gMPDiIRPL/2oQAAANBJREFUOMvF0b9KgzEcheHHVnCT\nKoI4uXbtLXgB3oJDJxevw1VwkoJ/NjepQ2/BrZRCx0ILFURQKV2kyOeSQpAmn7WDB0Lg955zEhLy\n2scdXlBggits+4WOQqjAJ3qYR7NGLrwXGU9+sGbEtlIF18FwmuBngZ+nCt6CIacC3Rx8LSl4xzgF\nn0tusBn4UyVhuA/7ZYIv5g+pE3ail25hN/qdmzCfpsJVjKKCZesDBwtzrAqGOMQj6vhCDRsY4ALH\nmOVObltR/xeG/jph6OD2r+Fv5lZBWEhMx58AAAAASUVORK5CYII=\n",
     brush: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAEQkAABEJAFAZ8RUAAAAB3RJTUUH3gMCEiQKB9YaAgAAAWtJREFUOMuN0r1qVVEQhuFn700k\nnfEvBq0iNiIiOKXgH4KCaBeIhWARK/EibLwFCwVLjyAWaQzRGG9grC3URkHUBKKgRuWohWvL5pjj\nyTSLxcz7rZlZHyMiItqzFxGTEVF18/UoODNFxDIO4x12dkXqTcBPsCUzD+AK3ndFqhHwEsYz82gn\nN4dbmMRK9R/4KY7jAvbiWmYeHBT5Z4QCP8J1rGAeN3GvU3Mbl/Gq3qCDcxjLzOV+v78fq/iFIxFx\nPyJ2lNJpfBy2g59YzMyzEbEVLzGBJjOriLiBq5gaJrCIU3hcRCbwAtuwjm/Yg/V6I9NgDA1OR8RC\nZq6Vcd7iUwtn5h8fdMBdETGPE+Xe4ExELDRNs4bX2NfCUHe+7UExyfkCP8MhzOA7PuAkvrbwXyNF\nxF3MDqxiqlhXC7SPdaOKiN14g0u4g3H0MvOiTUSNY3iemb0ywmfMdfYyUmAJ2yPiBx6Wr/oy2Oqw\n+A1SupBzAOuE/AAAAABJRU5ErkJggg==\n"
-  }, M.Grid = h, h.prototype = Object.create(F.prototype), h.prototype.constructor = h, h.prototype.requiredProps = ["xy"], h.prototype.defaultProps = {
+  }, F.Grid = h, h.prototype = Object.create(M.prototype), h.prototype.constructor = h, h.prototype.requiredProps = ["xy"], h.prototype.defaultProps = {
     color: "gray",
     dasharray: "2,2",
     alpha: "0.5",
@@ -992,22 +988,21 @@ var mpld3 = createCommonjsModule(function (module) {
       top: "axisTop",
       bottom: "axisBottom"
     }[this.position];
-    this.grid = t[s](this.scale).ticks(this.props.nticks).tickValues(this.props.tickvalues).tickSize(this.tickSize, 0, 0).tickFormat(""), this.elem = this.ax.axes.append("g").attr("class", this.cssclass).attr("transform", this.transform).call(this.grid), M.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " .tick", {
+    this.grid = t[s](this.scale).ticks(this.props.nticks).tickValues(this.props.tickvalues).tickSize(this.tickSize, 0, 0).tickFormat(""), this.elem = this.ax.axes.append("g").attr("class", this.cssclass).attr("transform", this.transform).call(this.grid), F.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " .tick", {
       stroke: this.props.color,
       "stroke-dasharray": this.props.dasharray,
       "stroke-opacity": this.props.alpha
-    }), M.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " path", {
+    }), F.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " path", {
       "stroke-width": 0
-    }), M.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " .domain", {
+    }), F.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " .domain", {
       "pointer-events": "none"
     });
   }, h.prototype.zoomed = function (t) {
     t ? "x" == this.props.xy ? this.elem.call(this.grid.scale(t.rescaleX(this.scale))) : this.elem.call(this.grid.scale(t.rescaleY(this.scale))) : this.elem.call(this.grid);
-  }, M.Axis = l, l.prototype = Object.create(F.prototype), l.prototype.constructor = l, l.prototype.requiredProps = ["position"], l.prototype.defaultProps = {
+  }, F.Axis = l, l.prototype = Object.create(M.prototype), l.prototype.constructor = l, l.prototype.requiredProps = ["position"], l.prototype.defaultProps = {
     nticks: 10,
     tickvalues: null,
     tickformat: null,
-    tickformat_formatter: null,
     fontsize: "11px",
     fontcolor: "black",
     axiscolor: "black",
@@ -1019,25 +1014,25 @@ var mpld3 = createCommonjsModule(function (module) {
     var t = {
       nticks: this.props.nticks,
       zorder: this.props.zorder,
-      tickvalues: null,
+      tickvalues: this.props.tickvalues,
       xy: this.props.xy
     };
     if (this.props.grid) for (var s in this.props.grid) t[s] = this.props.grid[s];
     return new h(this.ax, t);
   }, l.prototype.draw = function () {
-    function s(s, i, o) {
-      o = o || 1.2, s.each(function () {
-        for (var s, e = t.select(this), r = e.node().getBBox(), n = r.height, a = e.text().split(/\s+/).reverse(), p = [], h = 0, l = e.attr("y"), c = n, u = e.text(null).append("tspan").attr("x", 0).attr("y", l).attr("dy", c); s = a.pop();) p.push(s), u.text(p.join(" ")), u.node().getComputedTextLength() > i && (p.pop(), u.text(p.join(" ")), p = [s], u = e.append("tspan").attr("x", 0).attr("y", l).attr("dy", ++h * (n * o) + c).text(s));
+    function s(s, i, e) {
+      e = e || 1.2, s.each(function () {
+        for (var s, o = t.select(this), r = o.node().getBBox(), n = r.height, a = o.text().split(/\s+/).reverse(), p = [], h = 0, l = o.attr("y"), c = n, u = o.text(null).append("tspan").attr("x", 0).attr("y", l).attr("dy", c); s = a.pop();) p.push(s), u.text(p.join(" ")), u.node().getComputedTextLength() > i && (p.pop(), u.text(p.join(" ")), p = [s], u = o.append("tspan").attr("x", 0).attr("y", l).attr("dy", ++h * (n * e) + c).text(s));
       });
     }
 
     var i = 80,
-        o = "x" === this.props.xy ? this.parent.props.xscale : this.parent.props.yscale;
+        e = "x" === this.props.xy ? this.parent.props.xscale : this.parent.props.yscale;
 
-    if ("date" === o && this.props.tickvalues) {
-      var e = "x" === this.props.xy ? this.parent.x.domain() : this.parent.y.domain(),
+    if ("date" === e && this.props.tickvalues) {
+      var o = "x" === this.props.xy ? this.parent.x.domain() : this.parent.y.domain(),
           r = "x" === this.props.xy ? this.parent.xdom.domain() : this.parent.ydom.domain(),
-          n = t.scaleLinear().domain(e).range(r);
+          n = t.scaleLinear().domain(o).range(r);
       this.props.tickvalues = this.props.tickvalues.map(function (t) {
         return new Date(n(t));
       });
@@ -1049,39 +1044,27 @@ var mpld3 = createCommonjsModule(function (module) {
       top: "axisTop",
       bottom: "axisBottom"
     }[this.props.position];
-    this.axis = t[a](this.scale);
-    var p = this;
-    "index" == this.props.tickformat_formatter ? this.axis = this.axis.tickFormat(function (t, s) {
-      return p.props.tickformat[t];
-    }) : "percent" == this.props.tickformat_formatter ? this.axis = this.axis.tickFormat(function (s, i) {
-      var o = s / p.props.tickformat.xmax * 100,
-          e = p.props.tickformat.decimals || 0,
-          r = t.format("." + e + "f")(o);
-      return r + p.props.tickformat.symbol;
-    }) : "str_method" == this.props.tickformat_formatter ? this.axis = this.axis.tickFormat(function (s, i) {
-      var o = t.format(p.props.tickformat.format_string)(s);
-      return p.props.tickformat.prefix + o + p.props.tickformat.suffix;
-    }) : "fixed" == this.props.tickformat_formatter ? this.axis = this.axis.tickFormat(function (t, s) {
-      return p.props.tickformat[s];
-    }) : this.axis = this.axis.tickFormat(this.tickFormat), this.tickNr && (this.axis = this.axis.ticks(this.tickNr)), this.props.tickvalues && (this.axis = this.axis.tickValues(this.props.tickvalues), this.filter_ticks(this.axis.tickValues, this.axis.scale().domain())), this.elem = this.ax.baseaxes.append("g").attr("transform", this.transform).attr("class", this.cssclass).call(this.axis), "x" == this.props.xy && this.elem.selectAll("text").call(s, i), M.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " line,  ." + this.cssclass + " path", {
+    this.axis = t[a](this.scale), this.props.tickformat && this.props.tickvalues ? this.axis = this.axis.tickValues(this.props.tickvalues).tickFormat(function (t, s) {
+      return this.props.tickformat[s];
+    }.bind(this)) : (this.tickNr && (this.axis = this.axis.ticks(this.tickNr)), this.tickFormat && (this.axis = this.axis.tickFormat(this.tickFormat))), this.filter_ticks(this.axis.tickValues, this.axis.scale().domain()), this.elem = this.ax.baseaxes.append("g").attr("transform", this.transform).attr("class", this.cssclass).call(this.axis), "x" == this.props.xy && this.elem.selectAll("text").call(s, i), F.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " line,  ." + this.cssclass + " path", {
       "shape-rendering": "crispEdges",
       stroke: this.props.axiscolor,
       fill: "none"
-    }), M.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " text", {
+    }), F.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " text", {
       "font-family": "sans-serif",
       "font-size": this.props.fontsize + "px",
       fill: this.props.fontcolor,
       stroke: "none"
     });
   }, l.prototype.zoomed = function (t) {
-    this.props.tickvalues && this.filter_ticks(this.axis.tickValues, this.axis.scale().domain()), t ? "x" == this.props.xy ? this.elem.call(this.axis.scale(t.rescaleX(this.scale))) : this.elem.call(this.axis.scale(t.rescaleY(this.scale))) : this.elem.call(this.axis);
+    t ? "x" == this.props.xy ? this.elem.call(this.axis.scale(t.rescaleX(this.scale))) : this.elem.call(this.axis.scale(t.rescaleY(this.scale))) : this.elem.call(this.axis);
   }, l.prototype.setTicks = function (t, s) {
     this.tickNr = t, this.tickFormat = s;
   }, l.prototype.filter_ticks = function (t, s) {
     null != this.props.tickvalues && t(this.props.tickvalues.filter(function (t) {
       return t >= s[0] && t <= s[1];
     }));
-  }, M.Coordinates = c, c.prototype.xy = function (t, s, i) {
+  }, F.Coordinates = c, c.prototype.xy = function (t, s, i) {
     return s = "undefined" == typeof s ? 0 : s, i = "undefined" == typeof i ? 1 : i, [this.x(t[s]), this.y(t[i])];
   }, c.prototype.x_data = function (t) {
     return this.ax.x(t);
@@ -1099,7 +1082,7 @@ var mpld3 = createCommonjsModule(function (module) {
     return t * this.fig.width - this.ax.position[0];
   }, c.prototype.y_figure = function (t) {
     return (1 - t) * this.fig.height - this.ax.position[1];
-  }, M.Path = u, u.prototype = Object.create(F.prototype), u.prototype.constructor = u, u.prototype.requiredProps = ["data"], u.prototype.defaultProps = {
+  }, F.Path = u, u.prototype = Object.create(M.prototype), u.prototype.constructor = u, u.prototype.requiredProps = ["data"], u.prototype.defaultProps = {
     xindex: 0,
     yindex: 1,
     coordinates: "data",
@@ -1111,7 +1094,6 @@ var mpld3 = createCommonjsModule(function (module) {
     offset: null,
     offsetcoordinates: "data",
     alpha: 1,
-    drawstyle: "none",
     zorder: 1
   }, u.prototype.finiteFilter = function (t, s) {
     return isFinite(this.pathcoords.x(t[this.props.xindex])) && isFinite(this.pathcoords.y(t[this.props.yindex]));
@@ -1126,7 +1108,7 @@ var mpld3 = createCommonjsModule(function (module) {
     }
   }, u.prototype.elements = function (t) {
     return this.path;
-  }, M.PathCollection = d, d.prototype = Object.create(F.prototype), d.prototype.constructor = d, d.prototype.requiredProps = ["paths", "offsets"], d.prototype.defaultProps = {
+  }, F.PathCollection = d, d.prototype = Object.create(M.prototype), d.prototype.constructor = d, d.prototype.requiredProps = ["paths", "offsets"], d.prototype.defaultProps = {
     xindex: 0,
     yindex: 1,
     pathtransforms: [],
@@ -1134,16 +1116,15 @@ var mpld3 = createCommonjsModule(function (module) {
     offsetcoordinates: "data",
     offsetorder: "before",
     edgecolors: ["#000000"],
-    drawstyle: "none",
     edgewidths: [1],
     facecolors: ["#0000FF"],
     alphas: [1],
     zorder: 2
   }, d.prototype.transformFunc = function (t, s) {
     var i = this.props.pathtransforms,
-        o = 0 == i.length ? "" : M.getTransformation("matrix(" + n(i, s) + ")").toString(),
-        e = null === t || "undefined" == typeof t ? "translate(0, 0)" : "translate(" + this.offsetcoords.xy(t, this.props.xindex, this.props.yindex) + ")";
-    return "after" === this.props.offsetorder ? o + e : e + o;
+        e = 0 == i.length ? "" : F.getTransformation("matrix(" + n(i, s) + ")").toString(),
+        o = null === t || "undefined" == typeof t ? "translate(0, 0)" : "translate(" + this.offsetcoords.xy(t, this.props.xindex, this.props.yindex) + ")";
+    return "after" === this.props.offsetorder ? e + o : o + e;
   }, d.prototype.pathFunc = function (t, s) {
     return a().x(function (t) {
       return this.pathcoords.x(t[0]);
@@ -1158,18 +1139,18 @@ var mpld3 = createCommonjsModule(function (module) {
       fill: n(this.props.facecolors, s),
       "fill-opacity": n(this.props.alphas, s)
     },
-        o = "";
+        e = "";
 
-    for (var e in i) o += e + ":" + i[e] + ";";
+    for (var o in i) e += o + ":" + i[o] + ";";
 
-    return o;
+    return e;
   }, d.prototype.allFinite = function (t) {
     return t instanceof Array ? t.length == t.filter(isFinite).length : !0;
   }, d.prototype.draw = function () {
     this.offsetcoords.zoomable || this.pathcoords.zoomable ? this.group = this.ax.paths.append("svg:g") : this.group = this.ax.staticPaths.append("svg:g"), this.pathsobj = this.group.selectAll("paths").data(this.offsets.filter(this.allFinite)).enter().append("svg:path").attr("d", this.pathFunc.bind(this)).attr("class", "mpld3-path").attr("transform", this.transformFunc.bind(this)).attr("style", this.styleFunc.bind(this)).attr("vector-effect", "non-scaling-stroke");
   }, d.prototype.elements = function (t) {
     return this.group.selectAll("path");
-  }, M.Line = f, f.prototype = Object.create(u.prototype), f.prototype.constructor = f, f.prototype.requiredProps = ["data"], f.prototype.defaultProps = {
+  }, F.Line = f, f.prototype = Object.create(u.prototype), f.prototype.constructor = f, f.prototype.requiredProps = ["data"], f.prototype.defaultProps = {
     xindex: 0,
     yindex: 1,
     coordinates: "data",
@@ -1179,7 +1160,7 @@ var mpld3 = createCommonjsModule(function (module) {
     alpha: 1,
     zorder: 2,
     drawstyle: "none"
-  }, M.Markers = y, y.prototype = Object.create(d.prototype), y.prototype.constructor = y, y.prototype.requiredProps = ["data"], y.prototype.defaultProps = {
+  }, F.Markers = y, y.prototype = Object.create(d.prototype), y.prototype.constructor = y, y.prototype.requiredProps = ["data"], y.prototype.defaultProps = {
     xindex: 0,
     yindex: 1,
     coordinates: "data",
@@ -1189,41 +1170,38 @@ var mpld3 = createCommonjsModule(function (module) {
     alpha: 1,
     markersize: 6,
     markername: "circle",
-    drawstyle: "none",
     markerpath: null,
     zorder: 3
   }, y.prototype.pathFunc = function (t, s) {
     return this.marker;
-  }, M.Image = m, m.prototype = Object.create(F.prototype), m.prototype.constructor = m, m.prototype.requiredProps = ["data", "extent"], m.prototype.defaultProps = {
+  }, F.Image = g, g.prototype = Object.create(M.prototype), g.prototype.constructor = g, g.prototype.requiredProps = ["data", "extent"], g.prototype.defaultProps = {
     alpha: 1,
     coordinates: "data",
-    drawstyle: "none",
     zorder: 1
-  }, m.prototype.draw = function () {
+  }, g.prototype.draw = function () {
     this.image = this.ax.paths.append("svg:image"), this.image = this.image.attr("class", "mpld3-image").attr("xlink:href", "data:image/png;base64," + this.props.data).style("opacity", this.props.alpha).attr("preserveAspectRatio", "none"), this.updateDimensions();
-  }, m.prototype.elements = function (s) {
+  }, g.prototype.elements = function (s) {
     return t.select(this.image);
-  }, m.prototype.updateDimensions = function () {
+  }, g.prototype.updateDimensions = function () {
     var t = this.props.extent;
     this.image.attr("x", this.coords.x(t[0])).attr("y", this.coords.y(t[3])).attr("width", this.coords.x(t[1]) - this.coords.x(t[0])).attr("height", this.coords.y(t[2]) - this.coords.y(t[3]));
-  }, M.Text = g, g.prototype = Object.create(F.prototype), g.prototype.constructor = g, g.prototype.requiredProps = ["text", "position"], g.prototype.defaultProps = {
+  }, F.Text = m, m.prototype = Object.create(M.prototype), m.prototype.constructor = m, m.prototype.requiredProps = ["text", "position"], m.prototype.defaultProps = {
     coordinates: "data",
     h_anchor: "start",
     v_baseline: "auto",
     rotation: 0,
     fontsize: 11,
-    drawstyle: "none",
     color: "black",
     alpha: 1,
     zorder: 3
-  }, g.prototype.draw = function () {
+  }, m.prototype.draw = function () {
     "data" == this.props.coordinates ? this.coords.zoomable ? this.obj = this.ax.paths.append("text") : this.obj = this.ax.staticPaths.append("text") : this.obj = this.ax.baseaxes.append("text"), this.obj.attr("class", "mpld3-text").text(this.text).style("text-anchor", this.props.h_anchor).style("dominant-baseline", this.props.v_baseline).style("font-size", this.props.fontsize).style("fill", this.props.color).style("opacity", this.props.alpha), this.applyTransform();
-  }, g.prototype.elements = function (s) {
+  }, m.prototype.elements = function (s) {
     return t.select(this.obj);
-  }, g.prototype.applyTransform = function () {
+  }, m.prototype.applyTransform = function () {
     var t = this.coords.xy(this.position);
     this.obj.attr("x", t[0]).attr("y", t[1]), this.props.rotation && this.obj.attr("transform", "rotate(" + this.props.rotation + "," + t + ")");
-  }, M.Axes = x, x.prototype = Object.create(F.prototype), x.prototype.constructor = x, x.prototype.requiredProps = ["xlim", "ylim"], x.prototype.defaultProps = {
+  }, F.Axes = x, x.prototype = Object.create(M.prototype), x.prototype.constructor = x, x.prototype.requiredProps = ["xlim", "ylim"], x.prototype.defaultProps = {
     bbox: [.1, .1, .8, .8],
     axesbg: "#FFFFFF",
     axesbgalpha: 1,
@@ -1247,9 +1225,9 @@ var mpld3 = createCommonjsModule(function (module) {
     sharey: [],
     images: []
   }, x.prototype.draw = function () {
-    for (var s = 0; s < this.props.sharex.length; s++) this.sharex.push(M.get_element(this.props.sharex[s]));
+    for (var s = 0; s < this.props.sharex.length; s++) this.sharex.push(F.get_element(this.props.sharex[s]));
 
-    for (var s = 0; s < this.props.sharey.length; s++) this.sharey.push(M.get_element(this.props.sharey[s]));
+    for (var s = 0; s < this.props.sharey.length; s++) this.sharey.push(F.get_element(this.props.sharey[s]));
 
     this.baseaxes = this.fig.canvas.append("g").attr("transform", "translate(" + this.position[0] + "," + this.position[1] + ")").attr("width", this.width).attr("height", this.height).attr("class", "mpld3-baseaxes"), this.axes = this.baseaxes.append("g").attr("class", "mpld3-axes").style("pointer-events", "visiblefill"), this.clip = this.axes.append("svg:clipPath").attr("id", this.clipid).append("svg:rect").attr("x", 0).attr("y", 0).attr("width", this.width).attr("height", this.height), this.axesbg = this.axes.append("svg:rect").attr("width", this.width).attr("height", this.height).attr("class", "mpld3-axesbg").style("fill", this.props.axesbg).style("fill-opacity", this.props.axesbgalpha), this.pathsContainer = this.axes.append("g").attr("clip-path", "url(#" + this.clipid + ")").attr("x", 0).attr("y", 0).attr("width", this.width).attr("height", this.height).attr("class", "mpld3-paths-container"), this.paths = this.pathsContainer.append("g").attr("class", "mpld3-paths"), this.staticPaths = this.axes.append("g").attr("class", "mpld3-staticpaths"), this.brush = t.brush().extent([[0, 0], [this.fig.width, this.fig.height]]).on("start", this.brushStart.bind(this)).on("brush", this.brushMove.bind(this)).on("end", this.brushEnd.bind(this)).on("start.nokey", function () {
       t.select(window).on("keydown.brush keyup.brush", null);
@@ -1286,11 +1264,11 @@ var mpld3 = createCommonjsModule(function (module) {
     this.isZoomEnabled = !0, this.enableOrDisableZooming(), this.axes.style("cursor", "move");
   }, x.prototype.disableZoom = function () {
     this.isZoomEnabled = !1, this.enableOrDisableZooming(), this.axes.style("cursor", null);
-  }, x.prototype.doZoom = function (t, s, i, o) {
+  }, x.prototype.doZoom = function (t, s, i, e) {
     if (this.props.zoomable && this.zoom) {
       if (i) {
-        var e = this.axes.transition().duration(i).call(this.zoom.transform, s);
-        o && e.on("end", o);
+        var o = this.axes.transition().duration(i).call(this.zoom.transform, s);
+        e && o.on("end", e);
       } else this.axes.call(this.zoom.transform, s);
 
       t ? (this.lastTransform = s, this.sharex.forEach(function (t) {
@@ -1312,11 +1290,11 @@ var mpld3 = createCommonjsModule(function (module) {
   }, x.prototype.doBoxzoom = function (s) {
     if (s && this.brushG) {
       var i = s.map(this.lastTransform.invert, this.lastTransform),
-          o = i[1][0] - i[0][0],
-          e = i[1][1] - i[0][1],
+          e = i[1][0] - i[0][0],
+          o = i[1][1] - i[0][1],
           r = (i[0][0] + i[1][0]) / 2,
           n = (i[0][1] + i[1][1]) / 2,
-          a = o > e ? this.width / o : this.height / e,
+          a = e > o ? this.width / e : this.height / o,
           p = this.width / 2 - a * r,
           h = this.height / 2 - a * n,
           l = t.zoomIdentity.translate(p, h).scale(a);
@@ -1331,10 +1309,10 @@ var mpld3 = createCommonjsModule(function (module) {
     var s = t.event.selection;
     this.isBoxzoomEnabled && this.doBoxzoom(s), this.isLinkedBrushEnabled && (s || this.fig.endLinkedBrush(), this.isCurrentLinkedBrushTarget = !1);
   }, x.prototype.setTicks = function (t, s, i) {
-    this.axisList.forEach(function (o) {
-      o.props.xy == t && o.setTicks(s, i);
+    this.axisList.forEach(function (e) {
+      e.props.xy == t && e.setTicks(s, i);
     });
-  }, M.Toolbar = b, b.prototype = Object.create(F.prototype), b.prototype.constructor = b, b.prototype.defaultProps = {
+  }, F.Toolbar = b, b.prototype = Object.create(M.prototype), b.prototype.constructor = b, b.prototype.defaultProps = {
     buttons: ["reset", "move"]
   }, b.prototype.addButton = function (t) {
     this.buttons.push(new t(this));
@@ -1347,14 +1325,14 @@ var mpld3 = createCommonjsModule(function (module) {
       this.buttonsobj.transition(750).delay(250).attr("y", 16);
     }
 
-    M.insert_css("div#" + this.fig.figid + " .mpld3-toolbar image", {
+    F.insert_css("div#" + this.fig.figid + " .mpld3-toolbar image", {
       cursor: "pointer",
       opacity: .2,
       display: "inline-block",
       margin: "0px"
-    }), M.insert_css("div#" + this.fig.figid + " .mpld3-toolbar image.active", {
+    }), F.insert_css("div#" + this.fig.figid + " .mpld3-toolbar image.active", {
       opacity: .4
-    }), M.insert_css("div#" + this.fig.figid + " .mpld3-toolbar image.pressed", {
+    }), F.insert_css("div#" + this.fig.figid + " .mpld3-toolbar image.pressed", {
       opacity: .6
     }), this.fig.canvas.on("mouseenter", s.bind(this)).on("mouseleave", i.bind(this)).on("touchenter", s.bind(this)).on("touchstart", s.bind(this)), this.toolbar = this.fig.canvas.append("svg:svg").attr("width", 16 * this.buttons.length).attr("height", 16).attr("x", 2).attr("y", this.fig.height - 16 - 2).attr("class", "mpld3-toolbar"), this.buttonsobj = this.toolbar.append("svg:g").selectAll("buttons").data(this.buttons).enter().append("svg:image").attr("class", function (t) {
       return t.cssclass;
@@ -1370,7 +1348,7 @@ var mpld3 = createCommonjsModule(function (module) {
       t.select(this).classed("active", !1);
     });
 
-    for (var o = 0; o < this.buttons.length; o++) this.buttons[o].onDraw();
+    for (var e = 0; e < this.buttons.length; e++) this.buttons[e].onDraw();
   }, b.prototype.deactivate_all = function () {
     this.buttons.forEach(function (t) {
       t.deactivate();
@@ -1383,7 +1361,7 @@ var mpld3 = createCommonjsModule(function (module) {
     t.length > 0 && this.buttons.forEach(function (t) {
       t.actions.filter(s).length > 0 && t.deactivate();
     });
-  }, M.Button = v, v.prototype = Object.create(F.prototype), v.prototype.constructor = v, v.prototype.setState = function (t) {
+  }, F.Button = v, v.prototype = Object.create(M.prototype), v.prototype.constructor = v, v.prototype.setState = function (t) {
     t ? this.activate() : this.deactivate();
   }, v.prototype.click = function () {
     this.active ? this.deactivate() : this.activate();
@@ -1393,7 +1371,7 @@ var mpld3 = createCommonjsModule(function (module) {
     this.onDeactivate(), this.active = !1, this.toolbar.toolbar.select("." + this.cssclass).classed("pressed", !1);
   }, v.prototype.sticky = !1, v.prototype.actions = [], v.prototype.icon = function () {
     return "";
-  }, v.prototype.onActivate = function () {}, v.prototype.onDeactivate = function () {}, v.prototype.onDraw = function () {}, M.ButtonFactory = function (t) {
+  }, v.prototype.onActivate = function () {}, v.prototype.onDeactivate = function () {}, v.prototype.onDraw = function () {}, F.ButtonFactory = function (t) {
     function s(t) {
       v.call(this, t, this.buttonID);
     }
@@ -1404,7 +1382,7 @@ var mpld3 = createCommonjsModule(function (module) {
     for (var i in t) s.prototype[i] = t[i];
 
     return s;
-  }, M.Plugin = A, A.prototype = Object.create(F.prototype), A.prototype.constructor = A, A.prototype.requiredProps = [], A.prototype.defaultProps = {}, A.prototype.draw = function () {}, M.ResetPlugin = k, M.register_plugin("reset", k), k.prototype = Object.create(A.prototype), k.prototype.constructor = k, k.prototype.requiredProps = [], k.prototype.defaultProps = {}, M.ZoomPlugin = w, M.register_plugin("zoom", w), w.prototype = Object.create(A.prototype), w.prototype.constructor = w, w.prototype.requiredProps = [], w.prototype.defaultProps = {
+  }, F.Plugin = A, A.prototype = Object.create(M.prototype), A.prototype.constructor = A, A.prototype.requiredProps = [], A.prototype.defaultProps = {}, A.prototype.draw = function () {}, F.ResetPlugin = k, F.register_plugin("reset", k), k.prototype = Object.create(A.prototype), k.prototype.constructor = k, k.prototype.requiredProps = [], k.prototype.defaultProps = {}, F.ZoomPlugin = w, F.register_plugin("zoom", w), w.prototype = Object.create(A.prototype), w.prototype.constructor = w, w.prototype.requiredProps = [], w.prototype.defaultProps = {
     button: !0,
     enabled: null
   }, w.prototype.activate = function () {
@@ -1413,7 +1391,7 @@ var mpld3 = createCommonjsModule(function (module) {
     this.fig.disableZoom();
   }, w.prototype.draw = function () {
     this.props.enabled ? this.activate() : this.deactivate();
-  }, M.BoxZoomPlugin = B, M.register_plugin("boxzoom", B), B.prototype = Object.create(A.prototype), B.prototype.constructor = B, B.prototype.requiredProps = [], B.prototype.defaultProps = {
+  }, F.BoxZoomPlugin = B, F.register_plugin("boxzoom", B), B.prototype = Object.create(A.prototype), B.prototype.constructor = B, B.prototype.requiredProps = [], B.prototype.defaultProps = {
     button: !0,
     enabled: null
   }, B.prototype.activate = function () {
@@ -1422,7 +1400,7 @@ var mpld3 = createCommonjsModule(function (module) {
     this.fig.disableBoxzoom();
   }, B.prototype.draw = function () {
     this.props.enabled ? this.activate() : this.deactivate();
-  }, M.TooltipPlugin = z, M.register_plugin("tooltip", z), z.prototype = Object.create(A.prototype), z.prototype.constructor = z, z.prototype.requiredProps = ["id"], z.prototype.defaultProps = {
+  }, F.TooltipPlugin = z, F.register_plugin("tooltip", z), z.prototype = Object.create(A.prototype), z.prototype.constructor = z, z.prototype.requiredProps = ["id"], z.prototype.defaultProps = {
     labels: null,
     hoffset: 0,
     voffset: 10,
@@ -1434,54 +1412,54 @@ var mpld3 = createCommonjsModule(function (module) {
 
     function i(s, i) {
       if ("mouse" === a) {
-        var o = t.mouse(this.fig.canvas.node());
-        this.x = o[0] + this.props.hoffset, this.y = o[1] - this.props.voffset;
+        var e = t.mouse(this.fig.canvas.node());
+        this.x = e[0] + this.props.hoffset, this.y = e[1] - this.props.voffset;
       }
 
       this.tooltip.attr("x", this.x).attr("y", this.y);
     }
 
-    function o(t, s) {
+    function e(t, s) {
       this.tooltip.style("visibility", "hidden");
     }
 
-    var e = M.get_element(this.props.id, this.fig),
+    var o = F.get_element(this.props.id, this.fig),
         r = this.props.labels,
         a = this.props.location;
-    this.tooltip = this.fig.canvas.append("text").attr("class", "mpld3-tooltip-text").attr("x", 0).attr("y", 0).text("").style("visibility", "hidden"), "bottom left" == a || "top left" == a ? (this.x = e.ax.position[0] + 5 + this.props.hoffset, this.tooltip.style("text-anchor", "beginning")) : "bottom right" == a || "top right" == a ? (this.x = e.ax.position[0] + e.ax.width - 5 + this.props.hoffset, this.tooltip.style("text-anchor", "end")) : this.tooltip.style("text-anchor", "middle"), "bottom left" == a || "bottom right" == a ? this.y = e.ax.position[1] + e.ax.height - 5 + this.props.voffset : ("top left" == a || "top right" == a) && (this.y = e.ax.position[1] + 5 + this.props.voffset), e.elements().on("mouseover", s.bind(this)).on("mousemove", i.bind(this)).on("mouseout", o.bind(this));
-  }, M.LinkedBrushPlugin = E, M.register_plugin("linkedbrush", E), E.prototype = Object.create(M.Plugin.prototype), E.prototype.constructor = E, E.prototype.requiredProps = ["id"], E.prototype.defaultProps = {
+    this.tooltip = this.fig.canvas.append("text").attr("class", "mpld3-tooltip-text").attr("x", 0).attr("y", 0).text("").style("visibility", "hidden"), "bottom left" == a || "top left" == a ? (this.x = o.ax.position[0] + 5 + this.props.hoffset, this.tooltip.style("text-anchor", "beginning")) : "bottom right" == a || "top right" == a ? (this.x = o.ax.position[0] + o.ax.width - 5 + this.props.hoffset, this.tooltip.style("text-anchor", "end")) : this.tooltip.style("text-anchor", "middle"), "bottom left" == a || "bottom right" == a ? this.y = o.ax.position[1] + o.ax.height - 5 + this.props.voffset : ("top left" == a || "top right" == a) && (this.y = o.ax.position[1] + 5 + this.props.voffset), o.elements().on("mouseover", s.bind(this)).on("mousemove", i.bind(this)).on("mouseout", e.bind(this));
+  }, F.LinkedBrushPlugin = E, F.register_plugin("linkedbrush", E), E.prototype = Object.create(F.Plugin.prototype), E.prototype.constructor = E, E.prototype.requiredProps = ["id"], E.prototype.defaultProps = {
     button: !0,
     enabled: null
   }, E.prototype.activate = function () {
     this.fig.enableLinkedBrush();
   }, E.prototype.deactivate = function () {
     this.fig.disableLinkedBrush();
-  }, E.prototype.isPathInSelection = function (t, s, i, o) {
-    var e = o[0][0] < t[s] && o[1][0] > t[s] && o[0][1] < t[i] && o[1][1] > t[i];
-    return e;
+  }, E.prototype.isPathInSelection = function (t, s, i, e) {
+    var o = e[0][0] < t[s] && e[1][0] > t[s] && e[0][1] < t[i] && e[1][1] > t[i];
+    return o;
   }, E.prototype.invertSelection = function (t, s) {
     var i = [s.x.invert(t[0][0]), s.x.invert(t[1][0])],
-        o = [s.y.invert(t[1][1]), s.y.invert(t[0][1])];
-    return [[Math.min.apply(Math, i), Math.min.apply(Math, o)], [Math.max.apply(Math, i), Math.max.apply(Math, o)]];
+        e = [s.y.invert(t[1][1]), s.y.invert(t[0][1])];
+    return [[Math.min.apply(Math, i), Math.min.apply(Math, e)], [Math.max.apply(Math, i), Math.max.apply(Math, e)]];
   }, E.prototype.update = function (t) {
     t && this.pathCollectionsByAxes.forEach(function (s, i) {
-      var o = s[0],
-          e = this.objectsByAxes[i],
+      var e = s[0],
+          o = this.objectsByAxes[i],
           r = this.invertSelection(t, this.fig.axes[i]),
-          n = o.props.xindex,
-          a = o.props.yindex;
-      e.selectAll("path").classed("mpld3-hidden", function (t, s) {
+          n = e.props.xindex,
+          a = e.props.yindex;
+      o.selectAll("path").classed("mpld3-hidden", function (t, s) {
         return !this.isPathInSelection(t, n, a, r);
       }.bind(this));
     }.bind(this));
   }, E.prototype.end = function () {
     this.allObjects.selectAll("path").classed("mpld3-hidden", !1);
   }, E.prototype.draw = function () {
-    M.insert_css("#" + this.fig.figid + " path.mpld3-hidden", {
+    F.insert_css("#" + this.fig.figid + " path.mpld3-hidden", {
       stroke: "#ccc !important",
       fill: "#ccc !important"
     });
-    var t = M.get_element(this.props.id);
+    var t = F.get_element(this.props.id);
     if (!t) throw new Error("[LinkedBrush] Could not find path collection");
     if (!("offsets" in t.props)) throw new Error("[LinkedBrush] Figure is not a scatter plot.");
     this.objectClass = "mpld3-brushtarget-" + t.props[this.dataKey], this.pathCollectionsByAxes = this.fig.axes.map(function (s) {
@@ -1493,26 +1471,26 @@ var mpld3 = createCommonjsModule(function (module) {
     }.bind(this)), this.objectsByAxes = this.fig.axes.map(function (t) {
       return t.axes.selectAll("." + this.objectClass);
     }.bind(this)), this.allObjects = this.fig.canvas.selectAll("." + this.objectClass);
-  }, M.register_plugin("mouseposition", P), P.prototype = Object.create(M.Plugin.prototype), P.prototype.constructor = P, P.prototype.requiredProps = [], P.prototype.defaultProps = {
+  }, F.register_plugin("mouseposition", P), P.prototype = Object.create(F.Plugin.prototype), P.prototype.constructor = P, P.prototype.requiredProps = [], P.prototype.defaultProps = {
     fontsize: 12,
     fmt: ".3g"
   }, P.prototype.draw = function () {
-    for (var s = this.fig, i = t.format(this.props.fmt), o = s.canvas.append("text").attr("class", "mpld3-coordinates").style("text-anchor", "end").style("font-size", this.props.fontsize).attr("x", this.fig.width - 5).attr("y", this.fig.height - 5), e = 0; e < this.fig.axes.length; e++) {
+    for (var s = this.fig, i = t.format(this.props.fmt), e = s.canvas.append("text").attr("class", "mpld3-coordinates").style("text-anchor", "end").style("font-size", this.props.fontsize).attr("x", this.fig.width - 5).attr("y", this.fig.height - 5), o = 0; o < this.fig.axes.length; o++) {
       var r = function () {
-        var r = s.axes[e];
+        var r = s.axes[o];
         return function () {
           var s = t.mouse(this),
-              e = r.x.invert(s[0]),
+              o = r.x.invert(s[0]),
               n = r.y.invert(s[1]);
-          o.text("(" + i(e) + ", " + i(n) + ")");
+          e.text("(" + i(o) + ", " + i(n) + ")");
         };
       }();
 
-      s.axes[e].baseaxes.on("mousemove", r).on("mouseout", function () {
-        o.text("");
+      s.axes[o].baseaxes.on("mousemove", r).on("mouseout", function () {
+        e.text("");
       });
     }
-  }, M.Figure = O, O.prototype = Object.create(F.prototype), O.prototype.constructor = O, O.prototype.requiredProps = ["width", "height"], O.prototype.defaultProps = {
+  }, F.Figure = O, O.prototype = Object.create(M.prototype), O.prototype.constructor = O, O.prototype.requiredProps = ["width", "height"], O.prototype.defaultProps = {
     data: {},
     axes: [],
     plugins: [{
@@ -1525,14 +1503,14 @@ var mpld3 = createCommonjsModule(function (module) {
   }, O.prototype.addPlugin = function (t) {
     if (!t.type) return console.warn("unspecified plugin type. Skipping this");
     var i;
-    if (!(t.type in M.plugin_map)) return console.warn("Skipping unrecognized plugin: " + i);
-    i = M.plugin_map[t.type], (t.clear_toolbar || t.buttons) && console.warn("DEPRECATION WARNING: You are using pluginInfo.clear_toolbar or pluginInfo, which have been deprecated. Please see the build-in plugins for the new method to add buttons, otherwise contact the mpld3 maintainers.");
-    var o = s(t);
-    delete o.type;
-    var e = new i(this, o);
-    this.plugins.push(e), this.pluginsByType[t.type] = e;
+    if (!(t.type in F.plugin_map)) return console.warn("Skipping unrecognized plugin: " + i);
+    i = F.plugin_map[t.type], (t.clear_toolbar || t.buttons) && console.warn("DEPRECATION WARNING: You are using pluginInfo.clear_toolbar or pluginInfo, which have been deprecated. Please see the build-in plugins for the new method to add buttons, otherwise contact the mpld3 maintainers.");
+    var e = s(t);
+    delete e.type;
+    var o = new i(this, e);
+    this.plugins.push(o), this.pluginsByType[t.type] = o;
   }, O.prototype.draw = function () {
-    M.insert_css("div#" + this.figid, {
+    F.insert_css("div#" + this.figid, {
       "font-family": "Helvetica, sans-serif"
     }), this.canvas = this.root.append("svg:svg").attr("class", "mpld3-figure").attr("width", this.width).attr("height", this.height);
 
@@ -1582,8 +1560,8 @@ var mpld3 = createCommonjsModule(function (module) {
   }, O.prototype.toggleZoom = function () {
     this.isZoomEnabled ? this.disableZoom() : this.enableZoom();
   }, O.prototype.setTicks = function (t, s, i) {
-    this.axes.forEach(function (o) {
-      o.setTicks(t, s, i);
+    this.axes.forEach(function (e) {
+      e.setTicks(t, s, i);
     });
   }, O.prototype.setXTicks = function (t, s) {
     this.setTicks("x", t, s);
@@ -1591,27 +1569,27 @@ var mpld3 = createCommonjsModule(function (module) {
     this.setTicks("y", t, s);
   }, O.prototype.get_data = function (t) {
     return null === t || "undefined" == typeof t ? null : "string" == typeof t ? this.data[t] : t;
-  }, M.PlotElement = F, F.prototype.requiredProps = [], F.prototype.defaultProps = {}, F.prototype.processProps = function (t) {
+  }, F.PlotElement = M, M.prototype.requiredProps = [], M.prototype.defaultProps = {}, M.prototype.processProps = function (t) {
     t = s(t);
     var i = {},
-        o = this.name();
+        e = this.name();
     this.requiredProps.forEach(function (s) {
-      if (!(s in t)) throw "property '" + s + "' must be specified for " + o;
+      if (!(s in t)) throw "property '" + s + "' must be specified for " + e;
       i[s] = t[s], delete t[s];
     });
 
-    for (var e in this.defaultProps) e in t ? (i[e] = t[e], delete t[e]) : i[e] = this.defaultProps[e];
+    for (var o in this.defaultProps) o in t ? (i[o] = t[o], delete t[o]) : i[o] = this.defaultProps[o];
 
-    "id" in t ? (i.id = t.id, delete t.id) : "id" in i || (i.id = M.generateId());
+    "id" in t ? (i.id = t.id, delete t.id) : "id" in i || (i.id = F.generateId());
 
-    for (var e in t) console.warn("Unrecognized property '" + e + "' for object " + this.name() + " (value = " + t[e] + ").");
+    for (var o in t) console.warn("Unrecognized property '" + o + "' for object " + this.name() + " (value = " + t[o] + ").");
 
     return i;
-  }, F.prototype.name = function () {
+  }, M.prototype.name = function () {
     var t = /function (.{1,})\(/,
         s = t.exec(this.constructor.toString());
     return s && s.length > 1 ? s[1] : "";
-  }, module.exports ? module.exports = M : this.mpld3 = M, console.log("Loaded mpld3 version " + M.version);
+  }, module.exports ? module.exports = F : this.mpld3 = F, console.log("Loaded mpld3 version " + F.version);
 }(d3);
 });
 
@@ -2410,9 +2388,136 @@ var script = {
   }
 };
 
+function normalizeComponent(compiledTemplate, injectStyle, defaultExport, scopeId, isFunctionalTemplate, moduleIdentifier /* server only */, isShadowMode, createInjector, createInjectorSSR, createInjectorShadow) {
+    if (typeof isShadowMode === 'function') {
+        createInjectorSSR = createInjector;
+        createInjector = isShadowMode;
+        isShadowMode = false;
+    }
+    // Vue.extend constructor export interop
+    const options = typeof defaultExport === 'function' ? defaultExport.options : defaultExport;
+    // render functions
+    if (compiledTemplate && compiledTemplate.render) {
+        options.render = compiledTemplate.render;
+        options.staticRenderFns = compiledTemplate.staticRenderFns;
+        options._compiled = true;
+        // functional template
+        if (isFunctionalTemplate) {
+            options.functional = true;
+        }
+    }
+    // scopedId
+    if (scopeId) {
+        options._scopeId = scopeId;
+    }
+    let hook;
+    if (moduleIdentifier) {
+        // server build
+        hook = function (context) {
+            // 2.3 injection
+            context =
+                context || // cached call
+                    (this.$vnode && this.$vnode.ssrContext) || // stateful
+                    (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext); // functional
+            // 2.2 with runInNewContext: true
+            if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
+                context = __VUE_SSR_CONTEXT__;
+            }
+            // inject component styles
+            if (injectStyle) {
+                injectStyle.call(this, createInjectorSSR(context));
+            }
+            // register component module identifier for async chunk inference
+            if (context && context._registeredComponents) {
+                context._registeredComponents.add(moduleIdentifier);
+            }
+        };
+        // used by ssr in case component is cached and beforeCreate
+        // never gets called
+        options._ssrRegister = hook;
+    }
+    else if (injectStyle) {
+        hook = isShadowMode
+            ? function () {
+                injectStyle.call(this, createInjectorShadow(this.$root.$options.shadowRoot));
+            }
+            : function (context) {
+                injectStyle.call(this, createInjector(context));
+            };
+    }
+    if (hook) {
+        if (options.functional) {
+            // register for functional component in vue file
+            const originalRender = options.render;
+            options.render = function renderWithStyleInjection(h, context) {
+                hook.call(context);
+                return originalRender(h, context);
+            };
+        }
+        else {
+            // inject component registration as beforeCreate hook
+            const existing = options.beforeCreate;
+            options.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+        }
+    }
+    return defaultExport;
+}
+
+const isOldIE = typeof navigator !== 'undefined' &&
+    /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+function createInjector(context) {
+    return (id, style) => addStyle(id, style);
+}
+const HEAD = document.head || document.getElementsByTagName('head')[0];
+const styles = {};
+function addStyle(id, css) {
+    const group = isOldIE ? css.media || 'default' : id;
+    const style = styles[group] || (styles[group] = { ids: new Set(), styles: [] });
+    if (!style.ids.has(id)) {
+        style.ids.add(id);
+        let code = css.source;
+        if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+                '\n/*# sourceMappingURL=data:application/json;base64,' +
+                    btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+                    ' */';
+        }
+        if (!style.element) {
+            style.element = document.createElement('style');
+            style.element.type = 'text/css';
+            if (css.media)
+                style.element.setAttribute('media', css.media);
+            HEAD.appendChild(style.element);
+        }
+        if ('styleSheet' in style.element) {
+            style.styles.push(code);
+            style.element.styleSheet.cssText = style.styles
+                .filter(Boolean)
+                .join('\n');
+        }
+        else {
+            const index = style.ids.size - 1;
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index])
+                style.element.removeChild(nodes[index]);
+            if (nodes.length)
+                style.element.insertBefore(textNode, nodes[index]);
+            else
+                style.element.appendChild(textNode);
+        }
+    }
+}
+
 /* script */
-            const __vue_script__ = script;
-            
+const __vue_script__ = script;
+// For security concerns, we use only base name in production mode. See https://github.com/vuejs/rollup-plugin-vue/issues/258
+script.__file = "PopupSpinner.vue";
+
 /* template */
 var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('modal',{staticStyle:{"opacity":"1.0"},attrs:{"name":"popup-spinner","height":_vm.modalHeight,"width":_vm.modalWidth,"click-to-close":false},on:{"before-open":_vm.beforeOpen,"before-close":_vm.beforeClose}},[_c('div',{staticClass:"overlay-box"},[_c('div',{staticClass:"loader-box"},[_c('fulfilling-bouncing-circle-spinner',{attrs:{"color":_vm.color,"size":_vm.spinnerSize,"animation-duration":2000}})],1),_vm._v(" "),(_vm.title !== '')?_c('div',{style:(_vm.titleStyle)},[_vm._v("\n      "+_vm._s(_vm.title)+"\n    ")]):_vm._e(),_vm._v(" "),(_vm.hasCancelButton)?_c('div',{staticStyle:{"padding":"13px"}},[_c('button',{style:(_vm.cancelButtonStyle),on:{"click":_vm.cancel}},[_vm._v("Cancel")])]):_vm._e()])])};
 var __vue_staticRenderFns__ = [];
@@ -2420,11 +2525,11 @@ var __vue_staticRenderFns__ = [];
   /* style */
   const __vue_inject_styles__ = function (inject) {
     if (!inject) return
-    inject("data-v-3bb427d4_0", { source: ".loader-box[data-v-3bb427d4]{display:flex;justify-content:center}.overlay-box[data-v-3bb427d4]{display:flex;flex-direction:column;height:100%;justify-content:space-evenly}", map: undefined, media: undefined });
+    inject("data-v-1badb2fa_0", { source: ".loader-box[data-v-1badb2fa]{display:flex;justify-content:center}.overlay-box[data-v-1badb2fa]{display:flex;flex-direction:column;height:100%;justify-content:space-evenly}", map: undefined, media: undefined });
 
   };
   /* scoped */
-  const __vue_scope_id__ = "data-v-3bb427d4";
+  const __vue_scope_id__ = "data-v-1badb2fa";
   /* module identifier */
   const __vue_module_identifier__ = undefined;
   /* functional template */
@@ -2433,14 +2538,14 @@ var __vue_staticRenderFns__ = [];
   
 
   
-  var PopupSpinner = __vue_normalize__(
+  var PopupSpinner = normalizeComponent(
     { render: __vue_render__, staticRenderFns: __vue_staticRenderFns__ },
     __vue_inject_styles__,
     __vue_script__,
     __vue_scope_id__,
     __vue_is_functional_template__,
     __vue_module_identifier__,
-    __vue_create_injector__,
+    createInjector,
     undefined
   );
 
@@ -2562,8 +2667,10 @@ var script$1 = {
 };
 
 /* script */
-            const __vue_script__$1 = script$1;
-            
+const __vue_script__$1 = script$1;
+// For security concerns, we use only base name in production mode. See https://github.com/vuejs/rollup-plugin-vue/issues/258
+script$1.__file = "Notification.vue";
+
 /* template */
 var __vue_render__$1 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"alert open alert-with-icon",class:[_vm.verticalAlign, _vm.horizontalAlign, _vm.alertType],style:(_vm.customPosition),attrs:{"role":"alert","data-notify":"container","data-notify-position":"top-center"}},[_c('div',{staticClass:"notification-box"},[_c('div',[_c('span',{staticClass:"alert-icon",class:_vm.icon,attrs:{"data-notify":"message"}})]),_vm._v(" "),_c('div',{staticClass:"message-box"},[_c('div',{staticClass:"message",attrs:{"data-notify":"message"},domProps:{"innerHTML":_vm._s(_vm.message)}})]),_vm._v(" "),_c('div',[_c('button',{staticClass:"btn__trans close-button",attrs:{"aria-hidden":"true","data-notify":"dismiss"},on:{"click":_vm.close}},[_c('i',{staticClass:"ti-close"})])])])])};
 var __vue_staticRenderFns__$1 = [];
@@ -2571,12 +2678,12 @@ var __vue_staticRenderFns__$1 = [];
   /* style */
   const __vue_inject_styles__$1 = function (inject) {
     if (!inject) return
-    inject("data-v-61be677e_0", { source: "@import url(https://cdn.jsdelivr.net/gh/lykmapipo/themify-icons@0.1.2/css/themify-icons.css);", map: undefined, media: undefined })
-,inject("data-v-61be677e_1", { source: ".fade-enter-active[data-v-61be677e],.fade-leave-active[data-v-61be677e]{transition:opacity .3s}.fade-enter[data-v-61be677e],.fade-leave-to[data-v-61be677e]{opacity:0}.close-button[data-v-61be677e],.close-button[data-v-61be677e]:hover{background:0 0;line-height:0;padding:5px 5px;margin-left:10px;border-radius:3px}.close-button[data-v-61be677e]:hover{background:#ffffff63;color:#737373}.alert[data-v-61be677e]{border:0;border-radius:0;color:#fff;padding:20px 15px;font-size:14px;z-index:100;display:inline-block;position:fixed;transition:all .5s ease-in-out}.container .alert[data-v-61be677e]{border-radius:4px}.alert.center[data-v-61be677e]{left:0;right:0;margin:0 auto}.alert.left[data-v-61be677e]{left:20px}.alert.right[data-v-61be677e]{right:20px}.container .alert[data-v-61be677e]{border-radius:0}.alert .alert-icon[data-v-61be677e]{font-size:30px;margin-right:5px}.alert .close~span[data-v-61be677e]{display:inline-block;max-width:89%}.alert[data-notify=container][data-v-61be677e]{padding:0;border-radius:2px}.alert span[data-notify=icon][data-v-61be677e]{font-size:30px;display:block;left:15px;position:absolute;top:50%;margin-top:-20px}.alert-info[data-v-61be677e]{background-color:#7ce4fe;color:#3091b2}.alert-success[data-v-61be677e]{background-color:#080;color:#fff}.alert-warning[data-v-61be677e]{background-color:#e29722;color:#fff}.alert-danger[data-v-61be677e]{background-color:#ff8f5e;color:#b33c12}.message-box[data-v-61be677e]{font-size:15px;align-content:center;max-width:400px;min-width:150px;padding-left:10px;flex-grow:1}.message-box .message[data-v-61be677e]{line-height:1.5em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;width:100%}.notification-box[data-v-61be677e]{display:flex;justify-content:flex-start;padding:10px 15px}.notification-box>div[data-v-61be677e]{align-self:center}.btn__trans[data-v-61be677e]{font-size:18px;color:#fff;background-color:transparent;background-repeat:no-repeat;border:none;cursor:pointer;overflow:hidden;background-image:none;outline:0}", map: undefined, media: undefined });
+    inject("data-v-33f161c6_0", { source: "@import url(https://cdn.jsdelivr.net/gh/lykmapipo/themify-icons@0.1.2/css/themify-icons.css);", map: undefined, media: undefined })
+,inject("data-v-33f161c6_1", { source: ".fade-enter-active[data-v-33f161c6],.fade-leave-active[data-v-33f161c6]{transition:opacity .3s}.fade-enter[data-v-33f161c6],.fade-leave-to[data-v-33f161c6]{opacity:0}.close-button[data-v-33f161c6],.close-button[data-v-33f161c6]:hover{background:0 0;line-height:0;padding:5px 5px;margin-left:10px;border-radius:3px}.close-button[data-v-33f161c6]:hover{background:#ffffff63;color:#737373}.alert[data-v-33f161c6]{border:0;border-radius:0;color:#fff;padding:20px 15px;font-size:14px;z-index:100;display:inline-block;position:fixed;transition:all .5s ease-in-out}.container .alert[data-v-33f161c6]{border-radius:4px}.alert.center[data-v-33f161c6]{left:0;right:0;margin:0 auto}.alert.left[data-v-33f161c6]{left:20px}.alert.right[data-v-33f161c6]{right:20px}.container .alert[data-v-33f161c6]{border-radius:0}.alert .alert-icon[data-v-33f161c6]{font-size:30px;margin-right:5px}.alert .close~span[data-v-33f161c6]{display:inline-block;max-width:89%}.alert[data-notify=container][data-v-33f161c6]{padding:0;border-radius:2px}.alert span[data-notify=icon][data-v-33f161c6]{font-size:30px;display:block;left:15px;position:absolute;top:50%;margin-top:-20px}.alert-info[data-v-33f161c6]{background-color:#7ce4fe;color:#3091b2}.alert-success[data-v-33f161c6]{background-color:#080;color:#fff}.alert-warning[data-v-33f161c6]{background-color:#e29722;color:#fff}.alert-danger[data-v-33f161c6]{background-color:#ff8f5e;color:#b33c12}.message-box[data-v-33f161c6]{font-size:15px;align-content:center;max-width:400px;min-width:150px;padding-left:10px;flex-grow:1}.message-box .message[data-v-33f161c6]{line-height:1.5em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;width:100%}.notification-box[data-v-33f161c6]{display:flex;justify-content:flex-start;padding:10px 15px}.notification-box>div[data-v-33f161c6]{align-self:center}.btn__trans[data-v-33f161c6]{font-size:18px;color:#fff;background-color:transparent;background-repeat:no-repeat;border:none;cursor:pointer;overflow:hidden;background-image:none;outline:0}", map: undefined, media: undefined });
 
   };
   /* scoped */
-  const __vue_scope_id__$1 = "data-v-61be677e";
+  const __vue_scope_id__$1 = "data-v-33f161c6";
   /* module identifier */
   const __vue_module_identifier__$1 = undefined;
   /* functional template */
@@ -2585,14 +2692,14 @@ var __vue_staticRenderFns__$1 = [];
   
 
   
-  var Notification = __vue_normalize__(
+  var Notification = normalizeComponent(
     { render: __vue_render__$1, staticRenderFns: __vue_staticRenderFns__$1 },
     __vue_inject_styles__$1,
     __vue_script__$1,
     __vue_scope_id__$1,
     __vue_is_functional_template__$1,
     __vue_module_identifier__$1,
-    __vue_create_injector__,
+    createInjector,
     undefined
   );
 
@@ -2621,8 +2728,10 @@ var script$2 = {
 };
 
 /* script */
-            const __vue_script__$2 = script$2;
-            
+const __vue_script__$2 = script$2;
+// For security concerns, we use only base name in production mode. See https://github.com/vuejs/rollup-plugin-vue/issues/258
+script$2.__file = "Notifications.vue";
+
 /* template */
 var __vue_render__$2 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"notifications"},[_c('transition-group',{attrs:{"name":"list"},on:{"on-close":_vm.removeNotification}},_vm._l((_vm.notifications),function(notification,index){return _c('notification',{attrs:{"message":notification.message,"icon":notification.icon,"type":notification.type,"vertical-align":notification.verticalAlign,"horizontal-align":notification.horizontalAlign,"timeout":notification.timeout,"timestamp":notification.timestamp}})}),1)],1)};
 var __vue_staticRenderFns__$2 = [];
@@ -2630,7 +2739,7 @@ var __vue_staticRenderFns__$2 = [];
   /* style */
   const __vue_inject_styles__$2 = function (inject) {
     if (!inject) return
-    inject("data-v-321d3bee_0", { source: ".list-item{display:inline-block;margin-right:10px}.list-enter-active,.list-leave-active{transition:all 1s}.list-enter,.list-leave-to{opacity:0;transform:translateY(-30px)}", map: undefined, media: undefined });
+    inject("data-v-301ae192_0", { source: ".list-item{display:inline-block;margin-right:10px}.list-enter-active,.list-leave-active{transition:all 1s}.list-enter,.list-leave-to{opacity:0;transform:translateY(-30px)}", map: undefined, media: undefined });
 
   };
   /* scoped */
@@ -2643,14 +2752,14 @@ var __vue_staticRenderFns__$2 = [];
   
 
   
-  var Notifications = __vue_normalize__(
+  var Notifications = normalizeComponent(
     { render: __vue_render__$2, staticRenderFns: __vue_staticRenderFns__$2 },
     __vue_inject_styles__$2,
     __vue_script__$2,
     __vue_scope_id__$2,
     __vue_is_functional_template__$2,
     __vue_module_identifier__$2,
-    __vue_create_injector__,
+    createInjector,
     undefined
   );
 
@@ -2715,8 +2824,10 @@ var script$3 = {
 };
 
 /* script */
-            const __vue_script__$3 = script$3;
-            
+const __vue_script__$3 = script$3;
+// For security concerns, we use only base name in production mode. See https://github.com/vuejs/rollup-plugin-vue/issues/258
+script$3.__file = "Dropdown.vue";
+
 /* template */
 var __vue_render__$3 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{directives:[{name:"click-outside",rawName:"v-click-outside",value:(_vm.closeDropDown),expression:"closeDropDown"}],staticClass:"dropdown",class:{open:_vm.isOpen}},[_c('a',{staticClass:"dropdown-toggle btn-rotate",style:(_vm.style),attrs:{"href":"javascript:void(0)","data-toggle":"dropdown"},on:{"click":_vm.toggleDropDown}},[_vm._t("title",[_c('i',{class:_vm.icon}),_vm._v(" "),_c('div',{staticClass:"dropdown-title"},[_vm._v(_vm._s(_vm.title)+"\n        "),_c('b',{staticClass:"caret"})])])],2),_vm._v(" "),_c('ul',{staticClass:"dropdown-menu"},[_vm._t("default")],2)])};
 var __vue_staticRenderFns__$3 = [];
@@ -2724,7 +2835,7 @@ var __vue_staticRenderFns__$3 = [];
   /* style */
   const __vue_inject_styles__$3 = function (inject) {
     if (!inject) return
-    inject("data-v-73a696f8_0", { source: ".dropdown-toggle{cursor:pointer;display:flex;justify-content:space-evenly;text-transform:initial}.dropdown-toggle:after{position:absolute;right:10px;top:50%;margin-top:-2px}.dropdown-menu{margin-top:20px}", map: undefined, media: undefined });
+    inject("data-v-964d9d2c_0", { source: ".dropdown-toggle{cursor:pointer;display:flex;justify-content:space-evenly;text-transform:initial}.dropdown-toggle:after{position:absolute;right:10px;top:50%;margin-top:-2px}.dropdown-menu{margin-top:20px}", map: undefined, media: undefined });
 
   };
   /* scoped */
@@ -2737,14 +2848,14 @@ var __vue_staticRenderFns__$3 = [];
   
 
   
-  var Dropdown = __vue_normalize__(
+  var Dropdown = normalizeComponent(
     { render: __vue_render__$3, staticRenderFns: __vue_staticRenderFns__$3 },
     __vue_inject_styles__$3,
     __vue_script__$3,
     __vue_scope_id__$3,
     __vue_is_functional_template__$3,
     __vue_module_identifier__$3,
-    __vue_create_injector__,
+    createInjector,
     undefined
   );
 
