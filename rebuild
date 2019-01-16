@@ -1,0 +1,4 @@
+#!/bin/bash
+rm -r ./dist/
+npm install
+npm run build
