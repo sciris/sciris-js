@@ -1,6 +1,6 @@
 {
   "name": "sciris-js",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "author": "Sciris <info@sciris.org>",
   "repository": {
@@ -44,6 +44,7 @@
     "name": "sciris-js",
     "moduleName": "sciris-js"
   },
+  "bundleDependencies": false,
   "dependencies": {
     "acorn": "^6.0.2",
     "axios": "^0.18.0",
