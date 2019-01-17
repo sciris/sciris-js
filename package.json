@@ -1,6 +1,6 @@
 {
   "name": "sciris-js",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "author": "Sciris <info@sciris.org>",
   "repository": {
@@ -52,14 +52,15 @@
     "crypto": "^1.0.1",
     "crypto-api": "^0.8.0",
     "crypto-js": "^3.1.9-1",
+    "epic-spinners": "^1.0.4",
     "file-saver": "^2.0.0-rc.4",
     "js-sha256": "^0.9.0",
+    "mpld3": "^0.4.1",
     "vue": "^2.5.17",
     "vue-clickaway": "^2.2.2",
     "vue-dialog-drag": "^0.1.29",
     "vue-js-modal": "^1.3.26",
-    "vue-progressbar": "git+https://github.com/sciris/vue-progressbar.git",
-    "epic-spinners": "^1.0.4"
+    "vue-progressbar": "git+https://github.com/sciris/vue-progressbar.git"
   },
   "devDependencies": {
     "babel": "^6.23.0",
