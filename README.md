@@ -23,6 +23,7 @@ npm install --save sciris-js
 ## Rebuild project for release
 
 ```
+npm install
 npm run build
 ```
 
