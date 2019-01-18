@@ -140,7 +140,7 @@ function reloadGraphs(vm, project_id, cache_id, showNoCacheError, iscalibration,
   utils.validateYears(vm)  // Make sure the start end years are in the right range.
   status.start(vm)
   rpcs.rpc('plot_results', [project_id, cache_id, vm.plotOptions],
-    {tool:vm.$globaltool, 'cascade':null, plotyear:vm.endYear, pops:vm.activePop, calibration:iscalibration, plotbudget:plotbudget})
+    {tool:vm.toolName(), 'cascade':null, plotyear:vm.endYear, pops:vm.activePop, calibration:iscalibration, plotbudget:plotbudget})
     .then(response => {
       vm.table = response.data.table
       vm.makeGraphs(response.data)
