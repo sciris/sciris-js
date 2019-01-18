@@ -5,7 +5,7 @@
 import utils from './utils.js'
 import rpcs from './rpc-service.js'
 import status from './status-service.js'
-import mpld3 from './mpld3.js'
+import mpld3 from 'mpld3'
 
 function getPlotOptions(vm, project_id) {
   return new Promise((resolve, reject) => {
