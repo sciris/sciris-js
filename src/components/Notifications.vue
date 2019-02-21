@@ -13,6 +13,7 @@ Last updated: 2018-07-11
 
       <notification 
         v-for="(notification,index) in notifications" 
+        :key="index+0" 
         :message="notification.message" 
         :icon="notification.icon" 
         :type="notification.type" 
