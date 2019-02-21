@@ -50,19 +50,20 @@ function succeed(vm, successMessage) {
 
 function fail(vm, failMessage, error) {
   console.log(failMessage)
-  var error = error || {
-    "message": "unknown message"
-  };
-  var msgsplit = error.message.split('Exception details:') // WARNING, must match sc_app.py
-  var usermsg = msgsplit[0].replace(/\n/g,'<br>')
-  console.log(error.message)
-  console.log(usermsg)
+  if (error) {
+    var msgsplit = error.message.split('Exception details:') // WARNING, must match sc_app.py
+    var usererr = msgsplit[0].replace(/\n/g,'<br>')
+    console.log(error.message)
+    console.log(usererr)
+    var usermsg = '<b>' + failMessage + '</b>' + '<br><br>' + usermsg
+  } else {
+    var usermsg = '<b>' + failMessage + '</b>'
+  }
   complete = 100;
-
   var notif = {}
   if (failMessage !== '') {  // Put up a failure notification.
     notif = {
-      message: '<b>' + failMessage + '</b>' + '<br><br>' + usermsg,
+      message: usermsg,
       icon: 'ti-face-sad',
       type: 'warning',
       verticalAlign: 'top',
@@ -73,8 +74,27 @@ function fail(vm, failMessage, error) {
   EventBus.$emit(events.EVENT_STATUS_FAIL, vm, notif);
 }
 
+function notify(vm, notifyMessage) {
+  console.log(notifyMessage)
+  complete = 100; // End the counter
+
+  var notif = {}
+  if (notifyMessage !== '') { // Notification popup.
+    notif = {
+      message: notifyMessage,
+      icon: 'ti-info',
+      type: 'warn',
+      verticalAlign: 'top',
+      horizontalAlign: 'right',
+      timeout: 2000
+    }
+  }  
+  EventBus.$emit(events.EVENT_STATUS_NOTIFY, vm, notif);
+}
+
 export default {
   start,
   succeed,
   fail,
+  notify,
 }

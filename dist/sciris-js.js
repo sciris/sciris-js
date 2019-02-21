@@ -8367,11 +8367,13 @@
   const EVENT_STATUS_START = 'status:start';
   const EVENT_STATUS_UPDATE = 'status:update';
   const EVENT_STATUS_SUCCEED = 'status:success';
+  const EVENT_STATUS_NOTIFY = 'status:notify';
   const EVENT_STATUS_FAIL = 'status:fail';
   const events$1 = {
     EVENT_STATUS_START,
     EVENT_STATUS_UPDATE,
     EVENT_STATUS_SUCCEED,
+    EVENT_STATUS_NOTIFY,
     EVENT_STATUS_FAIL
   };
   const EventBus = new Vue();
@@ -8384,6 +8386,9 @@
   EventBus.$on(events$1.EVENT_STATUS_SUCCEED, (vm, notif) => {
     if (vm.$spinner) vm.$spinner.stop();
     if (vm.$Progress) vm.$Progress.finish();
+    if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
+  });
+  EventBus.$on(events$1.EVENT_STATUS_NOTIFY, (vm, notif) => {
     if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
   });
   EventBus.$on(events$1.EVENT_STATUS_FAIL, (vm, notif) => {
@@ -8446,21 +8451,25 @@
 
   function fail(vm, failMessage, error) {
     console.log(failMessage);
-    var error = error || {
-      "message": "unknown message"
-    };
-    var msgsplit = error.message.split('Exception details:'); // WARNING, must match sc_app.py
 
-    var usermsg = msgsplit[0].replace(/\n/g, '<br>');
-    console.log(error.message);
-    console.log(usermsg);
+    if (error) {
+      var msgsplit = error.message.split('Exception details:'); // WARNING, must match sc_app.py
+
+      var usererr = msgsplit[0].replace(/\n/g, '<br>');
+      console.log(error.message);
+      console.log(usererr);
+      var usermsg = '<b>' + failMessage + '</b>' + '<br><br>' + usermsg;
+    } else {
+      var usermsg = '<b>' + failMessage + '</b>';
+    }
+
     complete = 100;
     var notif = {};
 
     if (failMessage !== '') {
       // Put up a failure notification.
       notif = {
-        message: '<b>' + failMessage + '</b>' + '<br><br>' + usermsg,
+        message: usermsg,
         icon: 'ti-face-sad',
         type: 'warning',
         verticalAlign: 'top',
@@ -8472,10 +8481,32 @@
     EventBus.$emit(events$1.EVENT_STATUS_FAIL, vm, notif);
   }
 
+  function notify(vm, notifyMessage) {
+    console.log(notifyMessage);
+    complete = 100; // End the counter
+
+    var notif = {};
+
+    if (notifyMessage !== '') {
+      // Notification popup.
+      notif = {
+        message: notifyMessage,
+        icon: 'ti-info',
+        type: 'warn',
+        verticalAlign: 'top',
+        horizontalAlign: 'right',
+        timeout: 2000
+      };
+    }
+
+    EventBus.$emit(events$1.EVENT_STATUS_NOTIFY, vm, notif);
+  }
+
   var status = {
     start,
     succeed,
-    fail
+    fail,
+    notify
   };
 
   /*
