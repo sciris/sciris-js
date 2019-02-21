@@ -5,7 +5,7 @@
 import utils from './utils.js'
 import rpcs from './rpc-service.js'
 import status from './status-service.js'
-import mpld3 from './mpld3.js'
+import mpld3 from 'mpld3'
 
 function getPlotOptions(vm, project_id) {
   return new Promise((resolve, reject) => {
@@ -140,7 +140,7 @@ function reloadGraphs(vm, project_id, cache_id, showNoCacheError, iscalibration,
   utils.validateYears(vm)  // Make sure the start end years are in the right range.
   status.start(vm)
   rpcs.rpc('plot_results', [project_id, cache_id, vm.plotOptions],
-    {tool:vm.$globaltool, 'cascade':null, plotyear:vm.endYear, pops:vm.activePop, calibration:iscalibration, plotbudget:plotbudget})
+    {tool:vm.toolName(), 'cascade':null, plotyear:vm.endYear, pops:vm.activePop, calibration:iscalibration, plotbudget:plotbudget})
     .then(response => {
       vm.table = response.data.table
       vm.makeGraphs(response.data)
