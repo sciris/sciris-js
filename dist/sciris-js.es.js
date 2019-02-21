@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.2.2
+ * sciris-js v0.2.3
  * (c) 2019-present Sciris <info@sciris.org>
  * Released under the MIT License.
  */
