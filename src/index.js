@@ -15,6 +15,7 @@ const upload = rpcs.upload;
 const succeed = status.succeed;
 const fail = status.fail;
 const start = status.start;
+const notify = status.notify;
 
 const updateSets = shared.updateSets; 
 const updateDatasets = shared.updateDatasets;
