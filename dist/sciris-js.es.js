@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.2.4
+ * sciris-js v0.2.5
  * (c) 2019-present Sciris <info@sciris.org>
  * Released under the MIT License.
  */
@@ -1899,6 +1899,7 @@ const upload = rpcs.upload;
 const succeed$1 = status.succeed;
 const fail$1 = status.fail;
 const start$1 = status.start;
+const notify$1 = status.notify;
 const updateSets$1 = shared.updateSets;
 const updateDatasets$1 = shared.updateDatasets;
 const exportGraphs$1 = shared.exportGraphs;
@@ -1992,6 +1993,7 @@ const sciris = {
   succeed: succeed$1,
   fail: fail$1,
   start: start$1,
+  notify: notify$1,
   // task-service.js
   getTaskResultWaiting: getTaskResultWaiting$1,
   getTaskResultPolling: getTaskResultPolling$1,

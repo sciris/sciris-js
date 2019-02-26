@@ -115,6 +115,7 @@ const sciris = {
   succeed,
   fail,
   start,
+  notify,
 
   // task-service.js
   getTaskResultWaiting,
