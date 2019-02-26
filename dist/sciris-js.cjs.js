@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.2.3
+ * sciris-js v0.2.4
  * (c) 2019-present Sciris <info@sciris.org>
  * Released under the MIT License.
  */
@@ -12,7 +12,6 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var Vue = _interopDefault(require('vue'));
 var axios = _interopDefault(require('axios'));
 var saveAs = _interopDefault(require('file-saver'));
-var mpld3 = _interopDefault(require('mpld3'));
 var sha224 = _interopDefault(require('crypto-js/sha224'));
 var epicSpinners = require('epic-spinners');
 var VueProgressBar = _interopDefault(require('vue-progressbar'));
@@ -532,6 +531,11 @@ var rpcs = {
 /*
  * Graphing functions (shared between calibration, scenarios, and optimization)
  */
+let mpld3 = null;
+
+if (typeof d3 !== 'undefined') {
+  mpld3 = require('mpld3');
+}
 
 function getPlotOptions(vm, project_id) {
   return new Promise((resolve, reject) => {
@@ -584,6 +588,11 @@ function clearGraphs(vm) {
 }
 
 function makeGraphs(vm, data, routepath) {
+  if (mpld3 == null) {
+    console.log("please include d3 to use the makeGraphs function");
+    return false;
+  }
+
   if (routepath && routepath !== vm.$route.path) {
     // Don't render graphs if we've changed page
     console.log('Not rendering graphs since route changed: ' + routepath + ' vs. ' + vm.$route.path);
@@ -1916,7 +1925,12 @@ const findDialog$1 = graphs.findDialog;
 const maximize$1 = graphs.maximize;
 const minimize$1 = graphs.minimize;
 const mpld3$1 = graphs.mpld3;
-const draw_figure = mpld3$1.draw_figure;
+let draw_figure = null;
+
+if (mpld3$1 !== null) {
+  draw_figure = mpld3$1.draw_figure;
+}
+
 const getTaskResultWaiting$1 = tasks.getTaskResultWaiting;
 const getTaskResultPolling$1 = tasks.getTaskResultPolling;
 const loginCall$1 = user.loginCall;
