@@ -8515,7 +8515,7 @@
       notif = {
         message: notifyMessage,
         icon: 'ti-info',
-        type: 'warn',
+        type: 'warning',
         verticalAlign: 'top',
         horizontalAlign: 'right',
         timeout: 2000
