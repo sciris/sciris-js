@@ -5,7 +5,11 @@
 import utils from './utils.js'
 import rpcs from './rpc-service.js'
 import status from './status-service.js'
-import mpld3 from 'mpld3'
+
+let mpld3 = null;
+if (typeof d3 !== 'undefined'){
+  mpld3 = require('mpld3');
+} 
 
 function getPlotOptions(vm, project_id) {
   return new Promise((resolve, reject) => {
@@ -53,6 +57,10 @@ function clearGraphs(vm) {
 }
 
 function makeGraphs(vm, data, routepath) {
+  if (mpld3 == null){
+    console.log("please include d3 to use the makeGraphs function")
+    return false;
+  }
   if (routepath && routepath !== vm.$route.path) { // Don't render graphs if we've changed page
     console.log('Not rendering graphs since route changed: ' + routepath + ' vs. ' + vm.$route.path)
   }

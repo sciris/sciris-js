@@ -38,8 +38,10 @@ const findDialog = graphs.findDialog;
 const maximize = graphs.maximize; 
 const minimize = graphs.minimize; 
 const mpld3 = graphs.mpld3; 
-const draw_figure = mpld3.draw_figure;
-
+let draw_figure = null;
+if (mpld3 !== null){
+  draw_figure = mpld3.draw_figure;
+} 
 const getTaskResultWaiting = tasks.getTaskResultWaiting;
 const getTaskResultPolling = tasks.getTaskResultPolling;
 
@@ -113,6 +115,7 @@ const sciris = {
   succeed,
   fail,
   start,
+  notify,
 
   // task-service.js
   getTaskResultWaiting,
