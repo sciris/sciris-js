@@ -496,8 +496,6 @@ function makeGraphs(vm, data, routepath) {
 
 function reloadGraphs(vm, project_id, cache_id, showNoCacheError, iscalibration, plotbudget) {
   console.log('reloadGraphs() called');
-  utils.validateYears(vm); // Make sure the start end years are in the right range.
-
   status.start(vm);
   rpcs.rpc('plot_results', [project_id, cache_id, vm.plotOptions], {
     tool: vm.toolName(),
