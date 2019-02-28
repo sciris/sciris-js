@@ -55,7 +55,7 @@ function fail(vm, failMessage, error) {
     var usererr = msgsplit[0].replace(/\n/g,'<br>')
     console.log(error.message)
     console.log(usererr)
-    var usermsg = '<b>' + failMessage + '</b>' + '<br><br>' + usermsg
+    var usermsg = '<b>' + failMessage + '</b>' + '<br><br>' + usererr
   } else {
     var usermsg = '<b>' + failMessage + '</b>'
   }
