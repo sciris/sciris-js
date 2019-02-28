@@ -4,7 +4,6 @@ import rpcs from './libs/rpc-service.js';
 import tasks from './libs/task-service.js';
 import user from './libs/user-service.js';
 import utils from './libs/utils.js';
-import shared from './libs/shared.js';
 import EventBus from './eventbus.js';
 import ScirisVue from './plugins.js';
 
@@ -16,11 +15,6 @@ const succeed = status.succeed;
 const fail = status.fail;
 const start = status.start;
 const notify = status.notify;
-
-const updateSets = shared.updateSets; 
-const updateDatasets = shared.updateDatasets;
-const exportGraphs = shared.exportGraphs;
-const exportResults = shared.exportResults;
 
 const placeholders = graphs.placeholders; 
 const clearGraphs = graphs.clearGraphs; 
@@ -65,32 +59,12 @@ const checkAdminLoggedIn = user.checkAdminLoggedIn;
 const logOut = user.logOut; 
 
 const sleep = utils.sleep;
-const getUniqueName = utils.getUniqueName;
-const validateYears = utils.validateYears;
-const projectID = utils.projectID;
-const hasData = utils.hasData;
-const hasPrograms = utils.hasPrograms;
-const simStart = utils.simStart;
-const simEnd = utils.simEnd;
-const simYears = utils.simYears;
-const dataStart = utils.dataStart;
-const dataEnd = utils.dataEnd;
-const dataYears = utils.dataYears;
-const projectionYears = utils.projectionYears;
-const activePops = utils.activePops;
-const updateSorting = utils.updateSorting;
 
 const sciris = {
   // rpc-service.js
   rpc,
   download,
   upload,
-
-  // shared.js
-  updateSets,
-  updateDatasets,
-  exportGraphs,
-  exportResults,
 
   // graphs.js
   placeholders, 
@@ -143,25 +117,10 @@ const sciris = {
 
   // utils.js
   sleep,
-  getUniqueName,
-  validateYears,
-  projectID,
-  hasData,
-  hasPrograms,
-  simStart,
-  simEnd,
-  simYears,
-  dataStart,
-  dataEnd,
-  dataYears,
-  projectionYears,
-  activePops,
-  updateSorting,
 
   rpcs,
   graphs,
   status,
-  shared,
   user,
   tasks,
   utils,

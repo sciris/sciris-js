@@ -1,7 +1,7 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.sciris = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 (function (process,global,setImmediate){
 /*!
- * sciris-js v0.2.5
+ * sciris-js v0.2.6
  * (c) 2019-present Sciris <info@sciris.org>
  * Released under the MIT License.
  */
@@ -8532,195 +8532,13 @@
     notify
   };
 
-  /*
-   * Small utilities that are shared across pages
-   */
   function sleep(time) {
     // Return a promise that resolves after _time_ milliseconds.
     return new Promise(resolve => setTimeout(resolve, time));
   }
 
-  function getUniqueName(fileName, otherNames) {
-    let tryName = fileName;
-    let numAdded = 0;
-
-    while (otherNames.indexOf(tryName) > -1) {
-      numAdded = numAdded + 1;
-      tryName = fileName + ' (' + numAdded + ')';
-    }
-
-    return tryName;
-  }
-
-  function validateYears(vm) {
-    if (vm.startYear > vm.simEnd) {
-      vm.startYear = vm.simEnd;
-    } else if (vm.startYear < vm.simStart) {
-      vm.startYear = vm.simStart;
-    }
-
-    if (vm.endYear > vm.simEnd) {
-      vm.endYear = vm.simEnd;
-    } else if (vm.endYear < vm.simStart) {
-      vm.endYear = vm.simStart;
-    }
-  }
-
-  function projectID(vm) {
-    if (vm.$store.state.activeProject.project === undefined) {
-      return '';
-    } else {
-      let projectID = vm.$store.state.activeProject.project.id;
-      return projectID;
-    }
-  }
-
-  function hasData(vm) {
-    if (vm.$store.state.activeProject.project === undefined) {
-      return false;
-    } else {
-      return vm.$store.state.activeProject.project.hasData;
-    }
-  }
-
-  function hasPrograms(vm) {
-    if (vm.$store.state.activeProject.project === undefined) {
-      return false;
-    } else {
-      return vm.$store.state.activeProject.project.hasPrograms;
-    }
-  }
-
-  function simStart(vm) {
-    if (vm.$store.state.activeProject.project === undefined) {
-      return '';
-    } else {
-      return vm.$store.state.activeProject.project.sim_start;
-    }
-  }
-
-  function simEnd(vm) {
-    if (vm.$store.state.activeProject.project === undefined) {
-      return '';
-    } else {
-      return vm.$store.state.activeProject.project.sim_end;
-    }
-  }
-
-  function simYears(vm) {
-    if (vm.$store.state.activeProject.project === undefined) {
-      return [];
-    } else {
-      var sim_start = vm.$store.state.activeProject.project.sim_start;
-      var sim_end = vm.$store.state.activeProject.project.sim_end;
-      var years = [];
-
-      for (var i = sim_start; i <= sim_end; i++) {
-        years.push(i);
-      }
-
-      console.log('Sim years: ' + years);
-      return years;
-    }
-  }
-
-  function dataStart(vm) {
-    if (vm.$store.state.activeProject.project === undefined) {
-      return '';
-    } else {
-      return vm.$store.state.activeProject.project.data_start;
-    }
-  }
-
-  function dataEnd(vm) {
-    if (vm.$store.state.activeProject.project === undefined) {
-      return '';
-    } else {
-      console.log('dataEnd: ' + vm.$store.state.activeProject.project.data_end);
-      return vm.$store.state.activeProject.project.data_end;
-    }
-  }
-
-  function dataYears(vm) {
-    if (vm.$store.state.activeProject.project === undefined) {
-      return [];
-    } else {
-      let data_start = vm.$store.state.activeProject.project.data_start;
-      let data_end = vm.$store.state.activeProject.project.data_end;
-      let years = [];
-
-      for (let i = data_start; i <= data_end; i++) {
-        years.push(i);
-      }
-
-      console.log('data years: ' + years);
-      return years;
-    }
-  } // projection years are used for scenario and optimization plot year dropdowns
-
-
-  function projectionYears(vm) {
-    if (vm.$store.state.activeProject.project === undefined) {
-      return [];
-    } else {
-      let data_end = vm.$store.state.activeProject.project.data_end;
-      let sim_end = vm.$store.state.activeProject.project.sim_end;
-      let years = [];
-
-      for (let i = data_end; i <= sim_end; i++) {
-        years.push(i);
-      }
-
-      console.log('projection years: ' + years);
-      return years;
-    }
-  }
-
-  function activePops(vm) {
-    if (vm.$store.state.activeProject.project === undefined) {
-      return '';
-    } else {
-      let pop_pairs = vm.$store.state.activeProject.project.pops;
-      let pop_list = ["All"];
-
-      for (let i = 0; i < pop_pairs.length; ++i) {
-        pop_list.push(pop_pairs[i][1]);
-      }
-
-      return pop_list;
-    }
-  }
-
-  function updateSorting(vm, sortColumn) {
-    console.log('updateSorting() called');
-
-    if (vm.sortColumn === sortColumn) {
-      // If the active sorting column is clicked...
-      vm.sortReverse = !vm.sortReverse; // Reverse the sort.
-    } else {
-      // Otherwise.
-      vm.sortColumn = sortColumn; // Select the new column for sorting.
-
-      vm.sortReverse = false; // Set the sorting for non-reverse.
-    }
-  }
-
   var utils = {
-    sleep,
-    getUniqueName,
-    validateYears,
-    projectID,
-    hasData,
-    hasPrograms,
-    simStart,
-    simEnd,
-    simYears,
-    dataStart,
-    dataEnd,
-    dataYears,
-    projectionYears,
-    activePops,
-    updateSorting
+    sleep
   };
 
   var bind$1 = function bind(fn, thisArg) {
@@ -11825,114 +11643,6 @@
     getUserInfo,
     checkLoggedIn,
     checkAdminLoggedIn
-  };
-
-  /*
-   * Heftier functions that are shared across pages
-   */
-
-  function updateSets(vm) {
-    return new Promise((resolve, reject) => {
-      console.log('updateSets() called');
-      rpcs.rpc('get_parset_info', [vm.projectID]) // Get the current user's parsets from the server.
-      .then(response => {
-        vm.parsetOptions = response.data; // Set the scenarios to what we received.
-
-        if (vm.parsetOptions.indexOf(vm.activeParset) === -1) {
-          console.log('Parameter set ' + vm.activeParset + ' no longer found');
-          vm.activeParset = vm.parsetOptions[0]; // If the active parset no longer exists in the array, reset it
-        } else {
-          console.log('Parameter set ' + vm.activeParset + ' still found');
-        }
-
-        vm.newParsetName = vm.activeParset; // WARNING, KLUDGY
-
-        console.log('Parset options: ' + vm.parsetOptions);
-        console.log('Active parset: ' + vm.activeParset);
-        rpcs.rpc('get_progset_info', [vm.projectID]) // Get the current user's progsets from the server.
-        .then(response => {
-          vm.progsetOptions = response.data; // Set the scenarios to what we received.
-
-          if (vm.progsetOptions.indexOf(vm.activeProgset) === -1) {
-            console.log('Program set ' + vm.activeProgset + ' no longer found');
-            vm.activeProgset = vm.progsetOptions[0]; // If the active parset no longer exists in the array, reset it
-          } else {
-            console.log('Program set ' + vm.activeProgset + ' still found');
-          }
-
-          vm.newProgsetName = vm.activeProgset; // WARNING, KLUDGY
-
-          console.log('Progset options: ' + vm.progsetOptions);
-          console.log('Active progset: ' + vm.activeProgset);
-          resolve(response);
-        }).catch(error => {
-          status.fail(this, 'Could not get progset info', error);
-          reject(error);
-        });
-      }).catch(error => {
-        status.fail(this, 'Could not get parset info', error);
-        reject(error);
-      });
-    }).catch(error => {
-      status.fail(this, 'Could not get parset info', error);
-      reject(error);
-    });
-  }
-
-  function exportGraphs(vm) {
-    return new Promise((resolve, reject) => {
-      console.log('exportGraphs() called');
-      rpcs.download('download_graphs', [vm.$store.state.currentUser.username]).then(response => {
-        resolve(response);
-      }).catch(error => {
-        status.fail(vm, 'Could not download graphs', error);
-        reject(error);
-      });
-    });
-  }
-
-  function exportResults(vm, serverDatastoreId) {
-    return new Promise((resolve, reject) => {
-      console.log('exportResults()');
-      rpcs.download('export_results', [serverDatastoreId, vm.$store.state.currentUser.username]).then(response => {
-        resolve(response);
-      }).catch(error => {
-        status.fail(vm, 'Could not export results', error);
-        reject(error);
-      });
-    });
-  }
-
-  function updateDatasets(vm) {
-    return new Promise((resolve, reject) => {
-      console.log('updateDatasets() called');
-      rpcs.rpc('get_dataset_keys', [vm.projectID]) // Get the current user's datasets from the server.
-      .then(response => {
-        vm.datasetOptions = response.data; // Set the scenarios to what we received.
-
-        if (vm.datasetOptions.indexOf(vm.activeDataset) === -1) {
-          console.log('Dataset ' + vm.activeDataset + ' no longer found');
-          vm.activeDataset = vm.datasetOptions[0]; // If the active dataset no longer exists in the array, reset it
-        } else {
-          console.log('Dataset ' + vm.activeDataset + ' still found');
-        }
-
-        vm.newDatsetName = vm.activeDataset; // WARNING, KLUDGY
-
-        console.log('Datset options: ' + vm.datasetOptions);
-        console.log('Active dataset: ' + vm.activeDataset);
-      }).catch(error => {
-        status.fail(this, 'Could not get dataset info', error);
-        reject(error);
-      });
-    });
-  }
-
-  var shared = {
-    updateSets,
-    updateDatasets,
-    exportGraphs,
-    exportResults
   };
 
   var vueProgressbar = createCommonjsModule(function (module, exports) {
@@ -16870,10 +16580,6 @@
   const fail$1 = status.fail;
   const start$1 = status.start;
   const notify$1 = status.notify;
-  const updateSets$1 = shared.updateSets;
-  const updateDatasets$1 = shared.updateDatasets;
-  const exportGraphs$1 = shared.exportGraphs;
-  const exportResults$1 = shared.exportResults;
   const placeholders$1 = graphs.placeholders;
   const clearGraphs$1 = graphs.clearGraphs;
   const getPlotOptions$1 = graphs.getPlotOptions;
@@ -16917,30 +16623,11 @@
   const checkAdminLoggedIn$1 = user.checkAdminLoggedIn;
   const logOut = user.logOut;
   const sleep$1 = utils.sleep;
-  const getUniqueName$1 = utils.getUniqueName;
-  const validateYears$1 = utils.validateYears;
-  const projectID$1 = utils.projectID;
-  const hasData$1 = utils.hasData;
-  const hasPrograms$1 = utils.hasPrograms;
-  const simStart$1 = utils.simStart;
-  const simEnd$1 = utils.simEnd;
-  const simYears$1 = utils.simYears;
-  const dataStart$1 = utils.dataStart;
-  const dataEnd$1 = utils.dataEnd;
-  const dataYears$1 = utils.dataYears;
-  const projectionYears$1 = utils.projectionYears;
-  const activePops$1 = utils.activePops;
-  const updateSorting$1 = utils.updateSorting;
   const sciris = {
     // rpc-service.js
     rpc,
     download,
     upload,
-    // shared.js
-    updateSets: updateSets$1,
-    updateDatasets: updateDatasets$1,
-    exportGraphs: exportGraphs$1,
-    exportResults: exportResults$1,
     // graphs.js
     placeholders: placeholders$1,
     clearGraphs: clearGraphs$1,
@@ -16988,24 +16675,9 @@
     logOut,
     // utils.js
     sleep: sleep$1,
-    getUniqueName: getUniqueName$1,
-    validateYears: validateYears$1,
-    projectID: projectID$1,
-    hasData: hasData$1,
-    hasPrograms: hasPrograms$1,
-    simStart: simStart$1,
-    simEnd: simEnd$1,
-    simYears: simYears$1,
-    dataStart: dataStart$1,
-    dataEnd: dataEnd$1,
-    dataYears: dataYears$1,
-    projectionYears: projectionYears$1,
-    activePops: activePops$1,
-    updateSorting: updateSorting$1,
     rpcs,
     graphs,
     status,
-    shared,
     user,
     tasks,
     utils,
