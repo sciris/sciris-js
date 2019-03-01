@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.2.6
+ * sciris-js v0.2.7
  * (c) 2019-present Sciris <info@sciris.org>
  * Released under the MIT License.
  */
@@ -169,8 +169,21 @@ function sleep(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }
 
+function getUniqueName(fileName, otherNames) {
+  let tryName = fileName;
+  let numAdded = 0;
+
+  while (otherNames.indexOf(tryName) > -1) {
+    numAdded = numAdded + 1;
+    tryName = fileName + ' (' + numAdded + ')';
+  }
+
+  return tryName;
+}
+
 var utils = {
-  sleep
+  sleep,
+  getUniqueName
 };
 
 // rpc-service.js -- RPC functions for Vue to call
@@ -1657,6 +1670,7 @@ const checkLoggedIn$1 = user.checkLoggedIn;
 const checkAdminLoggedIn$1 = user.checkAdminLoggedIn;
 const logOut = user.logOut;
 const sleep$1 = utils.sleep;
+const getUniqueName$1 = utils.getUniqueName;
 const sciris = {
   // rpc-service.js
   rpc,
@@ -1709,6 +1723,7 @@ const sciris = {
   logOut,
   // utils.js
   sleep: sleep$1,
+  getUniqueName: getUniqueName$1,
   rpcs,
   graphs,
   status,

@@ -59,6 +59,7 @@ const checkAdminLoggedIn = user.checkAdminLoggedIn;
 const logOut = user.logOut; 
 
 const sleep = utils.sleep;
+const getUniqueName = utils.getUniqueName;
 
 const sciris = {
   // rpc-service.js
@@ -117,6 +118,7 @@ const sciris = {
 
   // utils.js
   sleep,
+  getUniqueName,
 
   rpcs,
   graphs,
