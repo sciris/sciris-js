@@ -1,7 +1,7 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.sciris = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 (function (process,global,setImmediate){
 /*!
- * sciris-js v0.2.7
+ * sciris-js v0.2.8
  * (c) 2019-present Sciris <info@sciris.org>
  * Released under the MIT License.
  */
@@ -12,7 +12,7 @@
 }(this, (function (exports) { 'use strict';
 
   /*!
-   * Vue.js v2.6.7
+   * Vue.js v2.6.8
    * (c) 2014-2019 Evan You
    * Released under the MIT License.
    */
@@ -479,7 +479,7 @@
    * using https://www.w3.org/TR/html53/semantics-scripting.html#potentialcustomelementname
    * skipping \u10000-\uEFFFF due to it freezing up PhantomJS
    */
-  var unicodeLetters = 'a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD';
+  var unicodeRegExp = /a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD/;
 
   /**
    * Check if a string starts with $ or _
@@ -504,7 +504,7 @@
   /**
    * Parse simple path.
    */
-  var bailRE = new RegExp(("[^" + unicodeLetters + ".$_\\d]"));
+  var bailRE = new RegExp(("[^" + (unicodeRegExp.source) + ".$_\\d]"));
   function parsePath (path) {
     if (bailRE.test(path)) {
       return
@@ -1408,7 +1408,7 @@
   }
 
   function validateComponentName (name) {
-    if (!new RegExp(("^[a-zA-Z][\\-\\.0-9_" + unicodeLetters + "]*$")).test(name)) {
+    if (!new RegExp(("^[a-zA-Z][\\-\\.0-9_" + (unicodeRegExp.source) + "]*$")).test(name)) {
       warn(
         'Invalid component name: "' + name + '". Component names ' +
         'should conform to valid custom element name in html5 specification.'
@@ -3612,17 +3612,21 @@
       return factory.resolved
     }
 
+    var owner = currentRenderingInstance;
+    if (isDef(factory.owners) && factory.owners.indexOf(owner) === -1) {
+      // already pending
+      factory.owners.push(owner);
+    }
+
     if (isTrue(factory.loading) && isDef(factory.loadingComp)) {
       return factory.loadingComp
     }
 
-    var owner = currentRenderingInstance;
-    if (isDef(factory.owners)) {
-      // already pending
-      factory.owners.push(owner);
-    } else {
+    if (!isDef(factory.owners)) {
       var owners = factory.owners = [owner];
-      var sync = true;
+      var sync = true
+
+      ;(owner).$on('hook:destroyed', function () { return remove(owners, owner); });
 
       var forceRender = function (renderCompleted) {
         for (var i = 0, l = owners.length; i < l; i++) {
@@ -5402,7 +5406,7 @@
     value: FunctionalRenderContext
   });
 
-  Vue.version = '2.6.7';
+  Vue.version = '2.6.8';
 
   /*  */
 
@@ -10071,27 +10075,6 @@
     mpld3 = require('mpld3');
   }
 
-  function getPlotOptions(vm, project_id) {
-    return new Promise((resolve, reject) => {
-      console.log('getPlotOptions() called');
-      status.start(vm); // Start indicating progress.
-
-      rpcs.rpc('get_supported_plots', [project_id, true]).then(response => {
-        vm.plotOptions = response.data; // Get the parameter values
-
-        status.succeed(vm, '');
-        resolve(response);
-      }).catch(error => {
-        status.fail(vm, 'Could not get plot options', error);
-        reject(error);
-      });
-    });
-  }
-
-  function togglePlotControls(vm) {
-    vm.showPlotControls = !vm.showPlotControls;
-  }
-
   function placeholders(vm, startVal) {
     let indices = [];
 
@@ -10208,29 +10191,6 @@
         status.succeed(vm, 'Graphs created'); // CK: This should be a promise, otherwise this appears before the graphs do
       });
     }
-  }
-
-  function reloadGraphs(vm, project_id, cache_id, showNoCacheError, iscalibration, plotbudget) {
-    console.log('reloadGraphs() called');
-    status.start(vm);
-    rpcs.rpc('plot_results', [project_id, cache_id, vm.plotOptions], {
-      tool: vm.toolName(),
-      'cascade': null,
-      plotyear: vm.endYear,
-      pops: vm.activePop,
-      calibration: iscalibration,
-      plotbudget: plotbudget
-    }).then(response => {
-      vm.table = response.data.table;
-      vm.makeGraphs(response.data);
-      status.succeed(vm, 'Data loaded, graphs now rendering...');
-    }).catch(error => {
-      if (showNoCacheError) {
-        status.fail(vm, 'Could not make graphs', error);
-      } else {
-        status.succeed(vm, ''); // Silently stop progress bar and spinner.
-      }
-    });
   } //
   // Graphs DOM functions
   //
@@ -10374,10 +10334,7 @@
   var graphs = {
     placeholders,
     clearGraphs,
-    getPlotOptions,
-    togglePlotControls,
     makeGraphs,
-    reloadGraphs,
     scaleFigs,
     showBrowserWindowSize,
     addListener,
@@ -16593,10 +16550,7 @@
   const notify$1 = status.notify;
   const placeholders$1 = graphs.placeholders;
   const clearGraphs$1 = graphs.clearGraphs;
-  const getPlotOptions$1 = graphs.getPlotOptions;
-  const togglePlotControls$1 = graphs.togglePlotControls;
   const makeGraphs$1 = graphs.makeGraphs;
-  const reloadGraphs$1 = graphs.reloadGraphs;
   const scaleFigs$1 = graphs.scaleFigs;
   const showBrowserWindowSize$1 = graphs.showBrowserWindowSize;
   const addListener$1 = graphs.addListener;
@@ -16643,10 +16597,7 @@
     // graphs.js
     placeholders: placeholders$1,
     clearGraphs: clearGraphs$1,
-    getPlotOptions: getPlotOptions$1,
-    togglePlotControls: togglePlotControls$1,
     makeGraphs: makeGraphs$1,
-    reloadGraphs: reloadGraphs$1,
     scaleFigs: scaleFigs$1,
     showBrowserWindowSize: showBrowserWindowSize$1,
     addListener: addListener$1,

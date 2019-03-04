@@ -11,27 +11,6 @@ if (typeof d3 !== 'undefined'){
   mpld3 = require('mpld3');
 } 
 
-function getPlotOptions(vm, project_id) {
-  return new Promise((resolve, reject) => {
-    console.log('getPlotOptions() called')
-    status.start(vm) // Start indicating progress.
-    rpcs.rpc('get_supported_plots', [project_id, true])
-      .then(response => {
-        vm.plotOptions = response.data // Get the parameter values
-        status.succeed(vm, '')
-        resolve(response)
-      })
-      .catch(error => {
-        status.fail(vm, 'Could not get plot options', error)
-        reject(error)
-      })
-  })
-}
-
-function togglePlotControls(vm) {
-  vm.showPlotControls = !vm.showPlotControls
-}
-
 function placeholders(vm, startVal) {
   let indices = []
   if (!startVal) {
@@ -140,27 +119,6 @@ function makeGraphs(vm, data, routepath) {
         status.succeed(vm, 'Graphs created') // CK: This should be a promise, otherwise this appears before the graphs do
       })
   }
-}
-
-
-function reloadGraphs(vm, project_id, cache_id, showNoCacheError, iscalibration, plotbudget) {
-  console.log('reloadGraphs() called')
-  status.start(vm)
-  rpcs.rpc('plot_results', [project_id, cache_id, vm.plotOptions],
-    {tool:vm.toolName(), 'cascade':null, plotyear:vm.endYear, pops:vm.activePop, calibration:iscalibration, plotbudget:plotbudget})
-    .then(response => {
-      vm.table = response.data.table
-      vm.makeGraphs(response.data)
-      status.succeed(vm, 'Data loaded, graphs now rendering...')
-    })
-    .catch(error => {
-      if (showNoCacheError) {
-        status.fail(vm, 'Could not make graphs', error)
-      }
-      else {
-        status.succeed(vm, '')  // Silently stop progress bar and spinner.
-      }
-    })
 }
 
 //
@@ -281,10 +239,7 @@ function minimize(vm, id) {
 export default {
   placeholders,
   clearGraphs,
-  getPlotOptions,
-  togglePlotControls,
   makeGraphs,
-  reloadGraphs,
   scaleFigs,
   showBrowserWindowSize,
   addListener,

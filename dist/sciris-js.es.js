@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.2.7
+ * sciris-js v0.2.8
  * (c) 2019-present Sciris <info@sciris.org>
  * Released under the MIT License.
  */
@@ -362,27 +362,6 @@ if (typeof d3 !== 'undefined') {
   mpld3 = require('mpld3');
 }
 
-function getPlotOptions(vm, project_id) {
-  return new Promise((resolve, reject) => {
-    console.log('getPlotOptions() called');
-    status.start(vm); // Start indicating progress.
-
-    rpcs.rpc('get_supported_plots', [project_id, true]).then(response => {
-      vm.plotOptions = response.data; // Get the parameter values
-
-      status.succeed(vm, '');
-      resolve(response);
-    }).catch(error => {
-      status.fail(vm, 'Could not get plot options', error);
-      reject(error);
-    });
-  });
-}
-
-function togglePlotControls(vm) {
-  vm.showPlotControls = !vm.showPlotControls;
-}
-
 function placeholders(vm, startVal) {
   let indices = [];
 
@@ -499,29 +478,6 @@ function makeGraphs(vm, data, routepath) {
       status.succeed(vm, 'Graphs created'); // CK: This should be a promise, otherwise this appears before the graphs do
     });
   }
-}
-
-function reloadGraphs(vm, project_id, cache_id, showNoCacheError, iscalibration, plotbudget) {
-  console.log('reloadGraphs() called');
-  status.start(vm);
-  rpcs.rpc('plot_results', [project_id, cache_id, vm.plotOptions], {
-    tool: vm.toolName(),
-    'cascade': null,
-    plotyear: vm.endYear,
-    pops: vm.activePop,
-    calibration: iscalibration,
-    plotbudget: plotbudget
-  }).then(response => {
-    vm.table = response.data.table;
-    vm.makeGraphs(response.data);
-    status.succeed(vm, 'Data loaded, graphs now rendering...');
-  }).catch(error => {
-    if (showNoCacheError) {
-      status.fail(vm, 'Could not make graphs', error);
-    } else {
-      status.succeed(vm, ''); // Silently stop progress bar and spinner.
-    }
-  });
 } //
 // Graphs DOM functions
 //
@@ -665,10 +621,7 @@ function minimize(vm, id) {
 var graphs = {
   placeholders,
   clearGraphs,
-  getPlotOptions,
-  togglePlotControls,
   makeGraphs,
-  reloadGraphs,
   scaleFigs,
   showBrowserWindowSize,
   addListener,
@@ -1623,10 +1576,7 @@ const start$1 = status.start;
 const notify$1 = status.notify;
 const placeholders$1 = graphs.placeholders;
 const clearGraphs$1 = graphs.clearGraphs;
-const getPlotOptions$1 = graphs.getPlotOptions;
-const togglePlotControls$1 = graphs.togglePlotControls;
 const makeGraphs$1 = graphs.makeGraphs;
-const reloadGraphs$1 = graphs.reloadGraphs;
 const scaleFigs$1 = graphs.scaleFigs;
 const showBrowserWindowSize$1 = graphs.showBrowserWindowSize;
 const addListener$1 = graphs.addListener;
@@ -1673,10 +1623,7 @@ const sciris = {
   // graphs.js
   placeholders: placeholders$1,
   clearGraphs: clearGraphs$1,
-  getPlotOptions: getPlotOptions$1,
-  togglePlotControls: togglePlotControls$1,
   makeGraphs: makeGraphs$1,
-  reloadGraphs: reloadGraphs$1,
   scaleFigs: scaleFigs$1,
   showBrowserWindowSize: showBrowserWindowSize$1,
   addListener: addListener$1,

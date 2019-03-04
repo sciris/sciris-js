@@ -18,10 +18,7 @@ const notify = status.notify;
 
 const placeholders = graphs.placeholders; 
 const clearGraphs = graphs.clearGraphs; 
-const getPlotOptions = graphs.getPlotOptions; 
-const togglePlotControls = graphs.togglePlotControls; 
 const makeGraphs = graphs.makeGraphs; 
-const reloadGraphs = graphs.reloadGraphs; 
 const scaleFigs = graphs.scaleFigs; 
 const showBrowserWindowSize = graphs.showBrowserWindowSize; 
 const addListener = graphs.addListener; 
@@ -70,10 +67,7 @@ const sciris = {
   // graphs.js
   placeholders, 
   clearGraphs, 
-  getPlotOptions,
-  togglePlotControls,
   makeGraphs,
-  reloadGraphs, 
   scaleFigs,
   showBrowserWindowSize,
   addListener,
