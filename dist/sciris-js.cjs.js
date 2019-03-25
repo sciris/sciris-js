@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.2.8
+ * sciris-js v0.2.10
  * (c) 2019-present Sciris <info@sciris.org>
  * Released under the MIT License.
  */
@@ -12,6 +12,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var Vue = _interopDefault(require('vue'));
 var axios = _interopDefault(require('axios'));
 var saveAs = _interopDefault(require('file-saver'));
+var mpld3 = _interopDefault(require('mpld3'));
 var sha224 = _interopDefault(require('crypto-js/sha224'));
 var epicSpinners = require('epic-spinners');
 var VueProgressBar = _interopDefault(require('vue-progressbar'));
@@ -362,11 +363,6 @@ var rpcs = {
 /*
  * Graphing functions (shared between calibration, scenarios, and optimization)
  */
-let mpld3 = null;
-
-if (typeof d3 !== 'undefined') {
-  mpld3 = require('mpld3');
-}
 
 function placeholders(vm, startVal) {
   let indices = [];
@@ -398,7 +394,7 @@ function clearGraphs(vm) {
 }
 
 function makeGraphs(vm, data, routepath) {
-  if (mpld3 == null) {
+  if (typeof d3 === 'undefined') {
     console.log("please include d3 to use the makeGraphs function");
     return false;
   }
@@ -463,7 +459,7 @@ function makeGraphs(vm, data, routepath) {
             }); // fig.setYTicks(null, function (d) { // Looks too weird with 500m for 0.5
             //   return d3.format('.2s')(d);
             // });
-          });
+          }, true);
         } catch (error) {
           console.log('Could not plot graph: ' + error.message);
         } // Draw legends

@@ -5,11 +5,7 @@
 import utils from './utils.js'
 import rpcs from './rpc-service.js'
 import status from './status-service.js'
-
-let mpld3 = null;
-if (typeof d3 !== 'undefined'){
-  mpld3 = require('mpld3');
-} 
+import mpld3 from 'mpld3'
 
 function placeholders(vm, startVal) {
   let indices = []
@@ -36,7 +32,7 @@ function clearGraphs(vm) {
 }
 
 function makeGraphs(vm, data, routepath) {
-  if (mpld3 == null){
+  if (typeof d3 === 'undefined'){
     console.log("please include d3 to use the makeGraphs function")
     return false;
   }
@@ -99,7 +95,7 @@ function makeGraphs(vm, data, routepath) {
               // fig.setYTicks(null, function (d) { // Looks too weird with 500m for 0.5
               //   return d3.format('.2s')(d);
               // });
-            });
+            }, true);
           } catch (error) {
             console.log('Could not plot graph: ' + error.message)
           }
