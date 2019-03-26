@@ -740,111 +740,249 @@ var tasks = {
   getTaskResultPolling
 };
 
-// loginCall() -- Call rpc() for performing a login.
+/** 
+ * Lower level user functions that call RPC service functions
+ *
+ * @module user 
+ */
+/**
+ * Call rpc() for performing a login. 
+ * The password is hashed using sha244 and sent to the API
+ *
+ * @function
+ * @async
+ * @param {string} username - username of the user 
+ * @param {string} passowrd - password of the user 
+ * @returns {Promise}
+ */
 
 function loginCall(username, password) {
   // Get a hex version of a hashed password using the SHA224 algorithm.
-  var hashPassword = sha224(password).toString(); // Make the actual RPC call.
-
-  return rpcs.rpc('user_login', [username, hashPassword]);
-} // logoutCall() -- Call rpc() for performing a logout.
+  const hashPassword = sha224(password).toString();
+  const args = [username, hashPassword];
+  return rpcs.rpc('user_login', args);
+}
+/**
+ * Call rpc() for performing a logout. 
+ * The use session is ended.
+ *
+ * @function
+ * @async
+ * @returns {Promise}
+ */
 
 
 function logoutCall() {
-  // Make the actual RPC call.
   return rpcs.rpc('user_logout');
-} // getCurrentUserInfo() -- Call rpc() for reading the currently
-// logged in user.
+}
+/**
+ * Call rpc() for reading the currently logged in user.
+ *
+ * @function
+ * @async
+ * @returns {Promise}
+ */
 
 
 function getCurrentUserInfo() {
-  // Make the actual RPC call.
   return rpcs.rpc('get_current_user_info');
-} // registerUser() -- Call rpc() for registering a new user.
+}
+/**
+ * Call rpc() for registering a new user.
+ *
+ * @function
+ * @async
+ * @param {string} username
+ * @param {string} passowrd
+ * @param {string} displayname - The verbose name of the user 
+ * @param {string} email 
+ * @returns {Promise}
+ */
 
 
 function registerUser(username, password, displayname, email) {
   // Get a hex version of a hashed password using the SHA224 algorithm.
-  var hashPassword = sha224(password).toString(); // Make the actual RPC call.
-
-  return rpcs.rpc('user_register', [username, hashPassword, displayname, email]);
-} // changeUserInfo() -- Call rpc() for changing a user's info.
+  const hashPassword = sha224(password).toString();
+  const args = [username, hashPassword, displayname, email];
+  return rpcs.rpc('user_register', args);
+}
+/**
+ * Change a user's displayname and/or email. It does not require the user to be logged in.
+ *
+ * @function
+ * @async
+ * @param {string} username - The username of the user 
+ * @param {string} passowrd - The password the current password of the user
+ * @param {string} displayname - The new value to be set for the display name 
+ * @param {string} email - The new value to be set for the email
+ * @returns {Promise}
+ */
 
 
 function changeUserInfo(username, password, displayname, email) {
   // Get a hex version of a hashed password using the SHA224 algorithm.
-  var hashPassword = sha224(password).toString(); // Make the actual RPC call.
-
-  return rpcs.rpc('user_change_info', [username, hashPassword, displayname, email]);
-} // changeUserPassword() -- Call rpc() for changing a user's password.
+  const hashPassword = sha224(password).toString();
+  const args = [username, hashPassword, displayname, email];
+  return rpcs.rpc('user_change_info', args);
+}
+/**
+ * Change the password of the currently logged in user
+ *
+ * @function
+ * @async
+ * @param {string} oldpassword - The current password of the user
+ * @param {string} newpassword - The password to use for the user from now on 
+ * @returns {Promise}
+ */
 
 
 function changeUserPassword(oldpassword, newpassword) {
   // Get a hex version of the hashed passwords using the SHA224 algorithm.
-  var hashOldPassword = sha224(oldpassword).toString();
-  var hashNewPassword = sha224(newpassword).toString(); // Make the actual RPC call.
-
-  return rpcs.rpc('user_change_password', [hashOldPassword, hashNewPassword]);
-} // adminGetUserInfo() -- Call rpc() for getting user information at the admin level.
+  const hashOldPassword = sha224(oldpassword).toString();
+  const hashNewPassword = sha224(newpassword).toString();
+  const args = [hashOldPassword, hashNewPassword];
+  return rpcs.rpc('user_change_password', args);
+}
+/**
+ * Allow a logged in user who is an admin to retreive information about a user 
+ *
+ * @function
+ * @async
+ * @param {string} username - The username of the user 
+ * @returns {Promise}
+ */
 
 
 function adminGetUserInfo(username) {
-  // Make the actual RPC call.
-  return rpcs.rpc('admin_get_user_info', [username]);
-} // deleteUser() -- Call rpc() for deleting a user.
+  const args = [username];
+  return rpcs.rpc('admin_get_user_info', args);
+}
+/**
+ * Allow a logged in user who is an admin to delete a user 
+ *
+ * @function
+ * @async
+ * @param {string} username - The username of the user 
+ * @returns {Promise}
+ */
 
 
 function deleteUser(username) {
-  // Make the actual RPC call.
-  return rpcs.rpc('admin_delete_user', [username]);
-} // activateUserAccount() -- Call rpc() for activating a user account.
+  const args = [username];
+  return rpcs.rpc('admin_delete_user', args);
+}
+/**
+ * Allow a logged in user who is an admin to activate a user's account 
+ *
+ * @function
+ * @async
+ * @param {string} username - The username of the user 
+ * @returns {Promise}
+ */
 
 
 function activateUserAccount(username) {
-  // Make the actual RPC call.
-  return rpcs.rpc('admin_activate_account', [username]);
-} // deactivateUserAccount() -- Call rpc() for deactivating a user account.
+  const args = [username];
+  return rpcs.rpc('admin_activate_account', args);
+}
+/**
+ * Allow a logged in user who is an admin to deactivate a user's account 
+ *
+ * @function
+ * @async
+ * @param {string} username - The username of the user 
+ * @returns {Promise}
+ */
 
 
 function deactivateUserAccount(username) {
-  // Make the actual RPC call.
-  return rpcs.rpc('admin_deactivate_account', [username]);
-} // grantUserAdminRights() -- Call rpc() for granting a user admin rights.
+  const args = [username];
+  return rpcs.rpc('admin_deactivate_account', args);
+}
+/**
+ * Allow a logged in user who is an admin to make another user an 
+ * admin by granting admin privilages to them 
+ *
+ * @function
+ * @async
+ * @param {string} username - The username of the user 
+ * @returns {Promise}
+ */
 
 
 function grantUserAdminRights(username) {
-  // Make the actual RPC call.
-  return rpcs.rpc('admin_grant_admin', [username]);
-} // revokeUserAdminRights() -- Call rpc() for revoking user admin rights.
+  const args = [username];
+  return rpcs.rpc('admin_grant_admin', args);
+}
+/**
+ * Allow a logged in user who is an admin to remove another admin by
+ * revoking their admin privilages
+ *
+ * @function
+ * @async
+ * @param {string} username - The username of the user 
+ * @returns {Promise}
+ */
 
 
 function revokeUserAdminRights(username) {
-  // Make the actual RPC call.
-  return rpcs.rpc('admin_revoke_admin', [username]);
-} // resetUserPassword() -- Call rpc() for resetting a user's password.
+  const args = [username];
+  return rpcs.rpc('admin_revoke_admin', args);
+}
+/**
+ * Allow a logged in user who is an admin to set a user's 
+ * password to 'sciris' 
+ *
+ * @function
+ * @async
+ * @param {string} username - The username of the user 
+ * @returns {Promise}
+ */
 
 
 function resetUserPassword(username) {
-  // Make the actual RPC call.
-  return rpcs.rpc('admin_reset_password', [username]);
+  const args = [username];
+  return rpcs.rpc('admin_reset_password', args);
 } // Higher level user functions that call the lower level ones above
 
+/**
+ * Fetch the currently logged in user from the server and commit it to
+ * a Vuex store instance
+ *
+ * @function
+ * @param {string} store - The username of the user 
+ */
 
-function getUserInfo(store) {
-  // Do the actual RPC call.
-  getCurrentUserInfo().then(response => {
+
+async function getUserInfo(store) {
+  try {
     // Set the username to what the server indicates.
+    const response = await getCurrentUserInfo();
     store.commit('newUser', response.data.user);
-  }).catch(error => {
-    // Set the username to {}.  An error probably means the
-    // user is not logged in.
+  } catch (error) {
+    // An error probably means the user is not logged in.
+    // Set the username to {}.  
     store.commit('newUser', {});
-  });
+  }
 }
+/**
+ * Check if there is a user currently logged in
+ *
+ * @function
+ * @returns {bool}
+ */
+
 
 function checkLoggedIn() {
   if (this.currentUser.displayname === undefined) return false;else return true;
 }
+/**
+ * Check if the currently logged in user is an admin
+ *
+ * @function
+ * @returns {bool}
+ */
+
 
 function checkAdminLoggedIn() {
   console.log(this);
@@ -1591,24 +1729,125 @@ if (mpld3$1 !== null) {
 
 const getTaskResultWaiting$1 = tasks.getTaskResultWaiting;
 const getTaskResultPolling$1 = tasks.getTaskResultPolling;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~loginCall|user.loginCall} 
+ */
+
 const loginCall$1 = user.loginCall;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~logoutCall|user.logoutCall}
+ */
+
 const logoutCall$1 = user.logoutCall;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~getCurrentUserInfo|user.getCurrentUserInfo} 
+ */
+
 const getCurrentUserInfo$1 = user.getCurrentUserInfo;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~registerUser|user.registerUser} 
+ */
+
 const registerUser$1 = user.registerUser;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~changeUserInfo|user.changeUserInfo} 
+ */
+
 const changeUserInfo$1 = user.changeUserInfo;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~changeUserPassword|user.changeUserPassword} 
+ */
+
 const changeUserPassword$1 = user.changeUserPassword;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~adminGetUserInfo|user.adminGetUserInfo} 
+ */
+
 const adminGetUserInfo$1 = user.adminGetUserInfo;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~deleteUser|user.deleteUser} 
+ */
+
 const deleteUser$1 = user.deleteUser;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~activateUserAccount|user.activateUserAccount} 
+ */
+
 const activateUserAccount$1 = user.activateUserAccount;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~deactivateUserAccount|user.deactivateUserAccount} 
+ */
+
 const deactivateUserAccount$1 = user.deactivateUserAccount;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~grantUserAdminRights|user.grantUserAdminRights} 
+ */
+
 const grantUserAdminRights$1 = user.grantUserAdminRights;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~revokeUserAdminRights|user.revokeUserAdminRights} 
+ */
+
 const revokeUserAdminRights$1 = user.revokeUserAdminRights;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~resetUserPassword|user.resetUserPassword} 
+ */
+
 const resetUserPassword$1 = user.resetUserPassword;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~getUserInfo|user.getUserInfo} 
+ */
+
 const getUserInfo$1 = user.getUserInfo;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~currentUser|user.currentUser} 
+ */
+
 const currentUser = user.currentUser;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~checkLoggedIn|user.checkLoggedIn} 
+ */
+
 const checkLoggedIn$1 = user.checkLoggedIn;
+/**
+ * @function
+ * @async
+ * @see {@link module:user~checkAdminLoggedIn|user.checkAdminLoggedIn} 
+ */
+
 const checkAdminLoggedIn$1 = user.checkAdminLoggedIn;
-const logOut = user.logOut;
 const sleep$1 = utils.sleep;
 const getUniqueName$1 = utils.getUniqueName;
 const sciris = {
@@ -1657,7 +1896,6 @@ const sciris = {
   currentUser,
   checkLoggedIn: checkLoggedIn$1,
   checkAdminLoggedIn: checkAdminLoggedIn$1,
-  logOut,
   // utils.js
   sleep: sleep$1,
   getUniqueName: getUniqueName$1,
