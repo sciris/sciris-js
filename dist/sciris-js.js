@@ -8424,8 +8424,18 @@
     if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
   });
 
-  // progress-indicator-service.js -- functions for showing progress
+  /** @module status */
   var complete = 0.0; // Put this here so it's global
+
+  /**
+   * Trigger the UI attributes associated with start of an action, this includes
+   * a Spinner and a thin progess bar on the top of the window. A message will 
+   * also be printed in side the console.
+   *
+   * @function
+   * @param {string} vm - Vue instance that is mounted
+   * @param {string} message - The message to show inside the console
+   */
 
   function start(vm, message) {
     if (!message) {
@@ -8454,6 +8464,16 @@
 
     EventBus.$emit(events$1.EVENT_STATUS_START, vm);
   }
+  /**
+   * Turn off all of the UI elements associated with services.start and trigger a 
+   * successful notification pop up on the right side of the window. A message 
+   * will also be printed in side the console.
+   *
+   * @function
+   * @param {string} vm - Vue instance that is mounted
+   * @param {string} successMessage - The message to show inside the console and notification popup
+   */
+
 
   function succeed(vm, successMessage) {
     console.log(successMessage);
@@ -8475,13 +8495,24 @@
 
     EventBus.$emit(events$1.EVENT_STATUS_SUCCEED, vm, notif);
   }
+  /**
+   * Turn off all of the UI elements associated with services.start and trigger a 
+   * failed notification pop up on the right side of the window. A message 
+   * will also be printed in side the console.
+   *
+   * @function
+   * @param {string} vm - Vue instance that is mounted
+   * @param {string} failMessage - The message to show inside the console and notification popup
+   * @param {string} error - The message to show inside the console and notification popup
+   */
+
 
   function fail(vm, failMessage, error) {
     console.log(failMessage);
 
     if (error) {
-      var msgsplit = error.message.split('Exception details:'); // WARNING, must match sc_app.py
-
+      // WARNING, must match sc_app.py
+      var msgsplit = error.message.split('Exception details:');
       var usererr = msgsplit[0].replace(/\n/g, '<br>');
       console.log(error.message);
       console.log(usererr);
@@ -8491,10 +8522,9 @@
     }
 
     complete = 100;
-    var notif = {};
+    var notif = {}; // Put up a failure notification.
 
     if (failMessage !== '') {
-      // Put up a failure notification.
       notif = {
         message: usermsg,
         icon: 'ti-face-sad',
@@ -8507,6 +8537,15 @@
 
     EventBus.$emit(events$1.EVENT_STATUS_FAIL, vm, notif);
   }
+  /**
+   * Show a neutral notification pop up on the right side of the window. 
+   * A message will also be printed in side the console.
+   *
+   * @function
+   * @param {string} vm - Vue instance that is mounted
+   * @param {string} notifyMessage - The message to show inside the console and notification popup
+   */
+
 
   function notify(vm, notifyMessage) {
     console.log(notifyMessage);
@@ -8536,10 +8575,28 @@
     notify
   };
 
+  /** @module utils */
+
+  /**
+   * Return a promise that resolves after a set amount of time in milliseconds.
+   *
+   * @function
+   * @async
+   * @param {number} time - the amount of time to sleep in  milliseconds
+   * @returns {Promise}
+   */
   function sleep(time) {
-    // Return a promise that resolves after _time_ milliseconds.
     return new Promise(resolve => setTimeout(resolve, time));
   }
+  /**
+   * Create a unique filename, if a name already exists then append it with "(x)"
+   *
+   * @function
+   * @param {string} fileName - the name of the new file that you want to have a unique name 
+   * @param {string[]} otherNames - the existing filenames that the new file should not be the same as 
+   * @returns {string} The unique filename
+   */
+
 
   function getUniqueName(fileName, otherNames) {
     let tryName = fileName;
@@ -9897,177 +9954,224 @@
 
   });
 
-  // rpc-service.js -- RPC functions for Vue to call
+  /** @module rpcs */
 
   function consoleLogCommand(type, funcname, args, kwargs) {
+    // Don't show any arguments if none are passed in.
     if (!args) {
-      // Don't show any arguments if none are passed in.
       args = '';
-    }
+    } // Don't show any kwargs if none are passed in.
+
 
     if (!kwargs) {
-      // Don't show any kwargs if none are passed in.
       kwargs = '';
     }
 
     console.log("RPC service call (" + type + "): " + funcname, args, kwargs);
-  } // readJsonFromBlob(theBlob) -- Attempt to convert a Blob passed in to a JSON. Passes back a Promise.
+  }
+  /**
+   * Attempt to convert a Blob passed in to a JSON. 
+   *
+   * @function
+   * @async
+   * @param {string} theBlob - username of the user 
+   * @returns {Promise}
+   */
 
 
-  function readJsonFromBlob(theBlob) {
+  async function readJsonFromBlob(theBlob) {
+    // Create a FileReader; reader.result contains the contents of blob as text when this is called
+    const reader = new FileReader(); // Create a callback for after the load attempt is finished
+
+    reader.addEventListener("loadend", async function () {
+      try {
+        // Try the conversion.
+        return await JSON.parse(reader.result);
+      } catch (e) {
+        // On failure to convert to JSON, reject the Promise.
+        throw Error('Failed to convert blob to JSON');
+      }
+    }); // Start the load attempt, trying to read the blob in as text.
+
+    reader.readAsText(theBlob);
+  }
+  /**
+   * Call an RPC defined using scirisweb 
+   *
+   * @function
+   * @async
+   * @param {string} funcname - name of the RPC as registered in an scirisweb app 
+   * @param {string[]} args - Python stlye args to be passed to the RPC 
+   * @param {Object} kwargs - Python stlye kwargs to be passed to the RPC 
+   * @returns {Promise}
+   */
+
+
+  async function rpc(funcname, args, kwargs) {
+    // Log the RPC call.
+    consoleLogCommand("normal", funcname, args, kwargs); // Do the RPC processing, returning results as a Promise.
+    // Send the POST request for the RPC call.
+
+    try {
+      const response = await axios$1.post('/api/rpcs', {
+        funcname: funcname,
+        args: args,
+        kwargs: kwargs
+      }); // If there is not error in the POST response.
+
+      if (typeof response.data.error === 'undefined') {
+        console.log('RPC succeeded'); // Signal success with the response.
+
+        return response;
+      }
+
+      console.log('RPC error: ' + response.data.error);
+      throw Error(response.data.error);
+    } catch (error) {
+      console.log('RPC error: ' + error); // If there was an actual response returned from the server...
+
+      if (error.response) {
+        // If we have exception information in the response 
+        // (which indicates an exception on the server side)...
+        if (typeof error.response.data.exception !== 'undefined') {
+          // For now, reject with an error message matching the exception.
+          throw Error(error.response.data.exception);
+        }
+      } else {
+        // Reject with the error axios got.
+        throw Error(error);
+      }
+    }
+  }
+  /**
+   * Call an Download RPC defined using scirisweb via /api/download
+   *
+   * @function
+   * @async
+   * @param {string} funcname - name of the RPC as registered in an scirisweb app 
+   * @param {string[]} args - Python stlye args to be passed to the RPC 
+   * @param {Object} kwargs - Python stlye kwargs to be passed to the RPC 
+   * @returns {Promise}
+   */
+  // #NOTE Parham: Need to confirm how this works before refactoring
+
+
+  function download(funcname, args, kwargs) {
+    consoleLogCommand("download", funcname, args, kwargs); // Log the download RPC call.
+
     return new Promise((resolve, reject) => {
-      const reader = new FileReader(); // Create a FileReader; reader.result contains the contents of blob as text when this is called
+      // Do the RPC processing, returning results as a Promise.
+      axios$1.post('/api/rpcs', {
+        // Send the POST request for the RPC call.
+        funcname: funcname,
+        args: args,
+        kwargs: kwargs
+      }, {
+        responseType: 'blob'
+      }).then(response => {
+        readJsonFromBlob(response.data).then(responsedata => {
+          if (typeof responsedata.error != 'undefined') {
+            // If we have error information in the response (which indicates a logical error on the server side)...
+            reject(Error(responsedata.error)); // For now, reject with an error message matching the error.
+          }
+        }).catch(error2 => {
+          // An error here indicates we do in fact have a file to download.
+          var blob = new Blob([response.data]); // Create a new blob object (containing the file data) from the response.data component.
 
-      reader.addEventListener("loadend", function () {
-        // Create a callback for after the load attempt is finished
-        try {
-          // Call a resolve passing back a JSON version of this.
-          var jsonresult = JSON.parse(reader.result); // Try the conversion.
+          var filename = response.headers.filename; // Grab the file name from response.headers.
 
-          resolve(jsonresult); // (Assuming successful) make the Promise resolve with the JSON result.
-        } catch (e) {
-          reject(Error('Failed to convert blob to JSON')); // On failure to convert to JSON, reject the Promise.
+          FileSaver_min(blob, filename); // Bring up the browser dialog allowing the user to save the file or cancel doing so.
+
+          resolve(response); // Signal success with the response.
+        });
+      }).catch(error => {
+        if (error.response) {
+          // If there was an actual response returned from the server...
+          readJsonFromBlob(error.response.data).then(responsedata => {
+            if (typeof responsedata.exception !== 'undefined') {
+              // If we have exception information in the response (which indicates an exception on the server side)...
+              reject(Error(responsedata.exception)); // For now, reject with an error message matching the exception.
+            }
+          }).catch(error2 => {
+            reject(error); // Reject with the error axios got.
+          });
+        } else {
+          reject(error); // Otherwise (no response was delivered), reject with the error axios got.
         }
       });
-      reader.readAsText(theBlob); // Start the load attempt, trying to read the blob in as text.
     });
+  }
+  /**
+   * Call the Upload RPC defined using scirisweb via /api/upload
+   *
+   * @function
+   * @async
+   * @param {string} funcname - name of the RPC as registered in an scirisweb app 
+   * @param {string[]} args - Python stlye args to be passed to the RPC 
+   * @param {Object} kwargs - Python stlye kwargs to be passed to the RPC 
+   * @param {string} fileType - Type of file being uploaded 
+   * @returns {Promise}
+   */
+
+
+  function upload(funcname, args, kwargs, fileType) {
+    consoleLogCommand("upload", funcname, args, kwargs); // Function for trapping the change event that has the user-selected file.
+
+    const onFileChange = async e => {
+      // Pull out the files (should only be 1) that were selected.
+      var files = e.target.files || e.dataTransfer.files; // If no files were selected, reject the promise.
+
+      if (!files.length) {
+        throw Error('No file selected');
+      } // Create a FormData object for holding the file.
+
+
+      const formData = new FormData(); // Put the selected file in the formData object with 'uploadfile' key.
+
+      formData.append('uploadfile', files[0]); // Add the RPC function name to the form data.
+
+      formData.append('funcname', funcname); // Add args and kwargs to the form data.
+
+      formData.append('args', JSON.stringify(args));
+      formData.append('kwargs', JSON.stringify(kwargs));
+
+      try {
+        const response = await axios$1.post('/api/rpcs', formData);
+
+        if (typeof response.data.error != 'undefined') {
+          throw Error(response.data.error);
+        }
+
+        return response;
+      } catch (error) {
+        // If there was an actual response returned from the server...
+        if (!error.response) {
+          throw Error(error);
+        } // If we have exception information in the response (which 
+        // indicates an exception on the server side)...
+
+
+        if (typeof error.response.data.exception != 'undefined') {
+          // For now, reject with an error message matching the exception.
+          throw Error(error.response.data.exception);
+        }
+      }
+    }; // Create an invisible file input element and set its change callback 
+    // to our onFileChange function.
+
+
+    const inElem = document.createElement('input');
+    inElem.setAttribute('type', 'file');
+    inElem.setAttribute('accept', fileType);
+    inElem.addEventListener('change', onFileChange); // Manually click the button to open the file dialog.
+
+    inElem.click();
   }
 
   var rpcs = {
-    rpc(funcname, args, kwargs) {
-      // rpc() -- normalRPC() /api/procedure calls in api.py.
-      consoleLogCommand("normal", funcname, args, kwargs); // Log the RPC call.
-
-      return new Promise((resolve, reject) => {
-        // Do the RPC processing, returning results as a Promise.
-        axios$1.post('/api/rpcs', {
-          // Send the POST request for the RPC call.
-          funcname: funcname,
-          args: args,
-          kwargs: kwargs
-        }).then(response => {
-          if (typeof response.data.error !== 'undefined') {
-            // If there is an error in the POST response.
-            console.log('RPC error: ' + response.data.error);
-            reject(Error(response.data.error));
-          } else {
-            console.log('RPC succeeded');
-            resolve(response); // Signal success with the response.
-          }
-        }).catch(error => {
-          console.log('RPC error: ' + error);
-
-          if (error.response) {
-            // If there was an actual response returned from the server...
-            if (typeof error.response.data.exception !== 'undefined') {
-              // If we have exception information in the response (which indicates an exception on the server side)...
-              reject(Error(error.response.data.exception)); // For now, reject with an error message matching the exception.
-            }
-          } else {
-            reject(error); // Reject with the error axios got.
-          }
-        });
-      });
-    },
-
-    download(funcname, args, kwargs) {
-      // download() -- download() /api/download calls in api.py.
-      consoleLogCommand("download", funcname, args, kwargs); // Log the download RPC call.
-
-      return new Promise((resolve, reject) => {
-        // Do the RPC processing, returning results as a Promise.
-        axios$1.post('/api/rpcs', {
-          // Send the POST request for the RPC call.
-          funcname: funcname,
-          args: args,
-          kwargs: kwargs
-        }, {
-          responseType: 'blob'
-        }).then(response => {
-          readJsonFromBlob(response.data).then(responsedata => {
-            if (typeof responsedata.error != 'undefined') {
-              // If we have error information in the response (which indicates a logical error on the server side)...
-              reject(Error(responsedata.error)); // For now, reject with an error message matching the error.
-            }
-          }).catch(error2 => {
-            // An error here indicates we do in fact have a file to download.
-            var blob = new Blob([response.data]); // Create a new blob object (containing the file data) from the response.data component.
-
-            var filename = response.headers.filename; // Grab the file name from response.headers.
-
-            FileSaver_min(blob, filename); // Bring up the browser dialog allowing the user to save the file or cancel doing so.
-
-            resolve(response); // Signal success with the response.
-          });
-        }).catch(error => {
-          if (error.response) {
-            // If there was an actual response returned from the server...
-            readJsonFromBlob(error.response.data).then(responsedata => {
-              if (typeof responsedata.exception !== 'undefined') {
-                // If we have exception information in the response (which indicates an exception on the server side)...
-                reject(Error(responsedata.exception)); // For now, reject with an error message matching the exception.
-              }
-            }).catch(error2 => {
-              reject(error); // Reject with the error axios got.
-            });
-          } else {
-            reject(error); // Otherwise (no response was delivered), reject with the error axios got.
-          }
-        });
-      });
-    },
-
-    // upload() -- upload() /api/upload calls in api.py.
-    upload(funcname, args, kwargs, fileType) {
-      consoleLogCommand("upload", funcname, args, kwargs); // Log the upload RPC call.
-
-      return new Promise((resolve, reject) => {
-        // Do the RPC processing, returning results as a Promise.
-        var onFileChange = e => {
-          // Function for trapping the change event that has the user-selected file.
-          var files = e.target.files || e.dataTransfer.files; // Pull out the files (should only be 1) that were selected.
-
-          if (!files.length) // If no files were selected, reject the promise.
-            reject(Error('No file selected'));
-          const formData = new FormData(); // Create a FormData object for holding the file.
-
-          formData.append('uploadfile', files[0]); // Put the selected file in the formData object with 'uploadfile' key.
-
-          formData.append('funcname', funcname); // Add the RPC function name to the form data.
-
-          formData.append('args', JSON.stringify(args)); // Add args and kwargs to the form data.
-
-          formData.append('kwargs', JSON.stringify(kwargs));
-          axios$1.post('/api/rpcs', formData) // Use a POST request to pass along file to the server.
-          .then(response => {
-            // If there is an error in the POST response.
-            if (typeof response.data.error != 'undefined') {
-              reject(Error(response.data.error));
-            }
-
-            resolve(response); // Signal success with the response.
-          }).catch(error => {
-            if (error.response) {
-              // If there was an actual response returned from the server...
-              if (typeof error.response.data.exception != 'undefined') {
-                // If we have exception information in the response (which indicates an exception on the server side)...
-                reject(Error(error.response.data.exception)); // For now, reject with an error message matching the exception.
-              }
-            }
-
-            reject(error); // Reject with the error axios got.
-          });
-        }; // Create an invisible file input element and set its change callback to our onFileChange function.
-
-
-        var inElem = document.createElement('input');
-        inElem.setAttribute('type', 'file');
-        inElem.setAttribute('accept', fileType);
-        inElem.addEventListener('change', onFileChange);
-        inElem.click(); // Manually click the button to open the file dialog.
-      });
-    }
-
+    rpc,
+    download,
+    upload
   };
 
   var mpld3_min = createCommonjsModule(function (module, exports) {
@@ -11253,9 +11357,7 @@
   });
   });
 
-  /*
-   * Graphing functions (shared between calibration, scenarios, and optimization)
-   */
+  /** @module graphs */
 
   function placeholders(vm, startVal) {
     let indices = [];
@@ -11272,110 +11374,130 @@
 
     return indices;
   }
+  /**
+   * Remove the figures that have been plotted in a Vue component
+   *
+   * @function
+   * @param {Object} vm - Vue component 
+   */
+
 
   function clearGraphs(vm) {
     for (let index = 0; index <= 100; index++) {
       let divlabel = 'fig' + index;
-      let div = document.getElementById(divlabel); // CK: Not sure if this is necessary? To ensure the div is clear first
 
-      while (div && div.firstChild) {
-        div.removeChild(div.firstChild);
+      if (typeof d3 === 'undefined') {
+        console.log("please include d3 to use the clearGraphs function");
+        return false;
       }
 
+      mpld3_min.remove_figure(divlabel);
       vm.hasGraphs = false;
     }
   }
+  /**
+   * Use the mpld3 graph definitions to plot graphs in a Vue component 
+   *
+   * @function
+   * @param {Object} vm - Vue component 
+   * @param {Object} data - The mpld3 object that defines the graphs 
+   * @param {string} routepath - The path that the  
+   */
 
-  function makeGraphs(vm, data, routepath) {
+
+  async function makeGraphs(vm, data, routepath) {
     if (typeof d3 === 'undefined') {
       console.log("please include d3 to use the makeGraphs function");
       return false;
-    }
+    } // Don't render graphs if we've changed page
+
 
     if (routepath && routepath !== vm.$route.path) {
-      // Don't render graphs if we've changed page
       console.log('Not rendering graphs since route changed: ' + routepath + ' vs. ' + vm.$route.path);
-    } else {
-      // Proceed...
-      let waitingtime = 0.5;
-      var graphdata = data.graphs; // var legenddata = data.legends
+      return false;
+    }
 
-      status.start(vm); // Start indicating progress.
+    let waitingtime = 0.5;
+    var graphdata = data.graphs; // var legenddata = data.legends
+    // Start indicating progress.
 
-      vm.hasGraphs = true;
-      utils.sleep(waitingtime * 1000).then(response => {
-        let n_plots = graphdata.length; // let n_legends = legenddata.length
+    status.start(vm);
+    vm.hasGraphs = true;
+    await utils.sleep(waitingtime * 1000);
+    let n_plots = graphdata.length; // let n_legends = legenddata.length
 
-        console.log('Rendering ' + n_plots + ' graphs'); // if (n_plots !== n_legends) {
-        //   console.log('WARNING: different numbers of plots and legends: ' + n_plots + ' vs. ' + n_legends)
+    console.log('Rendering ' + n_plots + ' graphs'); // if (n_plots !== n_legends) {
+    //   console.log('WARNING: different numbers of plots and legends: ' + n_plots + ' vs. ' + n_legends)
+    // }
+
+    for (var index = 0; index <= n_plots; index++) {
+      console.log('Rendering plot ' + index);
+      var figlabel = 'fig' + index;
+      var figdiv = document.getElementById(figlabel);
+
+      if (!figdiv) {
+        console.log('WARNING: figdiv not found: ' + figlabel);
+      } // Show figure containers
+
+
+      if (index >= 1 && index < n_plots) {
+        var figcontainerlabel = 'figcontainer' + index; // CK: Not sure if this is necessary? To ensure the div is clear first
+
+        var figcontainerdiv = document.getElementById(figcontainerlabel);
+
+        if (figcontainerdiv) {
+          figcontainerdiv.style.display = 'flex';
+        } else {
+          console.log('WARNING: figcontainerdiv not found: ' + figcontainerlabel);
+        } // var legendlabel = 'legend' + index
+        // var legenddiv  = document.getElementById(legendlabel);
+        // if (legenddiv) {
+        //   while (legenddiv.firstChild) {
+        //     legenddiv.removeChild(legenddiv.firstChild);
+        //   }
+        // } else {
+        //   console.log('WARNING: legenddiv not found: ' + legendlabel)
         // }
 
-        for (var index = 0; index <= n_plots; index++) {
-          console.log('Rendering plot ' + index);
-          var figlabel = 'fig' + index;
-          var figdiv = document.getElementById(figlabel); // CK: Not sure if this is necessary? To ensure the div is clear first
-
-          if (figdiv) {
-            while (figdiv.firstChild) {
-              figdiv.removeChild(figdiv.firstChild);
-            }
-          } else {
-            console.log('WARNING: figdiv not found: ' + figlabel);
-          } // Show figure containers
+      } // Draw figures
 
 
-          if (index >= 1 && index < n_plots) {
-            var figcontainerlabel = 'figcontainer' + index;
-            var figcontainerdiv = document.getElementById(figcontainerlabel); // CK: Not sure if this is necessary? To ensure the div is clear first
-
-            if (figcontainerdiv) {
-              figcontainerdiv.style.display = 'flex';
-            } else {
-              console.log('WARNING: figcontainerdiv not found: ' + figcontainerlabel);
-            } // var legendlabel = 'legend' + index
-            // var legenddiv  = document.getElementById(legendlabel);
-            // if (legenddiv) {
-            //   while (legenddiv.firstChild) {
-            //     legenddiv.removeChild(legenddiv.firstChild);
-            //   }
-            // } else {
-            //   console.log('WARNING: legenddiv not found: ' + legendlabel)
-            // }
-
-          } // Draw figures
-
-
-          try {
-            mpld3_min.draw_figure(figlabel, graphdata[index], function (fig, element) {
-              fig.setXTicks(6, function (d) {
-                return d3.format('.0f')(d);
-              }); // fig.setYTicks(null, function (d) { // Looks too weird with 500m for 0.5
-              //   return d3.format('.2s')(d);
-              // });
-            }, true);
-          } catch (error) {
-            console.log('Could not plot graph: ' + error.message);
-          } // Draw legends
-          // if (index>=1 && index<n_plots) {
-          //   try {
-          //     mpld3.draw_figure(legendlabel, legenddata[index], function (fig, element) {
-          //     });
-          //   } catch (error) {
-          //     console.log(error)
-          //   }
-          //
-          // }
+      try {
+        mpld3_min.draw_figure(figlabel, graphdata[index], function (fig, element) {
+          fig.setXTicks(6, function (d) {
+            return d3.format('.0f')(d);
+          }); // fig.setYTicks(null, function (d) { // Looks too weird with 500m for 0.5
+          //   return d3.format('.2s')(d);
+          // });
+        }, true);
+      } catch (error) {
+        console.log('Could not plot graph: ' + error.message);
+      } // Draw legends
+      // if (index>=1 && index<n_plots) {
+      //   try {
+      //     mpld3.draw_figure(legendlabel, legenddata[index], function (fig, element) {
+      //     });
+      //   } catch (error) {
+      //     console.log(error)
+      //   }
+      //
+      // }
 
 
-          vm.showGraphDivs[index] = true;
-        }
+      vm.showGraphDivs[index] = true;
+    } // CK: This should be a promise, otherwise this appears before the graphs do
 
-        status.succeed(vm, 'Graphs created'); // CK: This should be a promise, otherwise this appears before the graphs do
-      });
-    }
+
+    status.succeed(vm, 'Graphs created');
   } //
   // Graphs DOM functions
   //
+
+  /**
+   * Print the dimentions of the current window to the console 
+   *
+   * @function
+   */
 
 
   function showBrowserWindowSize() {
@@ -11387,6 +11509,14 @@
     console.log('Browser window size:');
     console.log(w, h, ow, oh);
   }
+  /**
+   * Given an SVG HTML element in the DOM scale its size 
+   *
+   * @function
+   * @svg {Object} svg - The HTML element of the SVG 
+   * @frac {number} frac - The fraction which the SVG figure should be scaled by 
+   */
+
 
   function scaleElem(svg, frac) {
     // It might ultimately be better to redraw the graph, but this works
@@ -11402,6 +11532,14 @@
     svg.setAttribute("width", width * frac);
     svg.setAttribute("height", height * frac);
   }
+  /**
+   * Scale all the figures inside a Vue component instance 
+   *
+   * @function
+   * @param {Object} vm - Vue component 
+   * @frac {number} frac - The fraction which the SVG figures should be scaled by 
+   */
+
 
   function scaleFigs(vm, frac) {
     vm.figscale = vm.figscale * frac;
@@ -11420,12 +11558,29 @@
   // Legend functions
   // 
 
+  /**
+   * Add a native mouseover listener to a Vue component instance. 
+   * It will update the variables `.mousex` and `.mousey` inside the instance
+   *
+   * @function
+   * @param {Object} vm - Vue component 
+   */
+
 
   function addListener(vm) {
     document.addEventListener('mousemove', function (e) {
       onMouseUpdate(e, vm);
     }, false);
   }
+  /**
+   * Pass the position of the mouse to a Vue component instance 
+   *
+   * @function
+   * @private
+   * @param {Object} e - Event object 
+   * @param {Object} vm - Vue component 
+   */
+
 
   function onMouseUpdate(e, vm) {
     vm.mousex = e.pageX;
@@ -11529,109 +11684,122 @@
     mpld3: mpld3_min
   };
 
-  // task-service.js -- task queuing functions for Vue to call
-  // sec.), and a remote task function name and its args, try to launch 
-  // the task, then wait for the waiting time, then try to get the 
-  // result.
+  /** @module task */
+  /**
+   * getTaskResultWaiting() -- given a task_id string, a waiting time (in 
+   * sec.), and a remote task function name and its args, try to launch 
+   * the task, then wait for the waiting time, then try to get the 
+   * result.
+   *
+   * @function
+   * @async
+   * @param {number} task_id - id of the task to keep track of
+   * @param {number} waitingtime - time to wait before checking the status of the task 
+   * @param {string} func_name - name of the remote task function 
+   * @param {string[]} args - Python style args to pass to the function 
+   * @param {Object} kwargs - Python style kwatgs to pass to the function
+   * @returns {Promise}
+   */
 
-  function getTaskResultWaiting(task_id, waitingtime, func_name, args, kwargs) {
+  async function getTaskResultWaiting(task_id, waitingtime, func_name, args, kwargs) {
     if (!args) {
       // Set the arguments to an empty list if none are passed in.
       args = [];
     }
 
-    return new Promise((resolve, reject) => {
-      rpcs.rpc('launch_task', [task_id, func_name, args, kwargs]) // Launch the task.
-      .then(response => {
-        utils.sleep(waitingtime * 1000) // Sleep waitingtime seconds.
-        .then(response2 => {
-          rpcs.rpc('get_task_result', [task_id]) // Get the result of the task.
-          .then(response3 => {
-            rpcs.rpc('delete_task', [task_id]); // Clean up the task_id task.
+    try {
+      const task = await rpcs.rpc('launch_task', [task_id, func_name, args, kwargs]);
+      await utils.sleep(waitingtime * 1000);
+      const result = await rpcs.rpc('get_task_result', [task_id]); // Clean up the task_id task.
 
-            resolve(response3); // Signal success with the result response.
-          }).catch(error => {
-            // While we might want to clean up the task as below, the Celery
-            // worker is likely to "resurrect" the task if it actually is
-            // running the task to completion.
-            // Clean up the task_id task.
-            // rpcCall('delete_task', [task_id])
-            reject(error); // Reject with the error the task result get attempt gave.
-          });
-        });
-      }).catch(error => {
-        reject(error); // Reject with the error the launch gave.
-      });
-    });
-  } // getTaskResultPolling() -- given a task_id string, a timeout time (in 
-  // sec.), a polling interval (also in sec.), and a remote task function name
-  //  and its args, try to launch the task, then start the polling if this is 
-  // successful, returning the ultimate results of the polling process. 
+      await rpcs.rpc('delete_task', [task_id]);
+    } catch (error) {
+      // While we might want to clean up the task as below, the Celery
+      // worker is likely to "resurrect" the task if it actually is
+      // running the task to completion.
+      // Clean up the task_id task.
+      // rpcCall('delete_task', [task_id])
+      throw Error(error);
+    }
+
+    return result;
+  }
+  /**
+   * Given a task_id string, a timeout time (in 
+   * sec.), a polling interval (also in sec.), and a remote task function name
+   * and its args, try to launch the task, then start the polling if this is 
+   * successful, returning the ultimate results of the polling process. 
+   *
+   * @function
+   * @async
+   * @param {number} task_id - id of the task to keep track of
+   * @param {number} timeout - maximum execution time  
+   * @param {number} pollinterval - how long to wait before initiating another poll
+   * @param {string} func_name - name of the remote task function 
+   * @param {string[]} args - Python style args to pass to the function 
+   * @param {Object} kwargs - Python style kwatgs to pass to the function
+   * @returns {Promise}
+   */
 
 
-  function getTaskResultPolling(task_id, timeout, pollinterval, func_name, args, kwargs) {
+  async function getTaskResultPolling(task_id, timeout, pollinterval, func_name, args, kwargs) {
     if (!args) {
       // Set the arguments to an empty list if none are passed in.
       args = [];
     }
 
-    return new Promise((resolve, reject) => {
-      rpcs.rpc('launch_task', [task_id, func_name, args, kwargs]) // Launch the task.
-      .then(response => {
-        pollStep(task_id, timeout, pollinterval, 0) // Do the whole sequence of polling steps, starting with the first (recursive) call.
-        .then(response2 => {
-          resolve(response2); // Resolve with the final polling result.
-        }).catch(error => {
-          reject(error); // Reject with the error the polling gave.
-        });
-      }).catch(error => {
-        reject(error); // Reject with the error the launch gave.
-      });
-    });
-  } // pollStep() -- A polling step for getTaskResultPolling().  Uses the task_id, 
-  // a timeout value (in sec.) a poll interval (in sec.) and the time elapsed 
-  // since the start of the entire polling process.  If timeout is zero or 
-  // negative, no timeout check is applied.  Otherwise, an error will be 
-  // returned if the polling has gone on beyond the timeout period.  Otherwise, 
-  // this function does a sleep() and then a check_task().  If the task is 
-  // completed, it will get the result.  Otherwise, it will recursively spawn 
-  // another pollStep().
+    await rpcs.rpc('launch_task', [task_id, func_name, args, kwargs]); // Do the whole sequence of polling steps, starting with the first (recursive) call.
+
+    return await pollStep(task_id, timeout, pollinterval, 0);
+  }
+  /**
+   * A polling step for getTaskResultPolling().  Uses the task_id, 
+   * a timeout value (in sec.) a poll interval (in sec.) and the time elapsed 
+   * since the start of the entire polling process.  If timeout is zero or 
+   * negative, no timeout check is applied.  Otherwise, an error will be 
+   * returned if the polling has gone on beyond the timeout period.  Otherwise, 
+   * this function does a sleep() and then a check_task().  If the task is 
+   * completed, it will get the result.  Otherwise, it will recursively spawn 
+   * another pollStep().
+   *
+   * @function
+   * @async
+   * @private
+   * @param {string} task_id - id of the task to keep track of
+   * @param {string} timeout - maximum execution time  
+   * @param {string} pollinterval - how long to wait before initiating another poll
+   * @param {string} elapsedtime - the current execution time
+   * @returns {Promise}
+   */
 
 
-  function pollStep(task_id, timeout, pollinterval, elapsedtime) {
-    return new Promise((resolve, reject) => {
-      if (elapsedtime > timeout && timeout > 0) {
-        // Check to see if the elapsed time is longer than the timeout (and we have a timeout we actually want to check against) and if so, fail.
-        reject(Error('Task polling timed out'));
-      } else {
-        // Otherwise, we've not run out of time yet, so do a polling step.
-        utils.sleep(pollinterval * 1000) // Sleep timeout seconds.
-        .then(response => {
-          rpcs.rpc('check_task', [task_id]) // Check the status of the task.
-          .then(response2 => {
-            if (response2.data.task.status == 'completed') {
-              // If the task is completed...
-              rpcs.rpc('get_task_result', [task_id]) // Get the result of the task.
-              .then(response3 => {
-                rpcs.rpc('delete_task', [task_id]); // Clean up the task_id task.
+  async function pollStep(task_id, timeout, pollinterval, elapsedtime) {
+    // Check to see if the elapsed time is longer than the timeout 
+    // (and we have a timeout we actually want to check against) and if so, fail.
+    if (elapsedtime > timeout && timeout > 0) {
+      throw Error('Task polling timed out');
+    } // Sleep timeout seconds.
 
-                resolve(response3); // Signal success with the response.
-              }).catch(error => {
-                reject(error); // Reject with the error the task result get attempt gave.
-              });
-            } else if (response2.data.task.status == 'error') {
-              // Otherwise, if the task ended in an error...
-              reject(Error(response2.data.task.errorText)); // Reject with an error for the exception.
-            } else {
-              // Otherwise, do another poll step, passing in an incremented elapsed time.
-              pollStep(task_id, timeout, pollinterval, elapsedtime + pollinterval).then(response3 => {
-                resolve(response3); // Resolve with the result of the next polling step (which may include subsequent (recursive) steps.
-              });
-            }
-          });
-        });
-      }
-    });
+
+    await utils.sleep(pollinterval * 1000); // Check the status of the task.
+
+    const task = await rpcs.rpc('check_task', [task_id]); // There was an issue with executing the taks
+
+    if (task.data.task.status == 'error') {
+      throw Error(task.data.task.errorText);
+    } // If the task is completed...
+
+
+    if (task.data.task.status == 'completed') {
+      const result = await rpcs.rpc('get_task_result', [task_id]); // Clean up the task_id task.
+
+      await rpcs.rpc('delete_task', [task_id]);
+      return result;
+    } // Task is still pending processing, do another poll step, passing in an 
+    // incremented elapsed time.
+
+
+    return await pollStep(task_id, timeout, pollinterval, elapsedtime + pollinterval);
   }
 
   var tasks = {
@@ -12662,13 +12830,9 @@
   }));
   });
 
-  /** 
-   * Lower level user functions that call RPC service functions
-   *
-   * @module user 
-   */
+  /** @module user */
   /**
-   * Call rpc() for performing a login. 
+   * Using the correct combination of a user's username and email perform a login 
    * The password is hashed using sha244 and sent to the API
    *
    * @function
@@ -17861,33 +18025,167 @@
     install
   };
 
-  const rpc = rpcs.rpc;
-  const download = rpcs.download;
-  const upload = rpcs.upload;
+  /**
+   * @function
+   * @async
+   * @see {@link module:rpcs~rpc|rpcs.rpc} 
+   */
+
+  const rpc$1 = rpcs.rpc;
+  /**
+   * @function
+   * @async
+   * @see {@link module:rpcs~download|rpcs.download} 
+   */
+
+  const download$1 = rpcs.download;
+  /**
+   * @function
+   * @async
+   * @see {@link module:rpcs~upload|rpcs.upload} 
+   */
+
+  const upload$1 = rpcs.upload;
+  /**
+   * @function
+   * @async
+   * @see {@link module:status~succeed|status.succeed} 
+   */
+
   const succeed$1 = status.succeed;
+  /**
+   * @function
+   * @async
+   * @see {@link module:status~fail|status.fail} 
+   */
+
   const fail$1 = status.fail;
+  /**
+   * @function
+   * @async
+   * @see {@link module:status~start|status.start} 
+   */
+
   const start$1 = status.start;
+  /**
+   * @function
+   * @async
+   * @see {@link module:status~notify|status.notify} 
+   */
+
   const notify$1 = status.notify;
+  /**
+   * @function
+   * @async
+   * @see {@link module:graphs~placeholders|graphs.placeholders} 
+   */
+
   const placeholders$1 = graphs.placeholders;
+  /**
+   * @function
+   * @async
+   * @see {@link module:graphs~clearGraphs|graphs.clearGraphs} 
+   */
+
   const clearGraphs$1 = graphs.clearGraphs;
+  /**
+   * @function
+   * @async
+   * @see {@link module:graphs~makeGraphs|graphs.makeGraphs} 
+   */
+
   const makeGraphs$1 = graphs.makeGraphs;
+  /**
+   * @function
+   * @async
+   * @see {@link module:graphs~scaleFigs|graphs.scaleFigs} 
+   */
+
   const scaleFigs$1 = graphs.scaleFigs;
+  /**
+   * @function
+   * @async
+   * @see {@link module:graphs~showBrowserWindowSize|graphs.showBrowserWindowSize} 
+   */
+
   const showBrowserWindowSize$1 = graphs.showBrowserWindowSize;
+  /**
+   * @function
+   * @async
+   * @see {@link module:graphs~addListener|graphs.addListener} 
+   */
+
   const addListener$1 = graphs.addListener;
+  /**
+   * @function
+   * @async
+   * @see {@link module:graphs~onMouseUpdate|graphs.onMouseUpdate} 
+   */
+
   const onMouseUpdate$1 = graphs.onMouseUpdate;
+  /**
+   * @function
+   * @async
+   * @see {@link module:graphs~createDialogs|graphs.createDialogs} 
+   */
+
   const createDialogs$1 = graphs.createDialogs;
+  /**
+   * @function
+   * @async
+   * @see {@link module:graphs~newDialog|graphs.newDialog} 
+   */
+
   const newDialog$1 = graphs.newDialog;
+  /**
+   * @function
+   * @async
+   * @see {@link module:graphs~findDialog|graphs.findDialog} 
+   */
+
   const findDialog$1 = graphs.findDialog;
+  /**
+   * @function
+   * @async
+   * @see {@link module:graphs~maximize|graphs.maximize} 
+   */
+
   const maximize$1 = graphs.maximize;
+  /**
+   * @function
+   * @async
+   * @see {@link module:graphs~minimize|graphs.minimize} 
+   */
+
   const minimize$1 = graphs.minimize;
+  /**
+   * Access to the mpld3 instance, only if d3 is included in the global scope
+   *
+   * @function
+   * @async
+   * @see {@link module:graphs~mpld3|graphs.mpld3} 
+   */
+
   const mpld3 = graphs.mpld3;
   let draw_figure = null;
 
   if (mpld3 !== null) {
     draw_figure = mpld3.draw_figure;
   }
+  /**
+   * @function
+   * @async
+   * @see {@link module:tasks~getTaskResultWaiting|tasks.getTaskResultWaiting} 
+   */
+
 
   const getTaskResultWaiting$1 = tasks.getTaskResultWaiting;
+  /**
+   * @function
+   * @async
+   * @see {@link module:tasks~getTaskResultPolling|tasks.getTaskResultPolling} 
+   */
+
   const getTaskResultPolling$1 = tasks.getTaskResultPolling;
   /**
    * @function
@@ -18008,13 +18306,25 @@
    */
 
   const checkAdminLoggedIn$1 = user.checkAdminLoggedIn;
+  /**
+   * @function
+   * @async
+   * @see {@link module:utils~sleep|utils.sleep} 
+   */
+
   const sleep$1 = utils.sleep;
+  /**
+   * @function
+   * @async
+   * @see {@link module:utils~getUniqueName|utils.getUniqueName} 
+   */
+
   const getUniqueName$1 = utils.getUniqueName;
   const sciris = {
     // rpc-service.js
-    rpc,
-    download,
-    upload,
+    rpc: rpc$1,
+    download: download$1,
+    upload: upload$1,
     // graphs.js
     placeholders: placeholders$1,
     clearGraphs: clearGraphs$1,

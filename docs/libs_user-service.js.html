@@ -1,23 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    
     <meta charset="utf-8">
-    <title>JSDoc: Source: libs/user-service.js</title>
-
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
+    <title>libs/user-service.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
     <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-
 <body>
 
-<div id="main">
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
 
-    <h1 class="page-title">Source: libs/user-service.js</h1>
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="https://github.com/sciris" target="_blank" class="menu-item" id="website_link" >Sciris</a></h2><h3>Modules</h3><ul><li><a href="module-graphs.html">graphs</a><ul class='methods'><li data-type='method'><a href="module-graphs.html#~clearGraphs">clearGraphs</a></li><li data-type='method'><a href="module-graphs.html#~makeGraphs">makeGraphs</a></li><li data-type='method'><a href="module-graphs.html#~showBrowserWindowSize">showBrowserWindowSize</a></li><li data-type='method'><a href="module-graphs.html#~scaleElem">scaleElem</a></li><li data-type='method'><a href="module-graphs.html#~scaleFigs">scaleFigs</a></li><li data-type='method'><a href="module-graphs.html#~addListener">addListener</a></li></ul></li><li><a href="module-rpcs.html">rpcs</a><ul class='methods'><li data-type='method'><a href="module-rpcs.html#~readJsonFromBlob">readJsonFromBlob</a></li><li data-type='method'><a href="module-rpcs.html#~rpc">rpc</a></li><li data-type='method'><a href="module-rpcs.html#~download">download</a></li><li data-type='method'><a href="module-rpcs.html#~upload">upload</a></li></ul></li><li><a href="module-status.html">status</a><ul class='methods'><li data-type='method'><a href="module-status.html#~start">start</a></li><li data-type='method'><a href="module-status.html#~succeed">succeed</a></li><li data-type='method'><a href="module-status.html#~fail">fail</a></li><li data-type='method'><a href="module-status.html#~notify">notify</a></li></ul></li><li><a href="module-task.html">task</a><ul class='methods'><li data-type='method'><a href="module-task.html#~getTaskResultWaiting">getTaskResultWaiting</a></li><li data-type='method'><a href="module-task.html#~getTaskResultPolling">getTaskResultPolling</a></li></ul></li><li><a href="module-user.html">user</a><ul class='methods'><li data-type='method'><a href="module-user.html#~loginCall">loginCall</a></li><li data-type='method'><a href="module-user.html#~logoutCall">logoutCall</a></li><li data-type='method'><a href="module-user.html#~getCurrentUserInfo">getCurrentUserInfo</a></li><li data-type='method'><a href="module-user.html#~registerUser">registerUser</a></li><li data-type='method'><a href="module-user.html#~changeUserInfo">changeUserInfo</a></li><li data-type='method'><a href="module-user.html#~changeUserPassword">changeUserPassword</a></li><li data-type='method'><a href="module-user.html#~adminGetUserInfo">adminGetUserInfo</a></li><li data-type='method'><a href="module-user.html#~deleteUser">deleteUser</a></li><li data-type='method'><a href="module-user.html#~activateUserAccount">activateUserAccount</a></li><li data-type='method'><a href="module-user.html#~deactivateUserAccount">deactivateUserAccount</a></li><li data-type='method'><a href="module-user.html#~grantUserAdminRights">grantUserAdminRights</a></li><li data-type='method'><a href="module-user.html#~revokeUserAdminRights">revokeUserAdminRights</a></li><li data-type='method'><a href="module-user.html#~resetUserPassword">resetUserPassword</a></li><li data-type='method'><a href="module-user.html#~getUserInfo">getUserInfo</a></li><li data-type='method'><a href="module-user.html#~checkLoggedIn">checkLoggedIn</a></li><li data-type='method'><a href="module-user.html#~checkAdminLoggedIn">checkAdminLoggedIn</a></li></ul></li><li><a href="module-utils.html">utils</a><ul class='methods'><li data-type='method'><a href="module-utils.html#~sleep">sleep</a></li><li data-type='method'><a href="module-utils.html#~getUniqueName">getUniqueName</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#rpc">rpc</a></li><li><a href="global.html#download">download</a></li><li><a href="global.html#upload">upload</a></li><li><a href="global.html#succeed">succeed</a></li><li><a href="global.html#fail">fail</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#notify">notify</a></li><li><a href="global.html#placeholders">placeholders</a></li><li><a href="global.html#clearGraphs">clearGraphs</a></li><li><a href="global.html#makeGraphs">makeGraphs</a></li><li><a href="global.html#scaleFigs">scaleFigs</a></li><li><a href="global.html#showBrowserWindowSize">showBrowserWindowSize</a></li><li><a href="global.html#addListener">addListener</a></li><li><a href="global.html#onMouseUpdate">onMouseUpdate</a></li><li><a href="global.html#createDialogs">createDialogs</a></li><li><a href="global.html#newDialog">newDialog</a></li><li><a href="global.html#findDialog">findDialog</a></li><li><a href="global.html#maximize">maximize</a></li><li><a href="global.html#minimize">minimize</a></li><li><a href="global.html#mpld3">mpld3</a></li><li><a href="global.html#getTaskResultWaiting">getTaskResultWaiting</a></li><li><a href="global.html#getTaskResultPolling">getTaskResultPolling</a></li><li><a href="global.html#loginCall">loginCall</a></li><li><a href="global.html#logoutCall">logoutCall</a></li><li><a href="global.html#getCurrentUserInfo">getCurrentUserInfo</a></li><li><a href="global.html#registerUser">registerUser</a></li><li><a href="global.html#changeUserInfo">changeUserInfo</a></li><li><a href="global.html#changeUserPassword">changeUserPassword</a></li><li><a href="global.html#adminGetUserInfo">adminGetUserInfo</a></li><li><a href="global.html#deleteUser">deleteUser</a></li><li><a href="global.html#activateUserAccount">activateUserAccount</a></li><li><a href="global.html#deactivateUserAccount">deactivateUserAccount</a></li><li><a href="global.html#grantUserAdminRights">grantUserAdminRights</a></li><li><a href="global.html#revokeUserAdminRights">revokeUserAdminRights</a></li><li><a href="global.html#resetUserPassword">resetUserPassword</a></li><li><a href="global.html#getUserInfo">getUserInfo</a></li><li><a href="global.html#currentUser">currentUser</a></li><li><a href="global.html#checkLoggedIn">checkLoggedIn</a></li><li><a href="global.html#checkAdminLoggedIn">checkAdminLoggedIn</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#getUniqueName">getUniqueName</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">libs/user-service.js</h1>
+    
 
     
 
@@ -26,12 +43,9 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/** 
- * Lower level user functions that call RPC service functions
- *
- * @module user 
- */
+            <pre class="prettyprint source linenums"><code>/** @module user */
 
+// Lower level user functions that call RPC service functions
 
 import rpcs from './rpc-service.js'
 import sha224 from 'crypto-js/sha224';
@@ -41,7 +55,7 @@ var state = {
 };
 
 /**
- * Call rpc() for performing a login. 
+ * Using the correct combination of a user's username and email perform a login 
  * The password is hashed using sha244 and sent to the API
  *
  * @function
@@ -331,19 +345,25 @@ export default {
 
 
 
+    
+    
 </div>
-
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-user.html">user</a></li></ul><h3>Global</h3><ul><li><a href="global.html#activateUserAccount">activateUserAccount</a></li><li><a href="global.html#adminGetUserInfo">adminGetUserInfo</a></li><li><a href="global.html#changeUserInfo">changeUserInfo</a></li><li><a href="global.html#changeUserPassword">changeUserPassword</a></li><li><a href="global.html#checkAdminLoggedIn">checkAdminLoggedIn</a></li><li><a href="global.html#checkLoggedIn">checkLoggedIn</a></li><li><a href="global.html#currentUser">currentUser</a></li><li><a href="global.html#deactivateUserAccount">deactivateUserAccount</a></li><li><a href="global.html#deleteUser">deleteUser</a></li><li><a href="global.html#getCurrentUserInfo">getCurrentUserInfo</a></li><li><a href="global.html#getUserInfo">getUserInfo</a></li><li><a href="global.html#grantUserAdminRights">grantUserAdminRights</a></li><li><a href="global.html#loginCall">loginCall</a></li><li><a href="global.html#logoutCall">logoutCall</a></li><li><a href="global.html#registerUser">registerUser</a></li><li><a href="global.html#resetUserPassword">resetUserPassword</a></li><li><a href="global.html#revokeUserAdminRights">revokeUserAdminRights</a></li></ul>
-</nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Mar 26 2019 15:09:12 GMT+0100 (Central European Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Mar 28 2019 16:18:02 GMT+0100 (Central European Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/jquery-3.1.1.min.js"></script>
+
+<script src="scripts/search.js"></script>
+
+
+
+
 </body>
 </html>

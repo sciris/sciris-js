@@ -1,3 +1,5 @@
+/** @module graphs */
+
 /*
  * Graphing functions (shared between calibration, scenarios, and optimization)
  */
@@ -20,107 +22,136 @@ function placeholders(vm, startVal) {
   return indices;
 }
 
+/**
+ * Remove the figures that have been plotted in a Vue component
+ *
+ * @function
+ * @param {Object} vm - Vue component 
+ */
 function clearGraphs(vm) {
   for (let index = 0; index <= 100; index++) {
-    let divlabel = 'fig' + index
-    let div = document.getElementById(divlabel); // CK: Not sure if this is necessary? To ensure the div is clear first
-    while (div && div.firstChild) {
-      div.removeChild(div.firstChild);
+    let divlabel = 'fig' + index;
+    if (typeof d3 === 'undefined'){
+      console.log("please include d3 to use the clearGraphs function")
+      return false;
     }
+
+    mpld3.remove_figure(divlabel);
     vm.hasGraphs = false
   }
 }
 
-function makeGraphs(vm, data, routepath) {
+/**
+ * Use the mpld3 graph definitions to plot graphs in a Vue component 
+ *
+ * @function
+ * @param {Object} vm - Vue component 
+ * @param {Object} data - The mpld3 object that defines the graphs 
+ * @param {string} routepath - The path that the  
+ */
+async function makeGraphs(vm, data, routepath) {
   if (typeof d3 === 'undefined'){
     console.log("please include d3 to use the makeGraphs function")
     return false;
   }
-  if (routepath && routepath !== vm.$route.path) { // Don't render graphs if we've changed page
+
+  // Don't render graphs if we've changed page
+  if (routepath && routepath !== vm.$route.path) { 
     console.log('Not rendering graphs since route changed: ' + routepath + ' vs. ' + vm.$route.path)
+    return false;
   }
-  else { // Proceed...
-    let waitingtime = 0.5
-    var graphdata = data.graphs
-    // var legenddata = data.legends
-    status.start(vm) // Start indicating progress.
-    vm.hasGraphs = true
-    utils.sleep(waitingtime * 1000)
-      .then(response => {
-        let n_plots = graphdata.length
-        // let n_legends = legenddata.length
-        console.log('Rendering ' + n_plots + ' graphs')
-        // if (n_plots !== n_legends) {
-        //   console.log('WARNING: different numbers of plots and legends: ' + n_plots + ' vs. ' + n_legends)
-        // }
-        for (var index = 0; index <= n_plots; index++) {
-          console.log('Rendering plot ' + index)
-          var figlabel    = 'fig' + index
-          var figdiv  = document.getElementById(figlabel); // CK: Not sure if this is necessary? To ensure the div is clear first
-          if (figdiv) {
-            while (figdiv.firstChild) {
-              figdiv.removeChild(figdiv.firstChild);
-            }
-          } else {
-            console.log('WARNING: figdiv not found: ' + figlabel)
-          }
 
-          // Show figure containers
-          if (index>=1 && index<n_plots) {
-            var figcontainerlabel = 'figcontainer' + index
-            var figcontainerdiv = document.getElementById(figcontainerlabel); // CK: Not sure if this is necessary? To ensure the div is clear first
-            if (figcontainerdiv) {
-              figcontainerdiv.style.display = 'flex'
-            } else {
-              console.log('WARNING: figcontainerdiv not found: ' + figcontainerlabel)
-            }
+  let waitingtime = 0.5
+  var graphdata = data.graphs
+  // var legenddata = data.legends
 
-            // var legendlabel = 'legend' + index
-            // var legenddiv  = document.getElementById(legendlabel);
-            // if (legenddiv) {
-            //   while (legenddiv.firstChild) {
-            //     legenddiv.removeChild(legenddiv.firstChild);
-            //   }
-            // } else {
-            //   console.log('WARNING: legenddiv not found: ' + legendlabel)
-            // }
-          }
+  // Start indicating progress.
+  status.start(vm)
 
-          // Draw figures
-          try {
-            mpld3.draw_figure(figlabel, graphdata[index], function (fig, element) {
-              fig.setXTicks(6, function (d) {
-                return d3.format('.0f')(d);
-              });
-              // fig.setYTicks(null, function (d) { // Looks too weird with 500m for 0.5
-              //   return d3.format('.2s')(d);
-              // });
-            }, true);
-          } catch (error) {
-            console.log('Could not plot graph: ' + error.message)
-          }
+  vm.hasGraphs = true
+  await utils.sleep(waitingtime * 1000);
 
-          // Draw legends
-          // if (index>=1 && index<n_plots) {
-          //   try {
-          //     mpld3.draw_figure(legendlabel, legenddata[index], function (fig, element) {
-          //     });
-          //   } catch (error) {
-          //     console.log(error)
-          //   }
-          //
-          // }
-          vm.showGraphDivs[index] = true;
-        }
-        status.succeed(vm, 'Graphs created') // CK: This should be a promise, otherwise this appears before the graphs do
-      })
+  let n_plots = graphdata.length
+  // let n_legends = legenddata.length
+
+  console.log('Rendering ' + n_plots + ' graphs')
+
+  // if (n_plots !== n_legends) {
+  //   console.log('WARNING: different numbers of plots and legends: ' + n_plots + ' vs. ' + n_legends)
+  // }
+
+  for (var index = 0; index <= n_plots; index++) {
+    console.log('Rendering plot ' + index);
+    var figlabel = 'fig' + index;
+
+    var figdiv  = document.getElementById(figlabel); 
+    if (!figdiv) {
+      console.log('WARNING: figdiv not found: ' + figlabel)
+    }
+
+    // Show figure containers
+    if (index>=1 && index < n_plots) {
+      var figcontainerlabel = 'figcontainer' + index
+
+      // CK: Not sure if this is necessary? To ensure the div is clear first
+      var figcontainerdiv = document.getElementById(figcontainerlabel); 
+      if (figcontainerdiv) {
+        figcontainerdiv.style.display = 'flex'
+      } else {
+        console.log('WARNING: figcontainerdiv not found: ' + figcontainerlabel)
+      }
+
+      // var legendlabel = 'legend' + index
+      // var legenddiv  = document.getElementById(legendlabel);
+      // if (legenddiv) {
+      //   while (legenddiv.firstChild) {
+      //     legenddiv.removeChild(legenddiv.firstChild);
+      //   }
+      // } else {
+      //   console.log('WARNING: legenddiv not found: ' + legendlabel)
+      // }
+    }
+
+    // Draw figures
+    try {
+      mpld3.draw_figure(figlabel, graphdata[index], function (fig, element) {
+        fig.setXTicks(6, function (d) {
+          return d3.format('.0f')(d);
+        });
+        // fig.setYTicks(null, function (d) { // Looks too weird with 500m for 0.5
+        //   return d3.format('.2s')(d);
+        // });
+      }, true);
+    } catch (error) {
+      console.log('Could not plot graph: ' + error.message)
+    }
+
+    // Draw legends
+    // if (index>=1 && index<n_plots) {
+    //   try {
+    //     mpld3.draw_figure(legendlabel, legenddata[index], function (fig, element) {
+    //     });
+    //   } catch (error) {
+    //     console.log(error)
+    //   }
+    //
+    // }
+    vm.showGraphDivs[index] = true;
   }
+
+  // CK: This should be a promise, otherwise this appears before the graphs do
+  status.succeed(vm, 'Graphs created') 
 }
 
 //
 // Graphs DOM functions
 //
 
+/**
+ * Print the dimentions of the current window to the console 
+ *
+ * @function
+ */
 function showBrowserWindowSize() {
   let w = window.innerWidth;
   let h = window.innerHeight;
@@ -130,6 +161,13 @@ function showBrowserWindowSize() {
   console.log(w, h, ow, oh)
 }
 
+/**
+ * Given an SVG HTML element in the DOM scale its size 
+ *
+ * @function
+ * @svg {Object} svg - The HTML element of the SVG 
+ * @frac {number} frac - The fraction which the SVG figure should be scaled by 
+ */
 function scaleElem(svg, frac) {
   // It might ultimately be better to redraw the graph, but this works
   let width  = svg.getAttribute("width")
@@ -143,6 +181,13 @@ function scaleElem(svg, frac) {
   svg.setAttribute("height", height*frac)
 }
 
+/**
+ * Scale all the figures inside a Vue component instance 
+ *
+ * @function
+ * @param {Object} vm - Vue component 
+ * @frac {number} frac - The fraction which the SVG figures should be scaled by 
+ */
 function scaleFigs(vm, frac) {
   vm.figscale = vm.figscale*frac;
   if (frac === 1.0) {
@@ -161,10 +206,25 @@ function scaleFigs(vm, frac) {
 // 
 
 
+/**
+ * Add a native mouseover listener to a Vue component instance. 
+ * It will update the variables `.mousex` and `.mousey` inside the instance
+ *
+ * @function
+ * @param {Object} vm - Vue component 
+ */
 function addListener(vm) {
   document.addEventListener('mousemove', function(e){onMouseUpdate(e, vm)}, false);
 }
 
+/**
+ * Pass the position of the mouse to a Vue component instance 
+ *
+ * @function
+ * @private
+ * @param {Object} e - Event object 
+ * @param {Object} vm - Vue component 
+ */
 function onMouseUpdate(e, vm) {
   vm.mousex = e.pageX;
   vm.mousey = e.pageY;

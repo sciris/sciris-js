@@ -7,33 +7,164 @@ import utils from './libs/utils.js';
 import EventBus from './eventbus.js';
 import ScirisVue from './plugins.js';
 
+/**
+ * @function
+ * @async
+ * @see {@link module:rpcs~rpc|rpcs.rpc} 
+ */
 const rpc = rpcs.rpc;
+
+/**
+ * @function
+ * @async
+ * @see {@link module:rpcs~download|rpcs.download} 
+ */
 const download = rpcs.download;
+
+/**
+ * @function
+ * @async
+ * @see {@link module:rpcs~upload|rpcs.upload} 
+ */
 const upload = rpcs.upload;
 
+/**
+ * @function
+ * @async
+ * @see {@link module:status~succeed|status.succeed} 
+ */
 const succeed = status.succeed;
+
+/**
+ * @function
+ * @async
+ * @see {@link module:status~fail|status.fail} 
+ */
 const fail = status.fail;
+
+/**
+ * @function
+ * @async
+ * @see {@link module:status~start|status.start} 
+ */
 const start = status.start;
+
+/**
+ * @function
+ * @async
+ * @see {@link module:status~notify|status.notify} 
+ */
 const notify = status.notify;
 
+/**
+ * @function
+ * @async
+ * @see {@link module:graphs~placeholders|graphs.placeholders} 
+ */
 const placeholders = graphs.placeholders; 
+
+/**
+ * @function
+ * @async
+ * @see {@link module:graphs~clearGraphs|graphs.clearGraphs} 
+ */
 const clearGraphs = graphs.clearGraphs; 
+
+/**
+ * @function
+ * @async
+ * @see {@link module:graphs~makeGraphs|graphs.makeGraphs} 
+ */
 const makeGraphs = graphs.makeGraphs; 
+
+/**
+ * @function
+ * @async
+ * @see {@link module:graphs~scaleFigs|graphs.scaleFigs} 
+ */
 const scaleFigs = graphs.scaleFigs; 
+
+/**
+ * @function
+ * @async
+ * @see {@link module:graphs~showBrowserWindowSize|graphs.showBrowserWindowSize} 
+ */
 const showBrowserWindowSize = graphs.showBrowserWindowSize; 
+
+/**
+ * @function
+ * @async
+ * @see {@link module:graphs~addListener|graphs.addListener} 
+ */
 const addListener = graphs.addListener; 
+
+/**
+ * @function
+ * @async
+ * @see {@link module:graphs~onMouseUpdate|graphs.onMouseUpdate} 
+ */
 const onMouseUpdate = graphs.onMouseUpdate; 
+
+/**
+ * @function
+ * @async
+ * @see {@link module:graphs~createDialogs|graphs.createDialogs} 
+ */
 const createDialogs = graphs.createDialogs; 
+
+/**
+ * @function
+ * @async
+ * @see {@link module:graphs~newDialog|graphs.newDialog} 
+ */
 const newDialog = graphs.newDialog; 
+
+/**
+ * @function
+ * @async
+ * @see {@link module:graphs~findDialog|graphs.findDialog} 
+ */
 const findDialog = graphs.findDialog; 
+
+/**
+ * @function
+ * @async
+ * @see {@link module:graphs~maximize|graphs.maximize} 
+ */
 const maximize = graphs.maximize; 
+
+/**
+ * @function
+ * @async
+ * @see {@link module:graphs~minimize|graphs.minimize} 
+ */
 const minimize = graphs.minimize; 
+
+/**
+ * Access to the mpld3 instance, only if d3 is included in the global scope
+ *
+ * @function
+ * @async
+ * @see {@link module:graphs~mpld3|graphs.mpld3} 
+ */
 const mpld3 = graphs.mpld3; 
 let draw_figure = null;
 if (mpld3 !== null){
   draw_figure = mpld3.draw_figure;
 } 
+
+/**
+ * @function
+ * @async
+ * @see {@link module:tasks~getTaskResultWaiting|tasks.getTaskResultWaiting} 
+ */
 const getTaskResultWaiting = tasks.getTaskResultWaiting;
+
+/**
+ * @function
+ * @async
+ * @see {@link module:tasks~getTaskResultPolling|tasks.getTaskResultPolling} 
+ */
 const getTaskResultPolling = tasks.getTaskResultPolling;
 
 /**
@@ -155,8 +286,18 @@ const checkLoggedIn = user.checkLoggedIn;
  */
 const checkAdminLoggedIn = user.checkAdminLoggedIn;
 
+/**
+ * @function
+ * @async
+ * @see {@link module:utils~sleep|utils.sleep} 
+ */
 const sleep = utils.sleep;
 
+/**
+ * @function
+ * @async
+ * @see {@link module:utils~getUniqueName|utils.getUniqueName} 
+ */
 const getUniqueName = utils.getUniqueName;
 
 const sciris = {

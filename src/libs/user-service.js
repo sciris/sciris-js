@@ -1,9 +1,6 @@
-/** 
- * Lower level user functions that call RPC service functions
- *
- * @module user 
- */
+/** @module user */
 
+// Lower level user functions that call RPC service functions
 
 import rpcs from './rpc-service.js'
 import sha224 from 'crypto-js/sha224';
@@ -13,7 +10,7 @@ var state = {
 };
 
 /**
- * Call rpc() for performing a login. 
+ * Using the correct combination of a user's username and email perform a login 
  * The password is hashed using sha244 and sent to the API
  *
  * @function

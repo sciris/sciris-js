@@ -1,3 +1,5 @@
+/** @module status */
+
 // progress-indicator-service.js -- functions for showing progress
 //
 // Last update: 8/12/18 (gchadder3)
@@ -11,6 +13,15 @@ import { events } from '../eventbus.js';
 
 var complete = 0.0; // Put this here so it's global
 
+/**
+ * Trigger the UI attributes associated with start of an action, this includes
+ * a Spinner and a thin progess bar on the top of the window. A message will 
+ * also be printed in side the console.
+ *
+ * @function
+ * @param {string} vm - Vue instance that is mounted
+ * @param {string} message - The message to show inside the console
+ */
 function start(vm, message) {
   if (!message) { message = 'Starting progress' }
   var delay = 100;
@@ -30,8 +41,17 @@ function start(vm, message) {
   EventBus.$emit(events.EVENT_STATUS_START, vm)
 }
 
+/**
+ * Turn off all of the UI elements associated with services.start and trigger a 
+ * successful notification pop up on the right side of the window. A message 
+ * will also be printed in side the console.
+ *
+ * @function
+ * @param {string} vm - Vue instance that is mounted
+ * @param {string} successMessage - The message to show inside the console and notification popup
+ */
 function succeed(vm, successMessage) {
-  console.log(successMessage)
+  console.log(successMessage);
   complete = 100; // End the counter
 
   var notif = {}
@@ -48,20 +68,33 @@ function succeed(vm, successMessage) {
   EventBus.$emit(events.EVENT_STATUS_SUCCEED, vm, notif);
 }
 
+/**
+ * Turn off all of the UI elements associated with services.start and trigger a 
+ * failed notification pop up on the right side of the window. A message 
+ * will also be printed in side the console.
+ *
+ * @function
+ * @param {string} vm - Vue instance that is mounted
+ * @param {string} failMessage - The message to show inside the console and notification popup
+ * @param {string} error - The message to show inside the console and notification popup
+ */
 function fail(vm, failMessage, error) {
   console.log(failMessage)
   if (error) {
-    var msgsplit = error.message.split('Exception details:') // WARNING, must match sc_app.py
-    var usererr = msgsplit[0].replace(/\n/g,'<br>')
-    console.log(error.message)
-    console.log(usererr)
-    var usermsg = '<b>' + failMessage + '</b>' + '<br><br>' + usererr
+    // WARNING, must match sc_app.py
+    var msgsplit = error.message.split('Exception details:'); 
+    var usererr = msgsplit[0].replace(/\n/g,'<br>');
+    console.log(error.message);
+    console.log(usererr);
+    var usermsg = '<b>' + failMessage + '</b>' + '<br><br>' + usererr;
   } else {
-    var usermsg = '<b>' + failMessage + '</b>'
+    var usermsg = '<b>' + failMessage + '</b>';
   }
   complete = 100;
-  var notif = {}
-  if (failMessage !== '') {  // Put up a failure notification.
+  var notif = {};
+
+  // Put up a failure notification.
+  if (failMessage !== '') {  
     notif = {
       message: usermsg,
       icon: 'ti-face-sad',
@@ -74,8 +107,16 @@ function fail(vm, failMessage, error) {
   EventBus.$emit(events.EVENT_STATUS_FAIL, vm, notif);
 }
 
+/**
+ * Show a neutral notification pop up on the right side of the window. 
+ * A message will also be printed in side the console.
+ *
+ * @function
+ * @param {string} vm - Vue instance that is mounted
+ * @param {string} notifyMessage - The message to show inside the console and notification popup
+ */
 function notify(vm, notifyMessage) {
-  console.log(notifyMessage)
+  console.log(notifyMessage);
   complete = 100; // End the counter
 
   var notif = {}

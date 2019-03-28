@@ -1,0 +1,15 @@
+{
+  "plugins": ["node_modules/jsdoc-strip-async-await"],
+  "docdash": {
+	"sort": false,
+	"search": true,
+	"menu":{ 
+		"Sciris": {
+			"href": "https://github.com/sciris", 
+			"target": "_blank",
+			"class":"menu-item",
+			"id": "website_link"
+		}
+	}
+  }
+}
