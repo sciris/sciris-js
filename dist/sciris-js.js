@@ -12,7 +12,7 @@
 }(this, (function (exports) { 'use strict';
 
   /*!
-   * Vue.js v2.6.8
+   * Vue.js v2.6.10
    * (c) 2014-2019 Evan You
    * Released under the MIT License.
    */
@@ -1859,10 +1859,11 @@
     var res;
     try {
       res = args ? handler.apply(context, args) : handler.call(context);
-      if (res && !res._isVue && isPromise(res)) {
+      if (res && !res._isVue && isPromise(res) && !res._handled) {
+        res.catch(function (e) { return handleError(e, vm, info + " (Promise/async)"); });
         // issue #9511
-        // reassign to res to avoid catch triggering multiple times when nested calls
-        res = res.catch(function (e) { return handleError(e, vm, info + " (Promise/async)"); });
+        // avoid catch triggering multiple times when nested calls
+        res._handled = true;
       }
     } catch (e) {
       handleError(e, vm, info);
@@ -2545,7 +2546,8 @@
     prevSlots
   ) {
     var res;
-    var isStable = slots ? !!slots.$stable : true;
+    var hasNormalSlots = Object.keys(normalSlots).length > 0;
+    var isStable = slots ? !!slots.$stable : !hasNormalSlots;
     var key = slots && slots.$key;
     if (!slots) {
       res = {};
@@ -2557,7 +2559,8 @@
       prevSlots &&
       prevSlots !== emptyObject &&
       key === prevSlots.$key &&
-      Object.keys(normalSlots).length === 0
+      !hasNormalSlots &&
+      !prevSlots.$hasNormal
     ) {
       // fast path 2: stable scoped slots w/ no normal slots to proxy,
       // only need to normalize once
@@ -2583,6 +2586,7 @@
     }
     def(res, '$stable', isStable);
     def(res, '$key', key);
+    def(res, '$hasNormal', hasNormalSlots);
     return res
   }
 
@@ -2592,8 +2596,10 @@
       res = res && typeof res === 'object' && !Array.isArray(res)
         ? [res] // single vnode
         : normalizeChildren(res);
-      return res && res.length === 0
-        ? undefined
+      return res && (
+        res.length === 0 ||
+        (res.length === 1 && res[0].isComment) // #9658
+      ) ? undefined
         : res
     };
     // this is a slot using the new v-slot syntax without scope. although it is
@@ -2773,12 +2779,13 @@
               : data.attrs || (data.attrs = {});
           }
           var camelizedKey = camelize(key);
-          if (!(key in hash) && !(camelizedKey in hash)) {
+          var hyphenatedKey = hyphenate(key);
+          if (!(camelizedKey in hash) && !(hyphenatedKey in hash)) {
             hash[key] = value[key];
 
             if (isSync) {
               var on = data.on || (data.on = {});
-              on[("update:" + camelizedKey)] = function ($event) {
+              on[("update:" + key)] = function ($event) {
                 value[key] = $event;
               };
             }
@@ -3613,7 +3620,7 @@
     }
 
     var owner = currentRenderingInstance;
-    if (isDef(factory.owners) && factory.owners.indexOf(owner) === -1) {
+    if (owner && isDef(factory.owners) && factory.owners.indexOf(owner) === -1) {
       // already pending
       factory.owners.push(owner);
     }
@@ -3622,9 +3629,11 @@
       return factory.loadingComp
     }
 
-    if (!isDef(factory.owners)) {
+    if (owner && !isDef(factory.owners)) {
       var owners = factory.owners = [owner];
-      var sync = true
+      var sync = true;
+      var timerLoading = null;
+      var timerTimeout = null
 
       ;(owner).$on('hook:destroyed', function () { return remove(owners, owner); });
 
@@ -3635,6 +3644,14 @@
 
         if (renderCompleted) {
           owners.length = 0;
+          if (timerLoading !== null) {
+            clearTimeout(timerLoading);
+            timerLoading = null;
+          }
+          if (timerTimeout !== null) {
+            clearTimeout(timerTimeout);
+            timerTimeout = null;
+          }
         }
       };
 
@@ -3681,7 +3698,8 @@
             if (res.delay === 0) {
               factory.loading = true;
             } else {
-              setTimeout(function () {
+              timerLoading = setTimeout(function () {
+                timerLoading = null;
                 if (isUndef(factory.resolved) && isUndef(factory.error)) {
                   factory.loading = true;
                   forceRender(false);
@@ -3691,7 +3709,8 @@
           }
 
           if (isDef(res.timeout)) {
-            setTimeout(function () {
+            timerTimeout = setTimeout(function () {
+              timerTimeout = null;
               if (isUndef(factory.resolved)) {
                 reject(
                   "timeout (" + (res.timeout) + "ms)"
@@ -4237,11 +4256,21 @@
   // timestamp can either be hi-res (relative to page load) or low-res
   // (relative to UNIX epoch), so in order to compare time we have to use the
   // same timestamp type when saving the flush timestamp.
-  if (inBrowser && getNow() > document.createEvent('Event').timeStamp) {
-    // if the low-res timestamp which is bigger than the event timestamp
-    // (which is evaluated AFTER) it means the event is using a hi-res timestamp,
-    // and we need to use the hi-res version for event listeners as well.
-    getNow = function () { return performance.now(); };
+  // All IE versions use low-res event timestamps, and have problematic clock
+  // implementations (#9632)
+  if (inBrowser && !isIE) {
+    var performance = window.performance;
+    if (
+      performance &&
+      typeof performance.now === 'function' &&
+      getNow() > document.createEvent('Event').timeStamp
+    ) {
+      // if the event timestamp, although evaluated AFTER the Date.now(), is
+      // smaller than it, it means the event is using a hi-res timestamp,
+      // and we need to use the hi-res version for event listener timestamps as
+      // well.
+      getNow = function () { return performance.now(); };
+    }
   }
 
   /**
@@ -5406,7 +5435,7 @@
     value: FunctionalRenderContext
   });
 
-  Vue.version = '2.6.8';
+  Vue.version = '2.6.10';
 
   /*  */
 
@@ -6859,8 +6888,10 @@
           e.target === e.currentTarget ||
           // event is fired after handler attachment
           e.timeStamp >= attachedTimestamp ||
-          // #9462 bail for iOS 9 bug: event.timeStamp is 0 after history.pushState
-          e.timeStamp === 0 ||
+          // bail for environments that have buggy event.timeStamp implementations
+          // #9462 iOS 9 bug: event.timeStamp is 0 after history.pushState
+          // #9681 QtWebEngine event.timeStamp is negative value
+          e.timeStamp <= 0 ||
           // #9448 bail if event is fired in another document in a multi-page
           // electron/nw.js app, since event.timeStamp will be using a different
           // starting reference
@@ -6927,10 +6958,11 @@
     }
 
     for (key in oldProps) {
-      if (isUndef(props[key])) {
+      if (!(key in props)) {
         elm[key] = '';
       }
     }
+
     for (key in props) {
       cur = props[key];
       // ignore children if the node has textContent or innerHTML,
@@ -7478,8 +7510,8 @@
     var context = activeInstance;
     var transitionNode = activeInstance.$vnode;
     while (transitionNode && transitionNode.parent) {
-      transitionNode = transitionNode.parent;
       context = transitionNode.context;
+      transitionNode = transitionNode.parent;
     }
 
     var isAppear = !context._isMounted || !vnode.isRootInsert;
@@ -8391,34 +8423,34 @@
     }, 0);
   }
 
-  const EVENT_STATUS_START = 'status:start';
-  const EVENT_STATUS_UPDATE = 'status:update';
-  const EVENT_STATUS_SUCCEED = 'status:success';
-  const EVENT_STATUS_NOTIFY = 'status:notify';
-  const EVENT_STATUS_FAIL = 'status:fail';
-  const events$1 = {
-    EVENT_STATUS_START,
-    EVENT_STATUS_UPDATE,
-    EVENT_STATUS_SUCCEED,
-    EVENT_STATUS_NOTIFY,
-    EVENT_STATUS_FAIL
+  var EVENT_STATUS_START = 'status:start';
+  var EVENT_STATUS_UPDATE = 'status:update';
+  var EVENT_STATUS_SUCCEED = 'status:success';
+  var EVENT_STATUS_NOTIFY = 'status:notify';
+  var EVENT_STATUS_FAIL = 'status:fail';
+  var events$1 = {
+    EVENT_STATUS_START: EVENT_STATUS_START,
+    EVENT_STATUS_UPDATE: EVENT_STATUS_UPDATE,
+    EVENT_STATUS_SUCCEED: EVENT_STATUS_SUCCEED,
+    EVENT_STATUS_NOTIFY: EVENT_STATUS_NOTIFY,
+    EVENT_STATUS_FAIL: EVENT_STATUS_FAIL
   };
-  const EventBus = new Vue();
-  EventBus.$on(events$1.EVENT_STATUS_START, vm => {
+  var EventBus = new Vue();
+  EventBus.$on(events$1.EVENT_STATUS_START, function (vm) {
     if (vm.$spinner) vm.$spinner.start();
   });
-  EventBus.$on(events$1.EVENT_STATUS_UPDATE, (vm, progress) => {
+  EventBus.$on(events$1.EVENT_STATUS_UPDATE, function (vm, progress) {
     if (vm.$Progress) vm.$Progress.set(progress);
   });
-  EventBus.$on(events$1.EVENT_STATUS_SUCCEED, (vm, notif) => {
+  EventBus.$on(events$1.EVENT_STATUS_SUCCEED, function (vm, notif) {
     if (vm.$spinner) vm.$spinner.stop();
     if (vm.$Progress) vm.$Progress.finish();
     if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
   });
-  EventBus.$on(events$1.EVENT_STATUS_NOTIFY, (vm, notif) => {
+  EventBus.$on(events$1.EVENT_STATUS_NOTIFY, function (vm, notif) {
     if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
   });
-  EventBus.$on(events$1.EVENT_STATUS_FAIL, (vm, notif) => {
+  EventBus.$on(events$1.EVENT_STATUS_FAIL, function (vm, notif) {
     if (vm.$spinner) vm.$spinner.stop();
     if (vm.$Progress) vm.$Progress.fail();
     if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
@@ -8569,11 +8601,789 @@
   }
 
   var status = {
-    start,
-    succeed,
-    fail,
-    notify
+    start: start,
+    succeed: succeed,
+    fail: fail,
+    notify: notify
   };
+
+  var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+  function unwrapExports (x) {
+  	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x.default : x;
+  }
+
+  function createCommonjsModule(fn, module) {
+  	return module = { exports: {} }, fn(module, module.exports), module.exports;
+  }
+
+  var runtime_1 = createCommonjsModule(function (module) {
+  /**
+   * Copyright (c) 2014-present, Facebook, Inc.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
+   */
+
+  var runtime = (function (exports) {
+
+    var Op = Object.prototype;
+    var hasOwn = Op.hasOwnProperty;
+    var undefined; // More compressible than void 0.
+    var $Symbol = typeof Symbol === "function" ? Symbol : {};
+    var iteratorSymbol = $Symbol.iterator || "@@iterator";
+    var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+    var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+    function wrap(innerFn, outerFn, self, tryLocsList) {
+      // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+      var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+      var generator = Object.create(protoGenerator.prototype);
+      var context = new Context(tryLocsList || []);
+
+      // The ._invoke method unifies the implementations of the .next,
+      // .throw, and .return methods.
+      generator._invoke = makeInvokeMethod(innerFn, self, context);
+
+      return generator;
+    }
+    exports.wrap = wrap;
+
+    // Try/catch helper to minimize deoptimizations. Returns a completion
+    // record like context.tryEntries[i].completion. This interface could
+    // have been (and was previously) designed to take a closure to be
+    // invoked without arguments, but in all the cases we care about we
+    // already have an existing method we want to call, so there's no need
+    // to create a new function object. We can even get away with assuming
+    // the method takes exactly one argument, since that happens to be true
+    // in every case, so we don't have to touch the arguments object. The
+    // only additional allocation required is the completion record, which
+    // has a stable shape and so hopefully should be cheap to allocate.
+    function tryCatch(fn, obj, arg) {
+      try {
+        return { type: "normal", arg: fn.call(obj, arg) };
+      } catch (err) {
+        return { type: "throw", arg: err };
+      }
+    }
+
+    var GenStateSuspendedStart = "suspendedStart";
+    var GenStateSuspendedYield = "suspendedYield";
+    var GenStateExecuting = "executing";
+    var GenStateCompleted = "completed";
+
+    // Returning this object from the innerFn has the same effect as
+    // breaking out of the dispatch switch statement.
+    var ContinueSentinel = {};
+
+    // Dummy constructor functions that we use as the .constructor and
+    // .constructor.prototype properties for functions that return Generator
+    // objects. For full spec compliance, you may wish to configure your
+    // minifier not to mangle the names of these two functions.
+    function Generator() {}
+    function GeneratorFunction() {}
+    function GeneratorFunctionPrototype() {}
+
+    // This is a polyfill for %IteratorPrototype% for environments that
+    // don't natively support it.
+    var IteratorPrototype = {};
+    IteratorPrototype[iteratorSymbol] = function () {
+      return this;
+    };
+
+    var getProto = Object.getPrototypeOf;
+    var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+    if (NativeIteratorPrototype &&
+        NativeIteratorPrototype !== Op &&
+        hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+      // This environment has a native %IteratorPrototype%; use it instead
+      // of the polyfill.
+      IteratorPrototype = NativeIteratorPrototype;
+    }
+
+    var Gp = GeneratorFunctionPrototype.prototype =
+      Generator.prototype = Object.create(IteratorPrototype);
+    GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
+    GeneratorFunctionPrototype.constructor = GeneratorFunction;
+    GeneratorFunctionPrototype[toStringTagSymbol] =
+      GeneratorFunction.displayName = "GeneratorFunction";
+
+    // Helper for defining the .next, .throw, and .return methods of the
+    // Iterator interface in terms of a single ._invoke method.
+    function defineIteratorMethods(prototype) {
+      ["next", "throw", "return"].forEach(function(method) {
+        prototype[method] = function(arg) {
+          return this._invoke(method, arg);
+        };
+      });
+    }
+
+    exports.isGeneratorFunction = function(genFun) {
+      var ctor = typeof genFun === "function" && genFun.constructor;
+      return ctor
+        ? ctor === GeneratorFunction ||
+          // For the native GeneratorFunction constructor, the best we can
+          // do is to check its .name property.
+          (ctor.displayName || ctor.name) === "GeneratorFunction"
+        : false;
+    };
+
+    exports.mark = function(genFun) {
+      if (Object.setPrototypeOf) {
+        Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+      } else {
+        genFun.__proto__ = GeneratorFunctionPrototype;
+        if (!(toStringTagSymbol in genFun)) {
+          genFun[toStringTagSymbol] = "GeneratorFunction";
+        }
+      }
+      genFun.prototype = Object.create(Gp);
+      return genFun;
+    };
+
+    // Within the body of any async function, `await x` is transformed to
+    // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+    // `hasOwn.call(value, "__await")` to determine if the yielded value is
+    // meant to be awaited.
+    exports.awrap = function(arg) {
+      return { __await: arg };
+    };
+
+    function AsyncIterator(generator) {
+      function invoke(method, arg, resolve, reject) {
+        var record = tryCatch(generator[method], generator, arg);
+        if (record.type === "throw") {
+          reject(record.arg);
+        } else {
+          var result = record.arg;
+          var value = result.value;
+          if (value &&
+              typeof value === "object" &&
+              hasOwn.call(value, "__await")) {
+            return Promise.resolve(value.__await).then(function(value) {
+              invoke("next", value, resolve, reject);
+            }, function(err) {
+              invoke("throw", err, resolve, reject);
+            });
+          }
+
+          return Promise.resolve(value).then(function(unwrapped) {
+            // When a yielded Promise is resolved, its final value becomes
+            // the .value of the Promise<{value,done}> result for the
+            // current iteration.
+            result.value = unwrapped;
+            resolve(result);
+          }, function(error) {
+            // If a rejected Promise was yielded, throw the rejection back
+            // into the async generator function so it can be handled there.
+            return invoke("throw", error, resolve, reject);
+          });
+        }
+      }
+
+      var previousPromise;
+
+      function enqueue(method, arg) {
+        function callInvokeWithMethodAndArg() {
+          return new Promise(function(resolve, reject) {
+            invoke(method, arg, resolve, reject);
+          });
+        }
+
+        return previousPromise =
+          // If enqueue has been called before, then we want to wait until
+          // all previous Promises have been resolved before calling invoke,
+          // so that results are always delivered in the correct order. If
+          // enqueue has not been called before, then it is important to
+          // call invoke immediately, without waiting on a callback to fire,
+          // so that the async generator function has the opportunity to do
+          // any necessary setup in a predictable way. This predictability
+          // is why the Promise constructor synchronously invokes its
+          // executor callback, and why async functions synchronously
+          // execute code before the first await. Since we implement simple
+          // async functions in terms of async generators, it is especially
+          // important to get this right, even though it requires care.
+          previousPromise ? previousPromise.then(
+            callInvokeWithMethodAndArg,
+            // Avoid propagating failures to Promises returned by later
+            // invocations of the iterator.
+            callInvokeWithMethodAndArg
+          ) : callInvokeWithMethodAndArg();
+      }
+
+      // Define the unified helper method that is used to implement .next,
+      // .throw, and .return (see defineIteratorMethods).
+      this._invoke = enqueue;
+    }
+
+    defineIteratorMethods(AsyncIterator.prototype);
+    AsyncIterator.prototype[asyncIteratorSymbol] = function () {
+      return this;
+    };
+    exports.AsyncIterator = AsyncIterator;
+
+    // Note that simple async functions are implemented on top of
+    // AsyncIterator objects; they just return a Promise for the value of
+    // the final result produced by the iterator.
+    exports.async = function(innerFn, outerFn, self, tryLocsList) {
+      var iter = new AsyncIterator(
+        wrap(innerFn, outerFn, self, tryLocsList)
+      );
+
+      return exports.isGeneratorFunction(outerFn)
+        ? iter // If outerFn is a generator, return the full iterator.
+        : iter.next().then(function(result) {
+            return result.done ? result.value : iter.next();
+          });
+    };
+
+    function makeInvokeMethod(innerFn, self, context) {
+      var state = GenStateSuspendedStart;
+
+      return function invoke(method, arg) {
+        if (state === GenStateExecuting) {
+          throw new Error("Generator is already running");
+        }
+
+        if (state === GenStateCompleted) {
+          if (method === "throw") {
+            throw arg;
+          }
+
+          // Be forgiving, per 25.3.3.3.3 of the spec:
+          // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
+          return doneResult();
+        }
+
+        context.method = method;
+        context.arg = arg;
+
+        while (true) {
+          var delegate = context.delegate;
+          if (delegate) {
+            var delegateResult = maybeInvokeDelegate(delegate, context);
+            if (delegateResult) {
+              if (delegateResult === ContinueSentinel) continue;
+              return delegateResult;
+            }
+          }
+
+          if (context.method === "next") {
+            // Setting context._sent for legacy support of Babel's
+            // function.sent implementation.
+            context.sent = context._sent = context.arg;
+
+          } else if (context.method === "throw") {
+            if (state === GenStateSuspendedStart) {
+              state = GenStateCompleted;
+              throw context.arg;
+            }
+
+            context.dispatchException(context.arg);
+
+          } else if (context.method === "return") {
+            context.abrupt("return", context.arg);
+          }
+
+          state = GenStateExecuting;
+
+          var record = tryCatch(innerFn, self, context);
+          if (record.type === "normal") {
+            // If an exception is thrown from innerFn, we leave state ===
+            // GenStateExecuting and loop back for another invocation.
+            state = context.done
+              ? GenStateCompleted
+              : GenStateSuspendedYield;
+
+            if (record.arg === ContinueSentinel) {
+              continue;
+            }
+
+            return {
+              value: record.arg,
+              done: context.done
+            };
+
+          } else if (record.type === "throw") {
+            state = GenStateCompleted;
+            // Dispatch the exception by looping back around to the
+            // context.dispatchException(context.arg) call above.
+            context.method = "throw";
+            context.arg = record.arg;
+          }
+        }
+      };
+    }
+
+    // Call delegate.iterator[context.method](context.arg) and handle the
+    // result, either by returning a { value, done } result from the
+    // delegate iterator, or by modifying context.method and context.arg,
+    // setting context.delegate to null, and returning the ContinueSentinel.
+    function maybeInvokeDelegate(delegate, context) {
+      var method = delegate.iterator[context.method];
+      if (method === undefined) {
+        // A .throw or .return when the delegate iterator has no .throw
+        // method always terminates the yield* loop.
+        context.delegate = null;
+
+        if (context.method === "throw") {
+          // Note: ["return"] must be used for ES3 parsing compatibility.
+          if (delegate.iterator["return"]) {
+            // If the delegate iterator has a return method, give it a
+            // chance to clean up.
+            context.method = "return";
+            context.arg = undefined;
+            maybeInvokeDelegate(delegate, context);
+
+            if (context.method === "throw") {
+              // If maybeInvokeDelegate(context) changed context.method from
+              // "return" to "throw", let that override the TypeError below.
+              return ContinueSentinel;
+            }
+          }
+
+          context.method = "throw";
+          context.arg = new TypeError(
+            "The iterator does not provide a 'throw' method");
+        }
+
+        return ContinueSentinel;
+      }
+
+      var record = tryCatch(method, delegate.iterator, context.arg);
+
+      if (record.type === "throw") {
+        context.method = "throw";
+        context.arg = record.arg;
+        context.delegate = null;
+        return ContinueSentinel;
+      }
+
+      var info = record.arg;
+
+      if (! info) {
+        context.method = "throw";
+        context.arg = new TypeError("iterator result is not an object");
+        context.delegate = null;
+        return ContinueSentinel;
+      }
+
+      if (info.done) {
+        // Assign the result of the finished delegate to the temporary
+        // variable specified by delegate.resultName (see delegateYield).
+        context[delegate.resultName] = info.value;
+
+        // Resume execution at the desired location (see delegateYield).
+        context.next = delegate.nextLoc;
+
+        // If context.method was "throw" but the delegate handled the
+        // exception, let the outer generator proceed normally. If
+        // context.method was "next", forget context.arg since it has been
+        // "consumed" by the delegate iterator. If context.method was
+        // "return", allow the original .return call to continue in the
+        // outer generator.
+        if (context.method !== "return") {
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+      } else {
+        // Re-yield the result returned by the delegate method.
+        return info;
+      }
+
+      // The delegate iterator is finished, so forget it and continue with
+      // the outer generator.
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    // Define Generator.prototype.{next,throw,return} in terms of the
+    // unified ._invoke helper method.
+    defineIteratorMethods(Gp);
+
+    Gp[toStringTagSymbol] = "Generator";
+
+    // A Generator should always return itself as the iterator object when the
+    // @@iterator function is called on it. Some browsers' implementations of the
+    // iterator prototype chain incorrectly implement this, causing the Generator
+    // object to not be returned from this call. This ensures that doesn't happen.
+    // See https://github.com/facebook/regenerator/issues/274 for more details.
+    Gp[iteratorSymbol] = function() {
+      return this;
+    };
+
+    Gp.toString = function() {
+      return "[object Generator]";
+    };
+
+    function pushTryEntry(locs) {
+      var entry = { tryLoc: locs[0] };
+
+      if (1 in locs) {
+        entry.catchLoc = locs[1];
+      }
+
+      if (2 in locs) {
+        entry.finallyLoc = locs[2];
+        entry.afterLoc = locs[3];
+      }
+
+      this.tryEntries.push(entry);
+    }
+
+    function resetTryEntry(entry) {
+      var record = entry.completion || {};
+      record.type = "normal";
+      delete record.arg;
+      entry.completion = record;
+    }
+
+    function Context(tryLocsList) {
+      // The root entry object (effectively a try statement without a catch
+      // or a finally block) gives us a place to store values thrown from
+      // locations where there is no enclosing try statement.
+      this.tryEntries = [{ tryLoc: "root" }];
+      tryLocsList.forEach(pushTryEntry, this);
+      this.reset(true);
+    }
+
+    exports.keys = function(object) {
+      var keys = [];
+      for (var key in object) {
+        keys.push(key);
+      }
+      keys.reverse();
+
+      // Rather than returning an object with a next method, we keep
+      // things simple and return the next function itself.
+      return function next() {
+        while (keys.length) {
+          var key = keys.pop();
+          if (key in object) {
+            next.value = key;
+            next.done = false;
+            return next;
+          }
+        }
+
+        // To avoid creating an additional object, we just hang the .value
+        // and .done properties off the next function object itself. This
+        // also ensures that the minifier will not anonymize the function.
+        next.done = true;
+        return next;
+      };
+    };
+
+    function values(iterable) {
+      if (iterable) {
+        var iteratorMethod = iterable[iteratorSymbol];
+        if (iteratorMethod) {
+          return iteratorMethod.call(iterable);
+        }
+
+        if (typeof iterable.next === "function") {
+          return iterable;
+        }
+
+        if (!isNaN(iterable.length)) {
+          var i = -1, next = function next() {
+            while (++i < iterable.length) {
+              if (hasOwn.call(iterable, i)) {
+                next.value = iterable[i];
+                next.done = false;
+                return next;
+              }
+            }
+
+            next.value = undefined;
+            next.done = true;
+
+            return next;
+          };
+
+          return next.next = next;
+        }
+      }
+
+      // Return an iterator with no values.
+      return { next: doneResult };
+    }
+    exports.values = values;
+
+    function doneResult() {
+      return { value: undefined, done: true };
+    }
+
+    Context.prototype = {
+      constructor: Context,
+
+      reset: function(skipTempReset) {
+        this.prev = 0;
+        this.next = 0;
+        // Resetting context._sent for legacy support of Babel's
+        // function.sent implementation.
+        this.sent = this._sent = undefined;
+        this.done = false;
+        this.delegate = null;
+
+        this.method = "next";
+        this.arg = undefined;
+
+        this.tryEntries.forEach(resetTryEntry);
+
+        if (!skipTempReset) {
+          for (var name in this) {
+            // Not sure about the optimal order of these conditions:
+            if (name.charAt(0) === "t" &&
+                hasOwn.call(this, name) &&
+                !isNaN(+name.slice(1))) {
+              this[name] = undefined;
+            }
+          }
+        }
+      },
+
+      stop: function() {
+        this.done = true;
+
+        var rootEntry = this.tryEntries[0];
+        var rootRecord = rootEntry.completion;
+        if (rootRecord.type === "throw") {
+          throw rootRecord.arg;
+        }
+
+        return this.rval;
+      },
+
+      dispatchException: function(exception) {
+        if (this.done) {
+          throw exception;
+        }
+
+        var context = this;
+        function handle(loc, caught) {
+          record.type = "throw";
+          record.arg = exception;
+          context.next = loc;
+
+          if (caught) {
+            // If the dispatched exception was caught by a catch block,
+            // then let that catch block handle the exception normally.
+            context.method = "next";
+            context.arg = undefined;
+          }
+
+          return !! caught;
+        }
+
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+          var record = entry.completion;
+
+          if (entry.tryLoc === "root") {
+            // Exception thrown outside of any try block that could handle
+            // it, so set the completion value of the entire function to
+            // throw the exception.
+            return handle("end");
+          }
+
+          if (entry.tryLoc <= this.prev) {
+            var hasCatch = hasOwn.call(entry, "catchLoc");
+            var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+            if (hasCatch && hasFinally) {
+              if (this.prev < entry.catchLoc) {
+                return handle(entry.catchLoc, true);
+              } else if (this.prev < entry.finallyLoc) {
+                return handle(entry.finallyLoc);
+              }
+
+            } else if (hasCatch) {
+              if (this.prev < entry.catchLoc) {
+                return handle(entry.catchLoc, true);
+              }
+
+            } else if (hasFinally) {
+              if (this.prev < entry.finallyLoc) {
+                return handle(entry.finallyLoc);
+              }
+
+            } else {
+              throw new Error("try statement without catch or finally");
+            }
+          }
+        }
+      },
+
+      abrupt: function(type, arg) {
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+          if (entry.tryLoc <= this.prev &&
+              hasOwn.call(entry, "finallyLoc") &&
+              this.prev < entry.finallyLoc) {
+            var finallyEntry = entry;
+            break;
+          }
+        }
+
+        if (finallyEntry &&
+            (type === "break" ||
+             type === "continue") &&
+            finallyEntry.tryLoc <= arg &&
+            arg <= finallyEntry.finallyLoc) {
+          // Ignore the finally entry if control is not jumping to a
+          // location outside the try/catch block.
+          finallyEntry = null;
+        }
+
+        var record = finallyEntry ? finallyEntry.completion : {};
+        record.type = type;
+        record.arg = arg;
+
+        if (finallyEntry) {
+          this.method = "next";
+          this.next = finallyEntry.finallyLoc;
+          return ContinueSentinel;
+        }
+
+        return this.complete(record);
+      },
+
+      complete: function(record, afterLoc) {
+        if (record.type === "throw") {
+          throw record.arg;
+        }
+
+        if (record.type === "break" ||
+            record.type === "continue") {
+          this.next = record.arg;
+        } else if (record.type === "return") {
+          this.rval = this.arg = record.arg;
+          this.method = "return";
+          this.next = "end";
+        } else if (record.type === "normal" && afterLoc) {
+          this.next = afterLoc;
+        }
+
+        return ContinueSentinel;
+      },
+
+      finish: function(finallyLoc) {
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+          if (entry.finallyLoc === finallyLoc) {
+            this.complete(entry.completion, entry.afterLoc);
+            resetTryEntry(entry);
+            return ContinueSentinel;
+          }
+        }
+      },
+
+      "catch": function(tryLoc) {
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+          if (entry.tryLoc === tryLoc) {
+            var record = entry.completion;
+            if (record.type === "throw") {
+              var thrown = record.arg;
+              resetTryEntry(entry);
+            }
+            return thrown;
+          }
+        }
+
+        // The context.catch method must only be called with a location
+        // argument that corresponds to a known catch block.
+        throw new Error("illegal catch attempt");
+      },
+
+      delegateYield: function(iterable, resultName, nextLoc) {
+        this.delegate = {
+          iterator: values(iterable),
+          resultName: resultName,
+          nextLoc: nextLoc
+        };
+
+        if (this.method === "next") {
+          // Deliberately forget the last sent value so that we don't
+          // accidentally pass it on to the delegate.
+          this.arg = undefined;
+        }
+
+        return ContinueSentinel;
+      }
+    };
+
+    // Regardless of whether this script is executing as a CommonJS module
+    // or not, return the runtime object so that we can declare the variable
+    // regeneratorRuntime in the outer scope, which allows this module to be
+    // injected easily by `bin/regenerator --include-runtime script.js`.
+    return exports;
+
+  }(
+    // If this script is executing as a CommonJS module, use module.exports
+    // as the regeneratorRuntime namespace. Otherwise create a new empty
+    // object. Either way, the resulting object will be used to initialize
+    // the regeneratorRuntime variable at the top of this file.
+    module.exports
+  ));
+
+  try {
+    regeneratorRuntime = runtime;
+  } catch (accidentalStrictMode) {
+    // This module should not be running in strict mode, so the above
+    // assignment should always work unless something is misconfigured. Just
+    // in case runtime.js accidentally runs in strict mode, we can escape
+    // strict mode using a global Function call. This could conceivably fail
+    // if a Content Security Policy forbids using Function, but in that case
+    // the proper solution is to fix the accidental strict mode problem. If
+    // you've misconfigured your bundler to force strict mode and applied a
+    // CSP to forbid Function, and you're not willing to fix either of those
+    // problems, please detail your unique predicament in a GitHub issue.
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+  });
+
+  var regenerator = runtime_1;
+
+  function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+      var info = gen[key](arg);
+      var value = info.value;
+    } catch (error) {
+      reject(error);
+      return;
+    }
+
+    if (info.done) {
+      resolve(value);
+    } else {
+      Promise.resolve(value).then(_next, _throw);
+    }
+  }
+
+  function _asyncToGenerator(fn) {
+    return function () {
+      var self = this,
+          args = arguments;
+      return new Promise(function (resolve, reject) {
+        var gen = fn.apply(self, args);
+
+        function _next(value) {
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+        }
+
+        function _throw(err) {
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+        }
+
+        _next(undefined);
+      });
+    };
+  }
+
+  var asyncToGenerator = _asyncToGenerator;
 
   /** @module utils */
 
@@ -8586,7 +9396,9 @@
    * @returns {Promise}
    */
   function sleep(time) {
-    return new Promise(resolve => setTimeout(resolve, time));
+    return new Promise(function (resolve) {
+      return setTimeout(resolve, time);
+    });
   }
   /**
    * Create a unique filename, if a name already exists then append it with "(x)"
@@ -8599,8 +9411,8 @@
 
 
   function getUniqueName(fileName, otherNames) {
-    let tryName = fileName;
-    let numAdded = 0;
+    var tryName = fileName;
+    var numAdded = 0;
 
     while (otherNames.indexOf(tryName) > -1) {
       numAdded = numAdded + 1;
@@ -8611,8 +9423,8 @@
   }
 
   var utils = {
-    sleep,
-    getUniqueName
+    sleep: sleep,
+    getUniqueName: getUniqueName
   };
 
   var bind$1 = function bind(fn, thisArg) {
@@ -9934,27 +10746,11 @@
 
   var axios$1 = axios_1;
 
-  var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-  function commonjsRequire () {
-  	throw new Error('Dynamic requires are not currently supported by rollup-plugin-commonjs');
-  }
-
-  function unwrapExports (x) {
-  	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x.default : x;
-  }
-
-  function createCommonjsModule(fn, module) {
-  	return module = { exports: {} }, fn(module, module.exports), module.exports;
-  }
-
   var FileSaver_min = createCommonjsModule(function (module, exports) {
   (function(a,b){b();})(commonjsGlobal,function(){function b(a,b){return "undefined"==typeof b?b={autoBom:!1}:"object"!=typeof b&&(console.warn("Deprecated: Expected third argument to be a object"),b={autoBom:!b}),b.autoBom&&/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a.type)?new Blob(["\uFEFF",a],{type:a.type}):a}function c(b,c,d){var e=new XMLHttpRequest;e.open("GET",b),e.responseType="blob",e.onload=function(){a(e.response,c,d);},e.onerror=function(){console.error("could not download file");},e.send();}function d(a){var b=new XMLHttpRequest;return b.open("HEAD",a,!1),b.send(),200<=b.status&&299>=b.status}function e(a){try{a.dispatchEvent(new MouseEvent("click"));}catch(c){var b=document.createEvent("MouseEvents");b.initMouseEvent("click",!0,!0,window,0,0,0,80,20,!1,!1,!1,!1,0,null),a.dispatchEvent(b);}}var f="object"==typeof window&&window.window===window?window:"object"==typeof self&&self.self===self?self:"object"==typeof commonjsGlobal&&commonjsGlobal.global===commonjsGlobal?commonjsGlobal:void 0,a=f.saveAs||("object"!=typeof window||window!==f?function(){}:"download"in HTMLAnchorElement.prototype?function(b,g,h){var i=f.URL||f.webkitURL,j=document.createElement("a");g=g||b.name||"download",j.download=g,j.rel="noopener","string"==typeof b?(j.href=b,j.origin===location.origin?e(j):d(j.href)?c(b,g,h):e(j,j.target="_blank")):(j.href=i.createObjectURL(b),setTimeout(function(){i.revokeObjectURL(j.href);},4E4),setTimeout(function(){e(j);},0));}:"msSaveOrOpenBlob"in navigator?function(f,g,h){if(g=g||f.name||"download","string"!=typeof f)navigator.msSaveOrOpenBlob(b(f,h),g);else if(d(f))c(f,g,h);else{var i=document.createElement("a");i.href=f,i.target="_blank",setTimeout(function(){e(i);});}}:function(a,b,d,e){if(e=e||open("","_blank"),e&&(e.document.title=e.document.body.innerText="downloading..."),"string"==typeof a)return c(a,b,d);var g="application/octet-stream"===a.type,h=/constructor/i.test(f.HTMLElement)||f.safari,i=/CriOS\/[\d]+/.test(navigator.userAgent);if((i||g&&h)&&"object"==typeof FileReader){var j=new FileReader;j.onloadend=function(){var a=j.result;a=i?a:a.replace(/^data:[^;]*;/,"data:attachment/file;"),e?e.location.href=a:location=a,e=null;},j.readAsDataURL(a);}else{var k=f.URL||f.webkitURL,l=k.createObjectURL(a);e?e.location=l:location.href=l,e=null,setTimeout(function(){k.revokeObjectURL(l);},4E4);}});f.saveAs=a.saveAs=a,module.exports=a;});
 
 
   });
-
-  /** @module rpcs */
 
   function consoleLogCommand(type, funcname, args, kwargs) {
     // Don't show any arguments if none are passed in.
@@ -9979,21 +10775,8 @@
    */
 
 
-  async function readJsonFromBlob(theBlob) {
-    // Create a FileReader; reader.result contains the contents of blob as text when this is called
-    const reader = new FileReader(); // Create a callback for after the load attempt is finished
-
-    reader.addEventListener("loadend", async function () {
-      try {
-        // Try the conversion.
-        return await JSON.parse(reader.result);
-      } catch (e) {
-        // On failure to convert to JSON, reject the Promise.
-        throw Error('Failed to convert blob to JSON');
-      }
-    }); // Start the load attempt, trying to read the blob in as text.
-
-    reader.readAsText(theBlob);
+  function readJsonFromBlob(_x) {
+    return _readJsonFromBlob.apply(this, arguments);
   }
   /**
    * Call an RPC defined using scirisweb 
@@ -10007,41 +10790,61 @@
    */
 
 
-  async function rpc(funcname, args, kwargs) {
-    // Log the RPC call.
-    consoleLogCommand("normal", funcname, args, kwargs); // Do the RPC processing, returning results as a Promise.
-    // Send the POST request for the RPC call.
+  function _readJsonFromBlob() {
+    _readJsonFromBlob = asyncToGenerator(
+    /*#__PURE__*/
+    regenerator.mark(function _callee3(theBlob) {
+      var reader;
+      return regenerator.wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              // Create a FileReader; reader.result contains the contents of blob as text when this is called
+              reader = new FileReader(); // Create a callback for after the load attempt is finished
 
-    try {
-      const response = await axios$1.post('/api/rpcs', {
-        funcname: funcname,
-        args: args,
-        kwargs: kwargs
-      }); // If there is not error in the POST response.
+              reader.addEventListener("loadend",
+              /*#__PURE__*/
+              asyncToGenerator(
+              /*#__PURE__*/
+              regenerator.mark(function _callee2() {
+                return regenerator.wrap(function _callee2$(_context2) {
+                  while (1) {
+                    switch (_context2.prev = _context2.next) {
+                      case 0:
+                        _context2.prev = 0;
+                        _context2.next = 3;
+                        return JSON.parse(reader.result);
 
-      if (typeof response.data.error === 'undefined') {
-        console.log('RPC succeeded'); // Signal success with the response.
+                      case 3:
+                        return _context2.abrupt("return", _context2.sent);
 
-        return response;
-      }
+                      case 6:
+                        _context2.prev = 6;
+                        _context2.t0 = _context2["catch"](0);
+                        throw Error('Failed to convert blob to JSON');
 
-      console.log('RPC error: ' + response.data.error);
-      throw Error(response.data.error);
-    } catch (error) {
-      console.log('RPC error: ' + error); // If there was an actual response returned from the server...
+                      case 9:
+                      case "end":
+                        return _context2.stop();
+                    }
+                  }
+                }, _callee2, null, [[0, 6]]);
+              }))); // Start the load attempt, trying to read the blob in as text.
 
-      if (error.response) {
-        // If we have exception information in the response 
-        // (which indicates an exception on the server side)...
-        if (typeof error.response.data.exception !== 'undefined') {
-          // For now, reject with an error message matching the exception.
-          throw Error(error.response.data.exception);
+              reader.readAsText(theBlob);
+
+            case 3:
+            case "end":
+              return _context3.stop();
+          }
         }
-      } else {
-        // Reject with the error axios got.
-        throw Error(error);
-      }
-    }
+      }, _callee3);
+    }));
+    return _readJsonFromBlob.apply(this, arguments);
+  }
+
+  function rpc(_x2, _x3, _x4) {
+    return _rpc.apply(this, arguments);
   }
   /**
    * Call an Download RPC defined using scirisweb via /api/download
@@ -10056,10 +10859,84 @@
   // #NOTE Parham: Need to confirm how this works before refactoring
 
 
+  function _rpc() {
+    _rpc = asyncToGenerator(
+    /*#__PURE__*/
+    regenerator.mark(function _callee4(funcname, args, kwargs) {
+      var response;
+      return regenerator.wrap(function _callee4$(_context4) {
+        while (1) {
+          switch (_context4.prev = _context4.next) {
+            case 0:
+              // Log the RPC call.
+              consoleLogCommand("normal", funcname, args, kwargs); // Do the RPC processing, returning results as a Promise.
+              // Send the POST request for the RPC call.
+
+              _context4.prev = 1;
+              _context4.next = 4;
+              return axios$1.post('/api/rpcs', {
+                funcname: funcname,
+                args: args,
+                kwargs: kwargs
+              });
+
+            case 4:
+              response = _context4.sent;
+
+              if (!(typeof response.data.error === 'undefined')) {
+                _context4.next = 8;
+                break;
+              }
+
+              console.log('RPC succeeded'); // Signal success with the response.
+
+              return _context4.abrupt("return", response);
+
+            case 8:
+              //console.log('RPC error: ' + response.data.error);
+              console.log(response.data);
+              throw Error(response.data.error);
+
+            case 12:
+              _context4.prev = 12;
+              _context4.t0 = _context4["catch"](1);
+              console.log('RPC error: ' + _context4.t0);
+              console.log(_context4.t0);
+              console.log("herkjhsdflkjahsdflkjhasdkljfhaslkjdfhalksjdhfkajsdhfkajsdhflkjasdhf>>>>>>>>>>>>"); // If there was an actual response returned from the server...
+
+              if (!_context4.t0.response) {
+                _context4.next = 22;
+                break;
+              }
+
+              if (!(typeof _context4.t0.response.data.exception !== 'undefined')) {
+                _context4.next = 20;
+                break;
+              }
+
+              throw Error(_context4.t0.response.data.exception);
+
+            case 20:
+              _context4.next = 23;
+              break;
+
+            case 22:
+              throw Error(_context4.t0);
+
+            case 23:
+            case "end":
+              return _context4.stop();
+          }
+        }
+      }, _callee4, null, [[1, 12]]);
+    }));
+    return _rpc.apply(this, arguments);
+  }
+
   function download(funcname, args, kwargs) {
     consoleLogCommand("download", funcname, args, kwargs); // Log the download RPC call.
 
-    return new Promise((resolve, reject) => {
+    return new Promise(function (resolve, reject) {
       // Do the RPC processing, returning results as a Promise.
       axios$1.post('/api/rpcs', {
         // Send the POST request for the RPC call.
@@ -10068,13 +10945,13 @@
         kwargs: kwargs
       }, {
         responseType: 'blob'
-      }).then(response => {
-        readJsonFromBlob(response.data).then(responsedata => {
+      }).then(function (response) {
+        readJsonFromBlob(response.data).then(function (responsedata) {
           if (typeof responsedata.error != 'undefined') {
             // If we have error information in the response (which indicates a logical error on the server side)...
             reject(Error(responsedata.error)); // For now, reject with an error message matching the error.
           }
-        }).catch(error2 => {
+        }).catch(function (error2) {
           // An error here indicates we do in fact have a file to download.
           var blob = new Blob([response.data]); // Create a new blob object (containing the file data) from the response.data component.
 
@@ -10084,15 +10961,15 @@
 
           resolve(response); // Signal success with the response.
         });
-      }).catch(error => {
+      }).catch(function (error) {
         if (error.response) {
           // If there was an actual response returned from the server...
-          readJsonFromBlob(error.response.data).then(responsedata => {
+          readJsonFromBlob(error.response.data).then(function (responsedata) {
             if (typeof responsedata.exception !== 'undefined') {
               // If we have exception information in the response (which indicates an exception on the server side)...
               reject(Error(responsedata.exception)); // For now, reject with an error message matching the exception.
             }
-          }).catch(error2 => {
+          }).catch(function (error2) {
             reject(error); // Reject with the error axios got.
           });
         } else {
@@ -10117,50 +10994,89 @@
   function upload(funcname, args, kwargs, fileType) {
     consoleLogCommand("upload", funcname, args, kwargs); // Function for trapping the change event that has the user-selected file.
 
-    const onFileChange = async e => {
-      // Pull out the files (should only be 1) that were selected.
-      var files = e.target.files || e.dataTransfer.files; // If no files were selected, reject the promise.
+    var onFileChange =
+    /*#__PURE__*/
+    function () {
+      var _ref = asyncToGenerator(
+      /*#__PURE__*/
+      regenerator.mark(function _callee(e) {
+        var files, formData, response;
+        return regenerator.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                // Pull out the files (should only be 1) that were selected.
+                files = e.target.files || e.dataTransfer.files; // If no files were selected, reject the promise.
 
-      if (!files.length) {
-        throw Error('No file selected');
-      } // Create a FormData object for holding the file.
+                if (files.length) {
+                  _context.next = 3;
+                  break;
+                }
 
+                throw Error('No file selected');
 
-      const formData = new FormData(); // Put the selected file in the formData object with 'uploadfile' key.
+              case 3:
+                // Create a FormData object for holding the file.
+                formData = new FormData(); // Put the selected file in the formData object with 'uploadfile' key.
 
-      formData.append('uploadfile', files[0]); // Add the RPC function name to the form data.
+                formData.append('uploadfile', files[0]); // Add the RPC function name to the form data.
 
-      formData.append('funcname', funcname); // Add args and kwargs to the form data.
+                formData.append('funcname', funcname); // Add args and kwargs to the form data.
 
-      formData.append('args', JSON.stringify(args));
-      formData.append('kwargs', JSON.stringify(kwargs));
+                formData.append('args', JSON.stringify(args));
+                formData.append('kwargs', JSON.stringify(kwargs));
+                _context.prev = 8;
+                _context.next = 11;
+                return axios$1.post('/api/rpcs', formData);
 
-      try {
-        const response = await axios$1.post('/api/rpcs', formData);
+              case 11:
+                response = _context.sent;
 
-        if (typeof response.data.error != 'undefined') {
-          throw Error(response.data.error);
-        }
+                if (!(typeof response.data.error != 'undefined')) {
+                  _context.next = 14;
+                  break;
+                }
 
-        return response;
-      } catch (error) {
-        // If there was an actual response returned from the server...
-        if (!error.response) {
-          throw Error(error);
-        } // If we have exception information in the response (which 
-        // indicates an exception on the server side)...
+                throw Error(response.data.error);
 
+              case 14:
+                return _context.abrupt("return", response);
 
-        if (typeof error.response.data.exception != 'undefined') {
-          // For now, reject with an error message matching the exception.
-          throw Error(error.response.data.exception);
-        }
-      }
-    }; // Create an invisible file input element and set its change callback 
+              case 17:
+                _context.prev = 17;
+                _context.t0 = _context["catch"](8);
+
+                if (_context.t0.response) {
+                  _context.next = 21;
+                  break;
+                }
+
+                throw Error(_context.t0);
+
+              case 21:
+                if (!(typeof _context.t0.response.data.exception != 'undefined')) {
+                  _context.next = 23;
+                  break;
+                }
+
+                throw Error(_context.t0.response.data.exception);
+
+              case 23:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, null, [[8, 17]]);
+      }));
+
+      return function onFileChange(_x5) {
+        return _ref.apply(this, arguments);
+      };
+    }(); // Create an invisible file input element and set its change callback 
     // to our onFileChange function.
 
 
-    const inElem = document.createElement('input');
+    var inElem = document.createElement('input');
     inElem.setAttribute('type', 'file');
     inElem.setAttribute('accept', fileType);
     inElem.addEventListener('change', onFileChange); // Manually click the button to open the file dialog.
@@ -10169,1204 +11085,25 @@
   }
 
   var rpcs = {
-    rpc,
-    download,
-    upload
+    rpc: rpc,
+    download: download,
+    upload: upload
   };
 
-  var mpld3_min = createCommonjsModule(function (module, exports) {
-  (function (f) {
-    {
-      module.exports = f();
-    }
-  })(function () {
-    return function () {
-      function r(e, n, t) {
-        function o(i, f) {
-          if (!n[i]) {
-            if (!e[i]) {
-              var c = "function" == typeof commonjsRequire && commonjsRequire;
-              if (!f && c) return c(i, !0);
-              if (u) return u(i, !0);
-              var a = new Error("Cannot find module '" + i + "'");
-              throw a.code = "MODULE_NOT_FOUND", a;
-            }
-
-            var p = n[i] = {
-              exports: {}
-            };
-            e[i][0].call(p.exports, function (r) {
-              var n = e[i][1][r];
-              return o(n || r);
-            }, p, p.exports, r, e, n, t);
-          }
-
-          return n[i].exports;
-        }
-
-        for (var u = "function" == typeof commonjsRequire && commonjsRequire, i = 0; i < t.length; i++) o(t[i]);
-
-        return o;
-      }
-
-      return r;
-    }()({
-      1: [function (require, module, exports) {
-        !function (t) {
-          function s(t) {
-            var s = {};
-
-            for (var i in t) s[i] = t[i];
-
-            return s;
-          }
-
-          function i(t, s) {
-            t = "undefined" != typeof t ? t : 10, s = "undefined" != typeof s ? s : "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-            for (var i = s.charAt(Math.round(Math.random() * (s.length - 11))), e = 1; t > e; e++) i += s.charAt(Math.round(Math.random() * (s.length - 1)));
-
-            return i;
-          }
-
-          function e(s, i) {
-            var e = t.interpolate([s[0].valueOf(), s[1].valueOf()], [i[0].valueOf(), i[1].valueOf()]);
-            return function (t) {
-              var s = e(t);
-              return [new Date(s[0]), new Date(s[1])];
-            };
-          }
-
-          function o(t) {
-            return "undefined" == typeof t;
-          }
-
-          function r(t) {
-            return null == t || o(t);
-          }
-
-          function n(t, s) {
-            return t.length > 0 ? t[s % t.length] : null;
-          }
-
-          function a(t) {
-            function s(t, s) {
-              var n = function (t) {
-                return "function" == typeof t ? t : function () {
-                  return t;
-                };
-              },
-                  a = n(i),
-                  p = n(e),
-                  h = [],
-                  l = [],
-                  c = 0,
-                  u = -1,
-                  d = 0,
-                  f = !1;
-
-              if (!s) {
-                s = ["M"];
-
-                for (var y = 1; y < t.length; y++) s.push("L");
-              }
-
-              for (; ++u < s.length;) {
-                for (d = c + r[s[u]], h = []; d > c;) o.call(this, t[c], c) ? (h.push(a.call(this, t[c], c), p.call(this, t[c], c)), c++) : (h = null, c = d);
-
-                h ? f && h.length > 0 ? (l.push("M", h[0], h[1]), f = !1) : (l.push(s[u]), l = l.concat(h)) : f = !0;
-              }
-
-              return c != t.length && console.warn("Warning: not all vertices used in Path"), l.join(" ");
-            }
-
-            var i = function (t, s) {
-              return t[0];
-            },
-                e = function (t, s) {
-              return t[1];
-            },
-                o = function (t, s) {
-              return !0;
-            },
-                r = {
-              M: 1,
-              m: 1,
-              L: 1,
-              l: 1,
-              Q: 2,
-              q: 2,
-              T: 1,
-              t: 1,
-              S: 2,
-              s: 2,
-              C: 3,
-              c: 3,
-              Z: 0,
-              z: 0
-            };
-
-            return s.x = function (t) {
-              return arguments.length ? (i = t, s) : i;
-            }, s.y = function (t) {
-              return arguments.length ? (e = t, s) : e;
-            }, s.defined = function (t) {
-              return arguments.length ? (o = t, s) : o;
-            }, s.call = s, s;
-          }
-
-          function p(t) {
-            function s(t) {
-              return i.forEach(function (s) {
-                t = s(t);
-              }), t;
-            }
-
-            var i = Array.prototype.slice.call(arguments, 0),
-                e = i.length;
-            return s.domain = function (t) {
-              return arguments.length ? (i[0].domain(t), s) : i[0].domain();
-            }, s.range = function (t) {
-              return arguments.length ? (i[e - 1].range(t), s) : i[e - 1].range();
-            }, s.step = function (t) {
-              return i[t];
-            }, s;
-          }
-
-          function h(t, s) {
-            if (F.call(this, t, s), this.cssclass = "mpld3-" + this.props.xy + "grid", "x" == this.props.xy) this.transform = "translate(0," + this.ax.height + ")", this.position = "bottom", this.scale = this.ax.xdom, this.tickSize = -this.ax.height;else {
-              if ("y" != this.props.xy) throw "unrecognized grid xy specifier: should be 'x' or 'y'";
-              this.transform = "translate(0,0)", this.position = "left", this.scale = this.ax.ydom, this.tickSize = -this.ax.width;
-            }
-          }
-
-          function l(t, s) {
-            F.call(this, t, s);
-            var i = {
-              bottom: [0, this.ax.height],
-              top: [0, 0],
-              left: [0, 0],
-              right: [this.ax.width, 0]
-            },
-                e = {
-              bottom: "x",
-              top: "x",
-              left: "y",
-              right: "y"
-            };
-            this.ax = t, this.transform = "translate(" + i[this.props.position] + ")", this.props.xy = e[this.props.position], this.cssclass = "mpld3-" + this.props.xy + "axis", this.scale = this.ax[this.props.xy + "dom"], this.tickNr = null, this.tickFormat = null;
-          }
-
-          function c(t, s) {
-            if (this.trans = t, "undefined" == typeof s) {
-              if (this.ax = null, this.fig = null, "display" !== this.trans) throw "ax must be defined if transform != 'display'";
-            } else this.ax = s, this.fig = s.fig;
-
-            if (this.zoomable = "data" === this.trans, this.x = this["x_" + this.trans], this.y = this["y_" + this.trans], "undefined" == typeof this.x || "undefined" == typeof this.y) throw "unrecognized coordinate code: " + this.trans;
-          }
-
-          function u(t, s) {
-            F.call(this, t, s), this.data = t.fig.get_data(this.props.data), this.pathcodes = this.props.pathcodes, this.pathcoords = new c(this.props.coordinates, this.ax), this.offsetcoords = new c(this.props.offsetcoordinates, this.ax), this.datafunc = a();
-          }
-
-          function d(t, s) {
-            F.call(this, t, s), (null == this.props.facecolors || 0 == this.props.facecolors.length) && (this.props.facecolors = ["none"]), (null == this.props.edgecolors || 0 == this.props.edgecolors.length) && (this.props.edgecolors = ["none"]);
-            var i = this.ax.fig.get_data(this.props.offsets);
-            (null === i || 0 === i.length) && (i = [null]);
-            var e = Math.max(this.props.paths.length, i.length);
-            if (i.length === e) this.offsets = i;else {
-              this.offsets = [];
-
-              for (var o = 0; e > o; o++) this.offsets.push(n(i, o));
-            }
-            this.pathcoords = new c(this.props.pathcoordinates, this.ax), this.offsetcoords = new c(this.props.offsetcoordinates, this.ax);
-          }
-
-          function f(s, i) {
-            F.call(this, s, i);
-            var e = this.props;
-            e.facecolor = "none", e.edgecolor = e.color, delete e.color, e.edgewidth = e.linewidth, delete e.linewidth;
-            const o = e.drawstyle;
-
-            switch (delete e.drawstyle, this.defaultProps = u.prototype.defaultProps, u.call(this, s, e), o) {
-              case "steps":
-              case "steps-pre":
-                this.datafunc = t.line().curve(t.curveStepBefore);
-                break;
-
-              case "steps-post":
-                this.datafunc = t.line().curve(t.curveStepAfter);
-                break;
-
-              case "steps-mid":
-                this.datafunc = t.line().curve(t.curveStep);
-                break;
-
-              default:
-                this.datafunc = t.line().curve(t.curveLinear);
-            }
-          }
-
-          function y(s, i) {
-            F.call(this, s, i), null !== this.props.markerpath ? this.marker = 0 == this.props.markerpath[0].length ? null : T.path().call(this.props.markerpath[0], this.props.markerpath[1]) : this.marker = null === this.props.markername ? null : t.symbol(this.props.markername).size(Math.pow(this.props.markersize, 2))();
-            var e = {
-              paths: [this.props.markerpath],
-              offsets: s.fig.parse_offsets(s.fig.get_data(this.props.data, !0)),
-              xindex: this.props.xindex,
-              yindex: this.props.yindex,
-              offsetcoordinates: this.props.coordinates,
-              edgecolors: [this.props.edgecolor],
-              edgewidths: [this.props.edgewidth],
-              facecolors: [this.props.facecolor],
-              alphas: [this.props.alpha],
-              zorder: this.props.zorder,
-              id: this.props.id
-            };
-            this.requiredProps = d.prototype.requiredProps, this.defaultProps = d.prototype.defaultProps, d.call(this, s, e);
-          }
-
-          function m(t, s) {
-            F.call(this, t, s), this.coords = new c(this.props.coordinates, this.ax);
-          }
-
-          function g(t, s) {
-            F.call(this, t, s), this.text = this.props.text, this.position = this.props.position, this.coords = new c(this.props.coordinates, this.ax);
-          }
-
-          function x(s, i) {
-            function e(t) {
-              return new Date(t[0], t[1], t[2], t[3], t[4], t[5]);
-            }
-
-            function o(t, s) {
-              return "date" !== t ? s : [e(s[0]), e(s[1])];
-            }
-
-            function r(s, i, e) {
-              var o = "date" === s ? t.scaleTime() : "log" === s ? t.scaleLog() : t.scaleLinear();
-              return o.domain(i).range(e);
-            }
-
-            F.call(this, s, i), this.axnum = this.fig.axes.length, this.axid = this.fig.figid + "_ax" + (this.axnum + 1), this.clipid = this.axid + "_clip", this.props.xdomain = this.props.xdomain || this.props.xlim, this.props.ydomain = this.props.ydomain || this.props.ylim, this.sharex = [], this.sharey = [], this.elements = [], this.axisList = [];
-            var n = this.props.bbox;
-            this.position = [n[0] * this.fig.width, (1 - n[1] - n[3]) * this.fig.height], this.width = n[2] * this.fig.width, this.height = n[3] * this.fig.height, this.isZoomEnabled = null, this.zoom = null, this.lastTransform = t.zoomIdentity, this.isBoxzoomEnabled = null, this.isLinkedBrushEnabled = null, this.isCurrentLinkedBrushTarget = !1, this.brushG = null, this.props.xdomain = o(this.props.xscale, this.props.xdomain), this.props.ydomain = o(this.props.yscale, this.props.ydomain), this.x = this.xdom = r(this.props.xscale, this.props.xdomain, [0, this.width]), this.y = this.ydom = r(this.props.yscale, this.props.ydomain, [this.height, 0]), "date" === this.props.xscale && (this.x = T.multiscale(t.scaleLinear().domain(this.props.xlim).range(this.props.xdomain.map(Number)), this.xdom)), "date" === this.props.yscale && (this.y = T.multiscale(t.scaleLinear().domain(this.props.ylim).range(this.props.ydomain.map(Number)), this.ydom));
-
-            for (var a = this.props.axes, p = 0; p < a.length; p++) {
-              var h = new T.Axis(this, a[p]);
-              this.axisList.push(h), this.elements.push(h), (this.props.gridOn || h.props.grid.gridOn) && this.elements.push(h.getGrid());
-            }
-
-            for (var l = this.props.paths, p = 0; p < l.length; p++) this.elements.push(new T.Path(this, l[p]));
-
-            for (var c = this.props.lines, p = 0; p < c.length; p++) this.elements.push(new T.Line(this, c[p]));
-
-            for (var u = this.props.markers, p = 0; p < u.length; p++) this.elements.push(new T.Markers(this, u[p]));
-
-            for (var d = this.props.texts, p = 0; p < d.length; p++) this.elements.push(new T.Text(this, d[p]));
-
-            for (var f = this.props.collections, p = 0; p < f.length; p++) this.elements.push(new T.PathCollection(this, f[p]));
-
-            for (var y = this.props.images, p = 0; p < y.length; p++) this.elements.push(new T.Image(this, y[p]));
-
-            this.elements.sort(function (t, s) {
-              return t.props.zorder - s.props.zorder;
-            });
-          }
-
-          function b(t, s) {
-            F.call(this, t, s), this.buttons = [], this.props.buttons.forEach(this.addButton.bind(this));
-          }
-
-          function v(t, s) {
-            F.call(this, t), this.toolbar = t, this.fig = this.toolbar.fig, this.cssclass = "mpld3-" + s + "button", this.active = !1;
-          }
-
-          function A(t, s) {
-            F.call(this, t, s);
-          }
-
-          function k(t, s) {
-            A.call(this, t, s);
-            var i = T.ButtonFactory({
-              buttonID: "reset",
-              sticky: !1,
-              onActivate: function () {
-                this.toolbar.fig.reset();
-              },
-              icon: function () {
-                return T.icons.reset;
-              }
-            });
-            this.fig.buttons.push(i);
-          }
-
-          function w(t, s) {
-            A.call(this, t, s), null === this.props.enabled && (this.props.enabled = !this.props.button);
-            var i = this.props.enabled;
-
-            if (this.props.button) {
-              var e = T.ButtonFactory({
-                buttonID: "zoom",
-                sticky: !0,
-                actions: ["scroll", "drag"],
-                onActivate: this.activate.bind(this),
-                onDeactivate: this.deactivate.bind(this),
-                onDraw: function () {
-                  this.setState(i);
-                },
-                icon: function () {
-                  return T.icons.move;
-                }
-              });
-              this.fig.buttons.push(e);
-            }
-          }
-
-          function B(t, s) {
-            A.call(this, t, s), null === this.props.enabled && (this.props.enabled = !this.props.button);
-            var i = this.props.enabled;
-
-            if (this.props.button) {
-              var e = T.ButtonFactory({
-                buttonID: "boxzoom",
-                sticky: !0,
-                actions: ["drag"],
-                onActivate: this.activate.bind(this),
-                onDeactivate: this.deactivate.bind(this),
-                onDraw: function () {
-                  this.setState(i);
-                },
-                icon: function () {
-                  return T.icons.zoom;
-                }
-              });
-              this.fig.buttons.push(e);
-            }
-
-            this.extentClass = "boxzoombrush";
-          }
-
-          function z(t, s) {
-            A.call(this, t, s);
-          }
-
-          function E(t, s) {
-            T.Plugin.call(this, t, s), null === this.props.enabled && (this.props.enabled = !this.props.button);
-            var i = this.props.enabled;
-
-            if (this.props.button) {
-              var e = T.ButtonFactory({
-                buttonID: "linkedbrush",
-                sticky: !0,
-                actions: ["drag"],
-                onActivate: this.activate.bind(this),
-                onDeactivate: this.deactivate.bind(this),
-                onDraw: function () {
-                  this.setState(i);
-                },
-                icon: function () {
-                  return T.icons.brush;
-                }
-              });
-              this.fig.buttons.push(e);
-            }
-
-            this.pathCollectionsByAxes = [], this.objectsByAxes = [], this.allObjects = [], this.extentClass = "linkedbrush", this.dataKey = "offsets", this.objectClass = null;
-          }
-
-          function P(t, s) {
-            T.Plugin.call(this, t, s);
-          }
-
-          function O(s, i) {
-            F.call(this, null, i), this.figid = s, this.width = this.props.width, this.height = this.props.height, this.data = this.props.data, this.buttons = [], this.root = t.select("#" + s).append("div").style("position", "relative"), this.axes = [];
-
-            for (var e = 0; e < this.props.axes.length; e++) this.axes.push(new x(this, this.props.axes[e]));
-
-            this.plugins = [], this.pluginsByType = {}, this.props.plugins.forEach(function (t) {
-              this.addPlugin(t);
-            }.bind(this)), this.toolbar = new T.Toolbar(this, {
-              buttons: this.buttons
-            });
-          }
-
-          function F(t, s) {
-            this.parent = r(t) ? null : t, this.props = r(s) ? {} : this.processProps(s), this.fig = t instanceof O ? t : t && "fig" in t ? t.fig : null, this.ax = t instanceof x ? t : t && "ax" in t ? t.ax : null;
-          }
-
-          var T = {
-            _mpld3IsLoaded: !0,
-            figures: [],
-            plugin_map: {}
-          };
-          T.version = "0.4.2", T.register_plugin = function (t, s) {
-            T.plugin_map[t] = s;
-          }, T.remove_figure = function (t) {
-            var s = document.getElementById(t);
-            null !== s && (s.innerHTML = "");
-
-            for (var i = 0; i < T.figures.length; i++) {
-              var e = T.figures[i];
-              e.figid === t && T.figures.splice(i, 1);
-            }
-
-            return !0;
-          }, T.draw_figure = function (t, s, i, e) {
-            var o = document.getElementById(t);
-            if (e = "undefined" != typeof e ? e : !1, e && T.remove_figure(t), null === o) throw t + " is not a valid id";
-            var r = new T.Figure(t, s);
-            return i && i(r, o), T.figures.push(r), r.draw(), r;
-          }, T.cloneObj = s, T.boundsToTransform = function (t, s) {
-            var i = t.width,
-                e = t.height,
-                o = s[1][0] - s[0][0],
-                r = s[1][1] - s[0][1],
-                n = (s[0][0] + s[1][0]) / 2,
-                a = (s[0][1] + s[1][1]) / 2,
-                p = Math.max(1, Math.min(8, .9 / Math.max(o / i, r / e))),
-                h = [i / 2 - p * n, e / 2 - p * a];
-            return {
-              translate: h,
-              scale: p
-            };
-          }, T.getTransformation = function (t) {
-            var s = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            s.setAttributeNS(null, "transform", t);
-            var i,
-                e,
-                o,
-                r = s.transform.baseVal.consolidate().matrix,
-                n = r.a,
-                a = r.b,
-                p = r.c,
-                h = r.d,
-                l = r.e,
-                c = r.f;
-            (i = Math.sqrt(n * n + a * a)) && (n /= i, a /= i), (o = n * p + a * h) && (p -= n * o, h -= a * o), (e = Math.sqrt(p * p + h * h)) && (p /= e, h /= e, o /= e), a * p > n * h && (n = -n, a = -a, o = -o, i = -i);
-            var u = {
-              translateX: l,
-              translateY: c,
-              rotate: 180 * Math.atan2(a, n) / Math.PI,
-              skewX: 180 * Math.atan(o) / Math.PI,
-              scaleX: i,
-              scaleY: e
-            },
-                d = "translate(" + u.translateX + "," + u.translateY + ")rotate(" + u.rotate + ")skewX(" + u.skewX + ")scale(" + u.scaleX + "," + u.scaleY + ")";
-            return d;
-          }, T.merge_objects = function (t) {
-            for (var s, i = {}, e = 0; e < arguments.length; e++) {
-              s = arguments[e];
-
-              for (var o in s) i[o] = s[o];
-            }
-
-            return i;
-          }, T.generate_id = function (t, s) {
-            return console.warn("mpld3.generate_id is deprecated. Use mpld3.generateId instead."), i(t, s);
-          }, T.generateId = i, T.get_element = function (t, s) {
-            var i, e, o;
-            i = "undefined" == typeof s ? T.figures : "undefined" == typeof s.length ? [s] : s;
-
-            for (var r = 0; r < i.length; r++) {
-              if (s = i[r], s.props.id === t) return s;
-
-              for (var n = 0; n < s.axes.length; n++) {
-                if (e = s.axes[n], e.props.id === t) return e;
-
-                for (var a = 0; a < e.elements.length; a++) if (o = e.elements[a], o.props.id === t) return o;
-              }
-            }
-
-            return null;
-          }, T.insert_css = function (t, s) {
-            var i = document.head || document.getElementsByTagName("head")[0],
-                e = document.createElement("style"),
-                o = t + " {";
-
-            for (var r in s) o += r + ":" + s[r] + "; ";
-
-            o += "}", e.type = "text/css", e.styleSheet ? e.styleSheet.cssText = o : e.appendChild(document.createTextNode(o)), i.appendChild(e);
-          }, T.process_props = function (t, s, i, e) {
-            function o(t) {
-              F.call(this, null, t);
-            }
-
-            console.warn("mpld3.process_props is deprecated. Plot elements should derive from mpld3.PlotElement"), o.prototype = Object.create(F.prototype), o.prototype.constructor = o, o.prototype.requiredProps = e, o.prototype.defaultProps = i;
-            var r = new o(s);
-            return r.props;
-          }, T.interpolateDates = e, T.path = function () {
-            return a();
-          }, T.multiscale = p, T.icons = {
-            reset: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gIcACMoD/OzIwAAAJhJREFUOMtjYKAx4KDUgNsMDAx7\nyNV8i4GB4T8U76VEM8mGYNNMtCH4NBM0hBjNMIwSsMzQ0MamcDkDA8NmQi6xggpUoikwQbIkHk2u\nE0rLI7vCBknBSyxeRDZAE6qHgQkq+ZeBgYERSfFPAoHNDNUDN4BswIRmKgxwEasP2dlsDAwMYlA/\n/mVgYHiBpkkGKscIDaPfVMmuAGnOTaGsXF0MAAAAAElFTkSuQmCC\n",
-            move: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gIcACQMfLHBNQAAANZJREFUOMud07FKA0EQBuAviaKB\nlFr7COJrpAyYRlKn8hECEkFEn8ROCCm0sBMRYgh5EgVFtEhsRjiO27vkBoZd/vn5d3b+XcrjFI9q\nxgXWkc8pUjOB93GMd3zgB9d1unjDSxmhWSHQqOJki+MtOuv/b3ZifUqctIrMxwhHuG1gim4Ma5kR\nWuEkXFgU4B0MW1Ho4TeyjX3s4TDq3zn8ALvZ7q5wX9DqLOHCDA95cFBAnOO1AL/ZdNopgY3fQcqF\nyriMe37hM9w521ZkkvlMo7o/8g7nZYQ/QDctp1nTCf0AAAAASUVORK5CYII=\n",
-            zoom: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gMPDiIRPL/2oQAAANBJREFUOMvF0b9KgzEcheHHVnCT\nKoI4uXbtLXgB3oJDJxevw1VwkoJ/NjepQ2/BrZRCx0ILFURQKV2kyOeSQpAmn7WDB0Lg955zEhLy\n2scdXlBggits+4WOQqjAJ3qYR7NGLrwXGU9+sGbEtlIF18FwmuBngZ+nCt6CIacC3Rx8LSl4xzgF\nn0tusBn4UyVhuA/7ZYIv5g+pE3ail25hN/qdmzCfpsJVjKKCZesDBwtzrAqGOMQj6vhCDRsY4ALH\nmOVObltR/xeG/jph6OD2r+Fv5lZBWEhMx58AAAAASUVORK5CYII=\n",
-            brush: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAEQkAABEJAFAZ8RUAAAAB3RJTUUH3gMCEiQKB9YaAgAAAWtJREFUOMuN0r1qVVEQhuFn700k\nnfEvBq0iNiIiOKXgH4KCaBeIhWARK/EibLwFCwVLjyAWaQzRGG9grC3URkHUBKKgRuWohWvL5pjj\nyTSLxcz7rZlZHyMiItqzFxGTEVF18/UoODNFxDIO4x12dkXqTcBPsCUzD+AK3ndFqhHwEsYz82gn\nN4dbmMRK9R/4KY7jAvbiWmYeHBT5Z4QCP8J1rGAeN3GvU3Mbl/Gq3qCDcxjLzOV+v78fq/iFIxFx\nPyJ2lNJpfBy2g59YzMyzEbEVLzGBJjOriLiBq5gaJrCIU3hcRCbwAtuwjm/Yg/V6I9NgDA1OR8RC\nZq6Vcd7iUwtn5h8fdMBdETGPE+Xe4ExELDRNs4bX2NfCUHe+7UExyfkCP8MhzOA7PuAkvrbwXyNF\nxF3MDqxiqlhXC7SPdaOKiN14g0u4g3H0MvOiTUSNY3iemb0ywmfMdfYyUmAJ2yPiBx6Wr/oy2Oqw\n+A1SupBzAOuE/AAAAABJRU5ErkJggg==\n"
-          }, T.Grid = h, h.prototype = Object.create(F.prototype), h.prototype.constructor = h, h.prototype.requiredProps = ["xy"], h.prototype.defaultProps = {
-            color: "gray",
-            dasharray: "2,2",
-            alpha: "0.5",
-            nticks: 10,
-            gridOn: !0,
-            tickvalues: null,
-            zorder: 0
-          }, h.prototype.draw = function () {
-            var s = {
-              left: "axisLeft",
-              right: "axisRight",
-              top: "axisTop",
-              bottom: "axisBottom"
-            }[this.position];
-            this.grid = t[s](this.scale).ticks(this.props.nticks).tickValues(this.props.tickvalues).tickSize(this.tickSize, 0, 0).tickFormat(""), this.elem = this.ax.axes.append("g").attr("class", this.cssclass).attr("transform", this.transform).call(this.grid), T.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " .tick", {
-              stroke: this.props.color,
-              "stroke-dasharray": this.props.dasharray,
-              "stroke-opacity": this.props.alpha
-            }), T.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " path", {
-              "stroke-width": 0
-            }), T.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " .domain", {
-              "pointer-events": "none"
-            });
-          }, h.prototype.zoomed = function (t) {
-            t ? "x" == this.props.xy ? this.elem.call(this.grid.scale(t.rescaleX(this.scale))) : this.elem.call(this.grid.scale(t.rescaleY(this.scale))) : this.elem.call(this.grid);
-          }, T.Axis = l, l.prototype = Object.create(F.prototype), l.prototype.constructor = l, l.prototype.requiredProps = ["position"], l.prototype.defaultProps = {
-            nticks: 10,
-            tickvalues: null,
-            tickformat: null,
-            tickformat_formatter: null,
-            fontsize: "11px",
-            fontcolor: "black",
-            axiscolor: "black",
-            scale: "linear",
-            grid: {},
-            zorder: 0,
-            visible: !0
-          }, l.prototype.getGrid = function () {
-            var t = {
-              nticks: this.props.nticks,
-              zorder: this.props.zorder,
-              tickvalues: null,
-              xy: this.props.xy
-            };
-            if (this.props.grid) for (var s in this.props.grid) t[s] = this.props.grid[s];
-            return new h(this.ax, t);
-          }, l.prototype.wrapTicks = function () {
-            function s(s, i, e) {
-              e = e || 1.2, s.each(function () {
-                for (var s, o = t.select(this), r = o.node().getBBox(), n = r.height, a = o.text().split(/\s+/).reverse(), p = [], h = 0, l = o.attr("y"), c = n, u = o.text(null).append("tspan").attr("x", 0).attr("y", l).attr("dy", c); s = a.pop();) p.push(s), u.text(p.join(" ")), u.node().getComputedTextLength() > i && (p.pop(), u.text(p.join(" ")), p = [s], u = o.append("tspan").attr("x", 0).attr("y", l).attr("dy", ++h * (n * e) + c).text(s));
-              });
-            }
-
-            var i = 80;
-            "x" == this.props.xy && this.elem.selectAll("text").call(s, i);
-          }, l.prototype.draw = function () {
-            var s = "x" === this.props.xy ? this.parent.props.xscale : this.parent.props.yscale;
-
-            if ("date" === s && this.props.tickvalues) {
-              var i = "x" === this.props.xy ? this.parent.x.domain() : this.parent.y.domain(),
-                  e = "x" === this.props.xy ? this.parent.xdom.domain() : this.parent.ydom.domain(),
-                  o = t.scaleLinear().domain(i).range(e);
-              this.props.tickvalues = this.props.tickvalues.map(function (t) {
-                return new Date(o(t));
-              });
-            }
-
-            var r = {
-              left: "axisLeft",
-              right: "axisRight",
-              top: "axisTop",
-              bottom: "axisBottom"
-            }[this.props.position];
-            this.axis = t[r](this.scale);
-            var n = this;
-            "index" == this.props.tickformat_formatter ? this.axis = this.axis.tickFormat(function (t, s) {
-              return n.props.tickformat[t];
-            }) : "percent" == this.props.tickformat_formatter ? this.axis = this.axis.tickFormat(function (s, i) {
-              var e = s / n.props.tickformat.xmax * 100,
-                  o = n.props.tickformat.decimals || 0,
-                  r = t.format("." + o + "f")(e);
-              return r + n.props.tickformat.symbol;
-            }) : "str_method" == this.props.tickformat_formatter ? this.axis = this.axis.tickFormat(function (s, i) {
-              var e = t.format(n.props.tickformat.format_string)(s);
-              return n.props.tickformat.prefix + e + n.props.tickformat.suffix;
-            }) : "fixed" == this.props.tickformat_formatter ? this.axis = this.axis.tickFormat(function (t, s) {
-              return n.props.tickformat[s];
-            }) : this.tickFormat && (this.axis = this.axis.tickFormat(this.tickFormat)), this.tickNr && (this.axis = this.axis.ticks(this.tickNr)), this.props.tickvalues && (this.axis = this.axis.tickValues(this.props.tickvalues), this.filter_ticks(this.axis.tickValues, this.axis.scale().domain())), this.elem = this.ax.baseaxes.append("g").attr("transform", this.transform).attr("class", this.cssclass).call(this.axis), this.wrapTicks(), T.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " line,  ." + this.cssclass + " path", {
-              "shape-rendering": "crispEdges",
-              stroke: this.props.axiscolor,
-              fill: "none"
-            }), T.insert_css("div#" + this.ax.fig.figid + " ." + this.cssclass + " text", {
-              "font-family": "sans-serif",
-              "font-size": this.props.fontsize + "px",
-              fill: this.props.fontcolor,
-              stroke: "none"
-            });
-          }, l.prototype.zoomed = function (t) {
-            this.props.tickvalues && this.filter_ticks(this.axis.tickValues, this.axis.scale().domain()), t ? ("x" == this.props.xy ? this.elem.call(this.axis.scale(t.rescaleX(this.scale))) : this.elem.call(this.axis.scale(t.rescaleY(this.scale))), this.wrapTicks()) : this.elem.call(this.axis);
-          }, l.prototype.setTicks = function (t, s) {
-            this.tickNr = t, this.tickFormat = s;
-          }, l.prototype.filter_ticks = function (t, s) {
-            null != this.props.tickvalues && t(this.props.tickvalues.filter(function (t) {
-              return t >= s[0] && t <= s[1];
-            }));
-          }, T.Coordinates = c, c.prototype.xy = function (t, s, i) {
-            return s = "undefined" == typeof s ? 0 : s, i = "undefined" == typeof i ? 1 : i, [this.x(t[s]), this.y(t[i])];
-          }, c.prototype.x_data = function (t) {
-            return this.ax.x(t);
-          }, c.prototype.y_data = function (t) {
-            return this.ax.y(t);
-          }, c.prototype.x_display = function (t) {
-            return t;
-          }, c.prototype.y_display = function (t) {
-            return t;
-          }, c.prototype.x_axes = function (t) {
-            return t * this.ax.width;
-          }, c.prototype.y_axes = function (t) {
-            return this.ax.height * (1 - t);
-          }, c.prototype.x_figure = function (t) {
-            return t * this.fig.width - this.ax.position[0];
-          }, c.prototype.y_figure = function (t) {
-            return (1 - t) * this.fig.height - this.ax.position[1];
-          }, T.Path = u, u.prototype = Object.create(F.prototype), u.prototype.constructor = u, u.prototype.requiredProps = ["data"], u.prototype.defaultProps = {
-            xindex: 0,
-            yindex: 1,
-            coordinates: "data",
-            facecolor: "green",
-            edgecolor: "black",
-            edgewidth: 1,
-            dasharray: "none",
-            pathcodes: null,
-            offset: null,
-            offsetcoordinates: "data",
-            alpha: 1,
-            drawstyle: "none",
-            zorder: 1
-          }, u.prototype.finiteFilter = function (t, s) {
-            return isFinite(this.pathcoords.x(t[this.props.xindex])) && isFinite(this.pathcoords.y(t[this.props.yindex]));
-          }, u.prototype.draw = function () {
-            if (this.datafunc.defined(this.finiteFilter.bind(this)).x(function (t) {
-              return this.pathcoords.x(t[this.props.xindex]);
-            }.bind(this)).y(function (t) {
-              return this.pathcoords.y(t[this.props.yindex]);
-            }.bind(this)), this.pathcoords.zoomable ? this.path = this.ax.paths.append("svg:path") : this.path = this.ax.staticPaths.append("svg:path"), this.path = this.path.attr("d", this.datafunc(this.data, this.pathcodes)).attr("class", "mpld3-path").style("stroke", this.props.edgecolor).style("stroke-width", this.props.edgewidth).style("stroke-dasharray", this.props.dasharray).style("stroke-opacity", this.props.alpha).style("fill", this.props.facecolor).style("fill-opacity", this.props.alpha).attr("vector-effect", "non-scaling-stroke"), null !== this.props.offset) {
-              var t = this.offsetcoords.xy(this.props.offset);
-              this.path.attr("transform", "translate(" + t + ")");
-            }
-          }, u.prototype.elements = function (t) {
-            return this.path;
-          }, T.PathCollection = d, d.prototype = Object.create(F.prototype), d.prototype.constructor = d, d.prototype.requiredProps = ["paths", "offsets"], d.prototype.defaultProps = {
-            xindex: 0,
-            yindex: 1,
-            pathtransforms: [],
-            pathcoordinates: "display",
-            offsetcoordinates: "data",
-            offsetorder: "before",
-            edgecolors: ["#000000"],
-            drawstyle: "none",
-            edgewidths: [1],
-            facecolors: ["#0000FF"],
-            alphas: [1],
-            zorder: 2
-          }, d.prototype.transformFunc = function (t, s) {
-            var i = this.props.pathtransforms,
-                e = 0 == i.length ? "" : T.getTransformation("matrix(" + n(i, s) + ")").toString(),
-                o = null === t || "undefined" == typeof t ? "translate(0, 0)" : "translate(" + this.offsetcoords.xy(t, this.props.xindex, this.props.yindex) + ")";
-            return "after" === this.props.offsetorder ? e + o : o + e;
-          }, d.prototype.pathFunc = function (t, s) {
-            return a().x(function (t) {
-              return this.pathcoords.x(t[0]);
-            }.bind(this)).y(function (t) {
-              return this.pathcoords.y(t[1]);
-            }.bind(this)).apply(this, n(this.props.paths, s));
-          }, d.prototype.styleFunc = function (t, s) {
-            var i = {
-              stroke: n(this.props.edgecolors, s),
-              "stroke-width": n(this.props.edgewidths, s),
-              "stroke-opacity": n(this.props.alphas, s),
-              fill: n(this.props.facecolors, s),
-              "fill-opacity": n(this.props.alphas, s)
-            },
-                e = "";
-
-            for (var o in i) e += o + ":" + i[o] + ";";
-
-            return e;
-          }, d.prototype.allFinite = function (t) {
-            return t instanceof Array ? t.length == t.filter(isFinite).length : !0;
-          }, d.prototype.draw = function () {
-            this.offsetcoords.zoomable || this.pathcoords.zoomable ? this.group = this.ax.paths.append("svg:g") : this.group = this.ax.staticPaths.append("svg:g"), this.pathsobj = this.group.selectAll("paths").data(this.offsets.filter(this.allFinite)).enter().append("svg:path").attr("d", this.pathFunc.bind(this)).attr("class", "mpld3-path").attr("transform", this.transformFunc.bind(this)).attr("style", this.styleFunc.bind(this)).attr("vector-effect", "non-scaling-stroke");
-          }, d.prototype.elements = function (t) {
-            return this.group.selectAll("path");
-          }, T.Line = f, f.prototype = Object.create(u.prototype), f.prototype.constructor = f, f.prototype.requiredProps = ["data"], f.prototype.defaultProps = {
-            xindex: 0,
-            yindex: 1,
-            coordinates: "data",
-            color: "salmon",
-            linewidth: 2,
-            dasharray: "none",
-            alpha: 1,
-            zorder: 2,
-            drawstyle: "none"
-          }, T.Markers = y, y.prototype = Object.create(d.prototype), y.prototype.constructor = y, y.prototype.requiredProps = ["data"], y.prototype.defaultProps = {
-            xindex: 0,
-            yindex: 1,
-            coordinates: "data",
-            facecolor: "salmon",
-            edgecolor: "black",
-            edgewidth: 1,
-            alpha: 1,
-            markersize: 6,
-            markername: "circle",
-            drawstyle: "none",
-            markerpath: null,
-            zorder: 3
-          }, y.prototype.pathFunc = function (t, s) {
-            return this.marker;
-          }, T.Image = m, m.prototype = Object.create(F.prototype), m.prototype.constructor = m, m.prototype.requiredProps = ["data", "extent"], m.prototype.defaultProps = {
-            alpha: 1,
-            coordinates: "data",
-            drawstyle: "none",
-            zorder: 1
-          }, m.prototype.draw = function () {
-            this.image = this.ax.paths.append("svg:image"), this.image = this.image.attr("class", "mpld3-image").attr("xlink:href", "data:image/png;base64," + this.props.data).style("opacity", this.props.alpha).attr("preserveAspectRatio", "none"), this.updateDimensions();
-          }, m.prototype.elements = function (s) {
-            return t.select(this.image);
-          }, m.prototype.updateDimensions = function () {
-            var t = this.props.extent;
-            this.image.attr("x", this.coords.x(t[0])).attr("y", this.coords.y(t[3])).attr("width", this.coords.x(t[1]) - this.coords.x(t[0])).attr("height", this.coords.y(t[2]) - this.coords.y(t[3]));
-          }, T.Text = g, g.prototype = Object.create(F.prototype), g.prototype.constructor = g, g.prototype.requiredProps = ["text", "position"], g.prototype.defaultProps = {
-            coordinates: "data",
-            h_anchor: "start",
-            v_baseline: "auto",
-            rotation: 0,
-            fontsize: 11,
-            drawstyle: "none",
-            color: "black",
-            alpha: 1,
-            zorder: 3
-          }, g.prototype.draw = function () {
-            "data" == this.props.coordinates ? this.coords.zoomable ? this.obj = this.ax.paths.append("text") : this.obj = this.ax.staticPaths.append("text") : this.obj = this.ax.baseaxes.append("text"), this.obj.attr("class", "mpld3-text").text(this.text).style("text-anchor", this.props.h_anchor).style("dominant-baseline", this.props.v_baseline).style("font-size", this.props.fontsize).style("fill", this.props.color).style("opacity", this.props.alpha), this.applyTransform();
-          }, g.prototype.elements = function (s) {
-            return t.select(this.obj);
-          }, g.prototype.applyTransform = function () {
-            var t = this.coords.xy(this.position);
-            this.obj.attr("x", t[0]).attr("y", t[1]), this.props.rotation && this.obj.attr("transform", "rotate(" + this.props.rotation + "," + t + ")");
-          }, T.Axes = x, x.prototype = Object.create(F.prototype), x.prototype.constructor = x, x.prototype.requiredProps = ["xlim", "ylim"], x.prototype.defaultProps = {
-            bbox: [.1, .1, .8, .8],
-            axesbg: "#FFFFFF",
-            axesbgalpha: 1,
-            gridOn: !1,
-            xdomain: null,
-            ydomain: null,
-            xscale: "linear",
-            yscale: "linear",
-            zoomable: !0,
-            axes: [{
-              position: "left"
-            }, {
-              position: "bottom"
-            }],
-            lines: [],
-            paths: [],
-            markers: [],
-            texts: [],
-            collections: [],
-            sharex: [],
-            sharey: [],
-            images: []
-          }, x.prototype.draw = function () {
-            for (var s = 0; s < this.props.sharex.length; s++) this.sharex.push(T.get_element(this.props.sharex[s]));
-
-            for (var s = 0; s < this.props.sharey.length; s++) this.sharey.push(T.get_element(this.props.sharey[s]));
-
-            this.baseaxes = this.fig.canvas.append("g").attr("transform", "translate(" + this.position[0] + "," + this.position[1] + ")").attr("width", this.width).attr("height", this.height).attr("class", "mpld3-baseaxes"), this.axes = this.baseaxes.append("g").attr("class", "mpld3-axes").style("pointer-events", "visiblefill"), this.clip = this.axes.append("svg:clipPath").attr("id", this.clipid).append("svg:rect").attr("x", 0).attr("y", 0).attr("width", this.width).attr("height", this.height), this.axesbg = this.axes.append("svg:rect").attr("width", this.width).attr("height", this.height).attr("class", "mpld3-axesbg").style("fill", this.props.axesbg).style("fill-opacity", this.props.axesbgalpha), this.pathsContainer = this.axes.append("g").attr("clip-path", "url(#" + this.clipid + ")").attr("x", 0).attr("y", 0).attr("width", this.width).attr("height", this.height).attr("class", "mpld3-paths-container"), this.paths = this.pathsContainer.append("g").attr("class", "mpld3-paths"), this.staticPaths = this.axes.append("g").attr("class", "mpld3-staticpaths"), this.brush = t.brush().extent([[0, 0], [this.fig.width, this.fig.height]]).on("start", this.brushStart.bind(this)).on("brush", this.brushMove.bind(this)).on("end", this.brushEnd.bind(this)).on("start.nokey", function () {
-              t.select(window).on("keydown.brush keyup.brush", null);
-            });
-
-            for (var s = 0; s < this.elements.length; s++) this.elements[s].draw();
-          }, x.prototype.bindZoom = function () {
-            this.zoom || (this.zoom = t.zoom(), this.zoom.on("zoom", this.zoomed.bind(this)), this.axes.call(this.zoom));
-          }, x.prototype.unbindZoom = function () {
-            this.zoom && (this.zoom.on("zoom", null), this.axes.on(".zoom", null), this.zoom = null);
-          }, x.prototype.bindBrush = function () {
-            this.brushG || (this.brushG = this.axes.append("g").attr("class", "mpld3-brush").call(this.brush));
-          }, x.prototype.unbindBrush = function () {
-            this.brushG && (this.brushG.remove(), this.brushG.on(".brush", null), this.brushG = null);
-          }, x.prototype.reset = function () {
-            this.zoom ? this.doZoom(!1, t.zoomIdentity, 750) : (this.bindZoom(), this.doZoom(!1, t.zoomIdentity, 750, function () {
-              this.isSomeTypeOfZoomEnabled || this.unbindZoom();
-            }.bind(this)));
-          }, x.prototype.enableOrDisableBrushing = function () {
-            this.isBoxzoomEnabled || this.isLinkedBrushEnabled ? this.bindBrush() : this.unbindBrush();
-          }, x.prototype.isSomeTypeOfZoomEnabled = function () {
-            return this.isZoomEnabled || this.isBoxzoomEnabled;
-          }, x.prototype.enableOrDisableZooming = function () {
-            this.isSomeTypeOfZoomEnabled() ? this.bindZoom() : this.unbindZoom();
-          }, x.prototype.enableLinkedBrush = function () {
-            this.isLinkedBrushEnabled = !0, this.enableOrDisableBrushing();
-          }, x.prototype.disableLinkedBrush = function () {
-            this.isLinkedBrushEnabled = !1, this.enableOrDisableBrushing();
-          }, x.prototype.enableBoxzoom = function () {
-            this.isBoxzoomEnabled = !0, this.enableOrDisableBrushing(), this.enableOrDisableZooming();
-          }, x.prototype.disableBoxzoom = function () {
-            this.isBoxzoomEnabled = !1, this.enableOrDisableBrushing(), this.enableOrDisableZooming();
-          }, x.prototype.enableZoom = function () {
-            this.isZoomEnabled = !0, this.enableOrDisableZooming(), this.axes.style("cursor", "move");
-          }, x.prototype.disableZoom = function () {
-            this.isZoomEnabled = !1, this.enableOrDisableZooming(), this.axes.style("cursor", null);
-          }, x.prototype.doZoom = function (t, s, i, e) {
-            if (this.props.zoomable && this.zoom) {
-              if (i) {
-                var o = this.axes.transition().duration(i).call(this.zoom.transform, s);
-                e && o.on("end", e);
-              } else this.axes.call(this.zoom.transform, s);
-
-              t ? (this.lastTransform = s, this.sharex.forEach(function (t) {
-                t.doZoom(!1, s, i);
-              }), this.sharey.forEach(function (t) {
-                t.doZoom(!1, s, i);
-              })) : this.lastTransform = s;
-            }
-          }, x.prototype.zoomed = function () {
-            var s = t.event.sourceEvent && "zoom" != t.event.sourceEvent.type;
-            if (s) this.doZoom(!0, t.event.transform, !1);else {
-              var i = t.event.transform;
-              this.paths.attr("transform", i), this.elements.forEach(function (t) {
-                t.zoomed && t.zoomed(i);
-              }.bind(this));
-            }
-          }, x.prototype.resetBrush = function () {
-            this.brushG.call(this.brush.move, null);
-          }, x.prototype.doBoxzoom = function (s) {
-            if (s && this.brushG) {
-              var i = s.map(this.lastTransform.invert, this.lastTransform),
-                  e = i[1][0] - i[0][0],
-                  o = i[1][1] - i[0][1],
-                  r = (i[0][0] + i[1][0]) / 2,
-                  n = (i[0][1] + i[1][1]) / 2,
-                  a = e > o ? this.width / e : this.height / o,
-                  p = this.width / 2 - a * r,
-                  h = this.height / 2 - a * n,
-                  l = t.zoomIdentity.translate(p, h).scale(a);
-              this.doZoom(!0, l, 750), this.resetBrush();
-            }
-          }, x.prototype.brushStart = function () {
-            this.isLinkedBrushEnabled && (this.isCurrentLinkedBrushTarget = "MouseEvent" == t.event.sourceEvent.constructor.name, this.isCurrentLinkedBrushTarget && this.fig.resetBrushForOtherAxes(this.axid));
-          }, x.prototype.brushMove = function () {
-            var s = t.event.selection;
-            this.isLinkedBrushEnabled && this.fig.updateLinkedBrush(s);
-          }, x.prototype.brushEnd = function () {
-            var s = t.event.selection;
-            this.isBoxzoomEnabled && this.doBoxzoom(s), this.isLinkedBrushEnabled && (s || this.fig.endLinkedBrush(), this.isCurrentLinkedBrushTarget = !1);
-          }, x.prototype.setTicks = function (t, s, i) {
-            this.axisList.forEach(function (e) {
-              e.props.xy == t && e.setTicks(s, i);
-            });
-          }, T.Toolbar = b, b.prototype = Object.create(F.prototype), b.prototype.constructor = b, b.prototype.defaultProps = {
-            buttons: ["reset", "move"]
-          }, b.prototype.addButton = function (t) {
-            this.buttons.push(new t(this));
-          }, b.prototype.draw = function () {
-            function s() {
-              this.buttonsobj.transition(750).attr("y", 0);
-            }
-
-            function i() {
-              this.buttonsobj.transition(750).delay(250).attr("y", 16);
-            }
-
-            T.insert_css("div#" + this.fig.figid + " .mpld3-toolbar image", {
-              cursor: "pointer",
-              opacity: .2,
-              display: "inline-block",
-              margin: "0px"
-            }), T.insert_css("div#" + this.fig.figid + " .mpld3-toolbar image.active", {
-              opacity: .4
-            }), T.insert_css("div#" + this.fig.figid + " .mpld3-toolbar image.pressed", {
-              opacity: .6
-            }), this.fig.canvas.on("mouseenter", s.bind(this)).on("mouseleave", i.bind(this)).on("touchenter", s.bind(this)).on("touchstart", s.bind(this)), this.toolbar = this.fig.canvas.append("svg:svg").attr("width", 16 * this.buttons.length).attr("height", 16).attr("x", 2).attr("y", this.fig.height - 16 - 2).attr("class", "mpld3-toolbar"), this.buttonsobj = this.toolbar.append("svg:g").selectAll("buttons").data(this.buttons).enter().append("svg:image").attr("class", function (t) {
-              return t.cssclass;
-            }).attr("xlink:href", function (t) {
-              return t.icon();
-            }).attr("width", 16).attr("height", 16).attr("x", function (t, s) {
-              return 16 * s;
-            }).attr("y", 16).on("click", function (t) {
-              t.click();
-            }).on("mouseenter", function () {
-              t.select(this).classed("active", !0);
-            }).on("mouseleave", function () {
-              t.select(this).classed("active", !1);
-            });
-
-            for (var e = 0; e < this.buttons.length; e++) this.buttons[e].onDraw();
-          }, b.prototype.deactivate_all = function () {
-            this.buttons.forEach(function (t) {
-              t.deactivate();
-            });
-          }, b.prototype.deactivate_by_action = function (t) {
-            function s(s) {
-              return -1 !== t.indexOf(s);
-            }
-
-            t.length > 0 && this.buttons.forEach(function (t) {
-              t.actions.filter(s).length > 0 && t.deactivate();
-            });
-          }, T.Button = v, v.prototype = Object.create(F.prototype), v.prototype.constructor = v, v.prototype.setState = function (t) {
-            t ? this.activate() : this.deactivate();
-          }, v.prototype.click = function () {
-            this.active ? this.deactivate() : this.activate();
-          }, v.prototype.activate = function () {
-            this.toolbar.deactivate_by_action(this.actions), this.onActivate(), this.active = !0, this.toolbar.toolbar.select("." + this.cssclass).classed("pressed", !0), this.sticky || this.deactivate();
-          }, v.prototype.deactivate = function () {
-            this.onDeactivate(), this.active = !1, this.toolbar.toolbar.select("." + this.cssclass).classed("pressed", !1);
-          }, v.prototype.sticky = !1, v.prototype.actions = [], v.prototype.icon = function () {
-            return "";
-          }, v.prototype.onActivate = function () {}, v.prototype.onDeactivate = function () {}, v.prototype.onDraw = function () {}, T.ButtonFactory = function (t) {
-            function s(t) {
-              v.call(this, t, this.buttonID);
-            }
-
-            if ("string" != typeof t.buttonID) throw "ButtonFactory: buttonID must be present and be a string";
-            s.prototype = Object.create(v.prototype), s.prototype.constructor = s;
-
-            for (var i in t) s.prototype[i] = t[i];
-
-            return s;
-          }, T.Plugin = A, A.prototype = Object.create(F.prototype), A.prototype.constructor = A, A.prototype.requiredProps = [], A.prototype.defaultProps = {}, A.prototype.draw = function () {}, T.ResetPlugin = k, T.register_plugin("reset", k), k.prototype = Object.create(A.prototype), k.prototype.constructor = k, k.prototype.requiredProps = [], k.prototype.defaultProps = {}, T.ZoomPlugin = w, T.register_plugin("zoom", w), w.prototype = Object.create(A.prototype), w.prototype.constructor = w, w.prototype.requiredProps = [], w.prototype.defaultProps = {
-            button: !0,
-            enabled: null
-          }, w.prototype.activate = function () {
-            this.fig.enableZoom();
-          }, w.prototype.deactivate = function () {
-            this.fig.disableZoom();
-          }, w.prototype.draw = function () {
-            this.props.enabled ? this.activate() : this.deactivate();
-          }, T.BoxZoomPlugin = B, T.register_plugin("boxzoom", B), B.prototype = Object.create(A.prototype), B.prototype.constructor = B, B.prototype.requiredProps = [], B.prototype.defaultProps = {
-            button: !0,
-            enabled: null
-          }, B.prototype.activate = function () {
-            this.fig.enableBoxzoom();
-          }, B.prototype.deactivate = function () {
-            this.fig.disableBoxzoom();
-          }, B.prototype.draw = function () {
-            this.props.enabled ? this.activate() : this.deactivate();
-          }, T.TooltipPlugin = z, T.register_plugin("tooltip", z), z.prototype = Object.create(A.prototype), z.prototype.constructor = z, z.prototype.requiredProps = ["id"], z.prototype.defaultProps = {
-            labels: null,
-            hoffset: 0,
-            voffset: 10,
-            location: "mouse"
-          }, z.prototype.draw = function () {
-            function s(t, s) {
-              this.tooltip.style("visibility", "visible").text(null === r ? "(" + t + ")" : n(r, s));
-            }
-
-            function i(s, i) {
-              if ("mouse" === a) {
-                var e = t.mouse(this.fig.canvas.node());
-                this.x = e[0] + this.props.hoffset, this.y = e[1] - this.props.voffset;
-              }
-
-              this.tooltip.attr("x", this.x).attr("y", this.y);
-            }
-
-            function e(t, s) {
-              this.tooltip.style("visibility", "hidden");
-            }
-
-            var o = T.get_element(this.props.id, this.fig),
-                r = this.props.labels,
-                a = this.props.location;
-            this.tooltip = this.fig.canvas.append("text").attr("class", "mpld3-tooltip-text").attr("x", 0).attr("y", 0).text("").style("visibility", "hidden"), "bottom left" == a || "top left" == a ? (this.x = o.ax.position[0] + 5 + this.props.hoffset, this.tooltip.style("text-anchor", "beginning")) : "bottom right" == a || "top right" == a ? (this.x = o.ax.position[0] + o.ax.width - 5 + this.props.hoffset, this.tooltip.style("text-anchor", "end")) : this.tooltip.style("text-anchor", "middle"), "bottom left" == a || "bottom right" == a ? this.y = o.ax.position[1] + o.ax.height - 5 + this.props.voffset : ("top left" == a || "top right" == a) && (this.y = o.ax.position[1] + 5 + this.props.voffset), o.elements().on("mouseover", s.bind(this)).on("mousemove", i.bind(this)).on("mouseout", e.bind(this));
-          }, T.LinkedBrushPlugin = E, T.register_plugin("linkedbrush", E), E.prototype = Object.create(T.Plugin.prototype), E.prototype.constructor = E, E.prototype.requiredProps = ["id"], E.prototype.defaultProps = {
-            button: !0,
-            enabled: null
-          }, E.prototype.activate = function () {
-            this.fig.enableLinkedBrush();
-          }, E.prototype.deactivate = function () {
-            this.fig.disableLinkedBrush();
-          }, E.prototype.isPathInSelection = function (t, s, i, e) {
-            var o = e[0][0] < t[s] && e[1][0] > t[s] && e[0][1] < t[i] && e[1][1] > t[i];
-            return o;
-          }, E.prototype.invertSelection = function (t, s) {
-            var i = [s.x.invert(t[0][0]), s.x.invert(t[1][0])],
-                e = [s.y.invert(t[1][1]), s.y.invert(t[0][1])];
-            return [[Math.min.apply(Math, i), Math.min.apply(Math, e)], [Math.max.apply(Math, i), Math.max.apply(Math, e)]];
-          }, E.prototype.update = function (t) {
-            t && this.pathCollectionsByAxes.forEach(function (s, i) {
-              var e = s[0],
-                  o = this.objectsByAxes[i],
-                  r = this.invertSelection(t, this.fig.axes[i]),
-                  n = e.props.xindex,
-                  a = e.props.yindex;
-              o.selectAll("path").classed("mpld3-hidden", function (t, s) {
-                return !this.isPathInSelection(t, n, a, r);
-              }.bind(this));
-            }.bind(this));
-          }, E.prototype.end = function () {
-            this.allObjects.selectAll("path").classed("mpld3-hidden", !1);
-          }, E.prototype.draw = function () {
-            T.insert_css("#" + this.fig.figid + " path.mpld3-hidden", {
-              stroke: "#ccc !important",
-              fill: "#ccc !important"
-            });
-            var t = T.get_element(this.props.id);
-            if (!t) throw new Error("[LinkedBrush] Could not find path collection");
-            if (!("offsets" in t.props)) throw new Error("[LinkedBrush] Figure is not a scatter plot.");
-            this.objectClass = "mpld3-brushtarget-" + t.props[this.dataKey], this.pathCollectionsByAxes = this.fig.axes.map(function (s) {
-              return s.elements.map(function (s) {
-                return s.props[this.dataKey] == t.props[this.dataKey] ? (s.group.classed(this.objectClass, !0), s) : void 0;
-              }.bind(this)).filter(function (t) {
-                return t;
-              });
-            }.bind(this)), this.objectsByAxes = this.fig.axes.map(function (t) {
-              return t.axes.selectAll("." + this.objectClass);
-            }.bind(this)), this.allObjects = this.fig.canvas.selectAll("." + this.objectClass);
-          }, T.register_plugin("mouseposition", P), P.prototype = Object.create(T.Plugin.prototype), P.prototype.constructor = P, P.prototype.requiredProps = [], P.prototype.defaultProps = {
-            fontsize: 12,
-            fmt: ".3g"
-          }, P.prototype.draw = function () {
-            for (var s = this.fig, i = t.format(this.props.fmt), e = s.canvas.append("text").attr("class", "mpld3-coordinates").style("text-anchor", "end").style("font-size", this.props.fontsize).attr("x", this.fig.width - 5).attr("y", this.fig.height - 5), o = 0; o < this.fig.axes.length; o++) {
-              var r = function () {
-                var r = s.axes[o];
-                return function () {
-                  var s = t.mouse(this),
-                      o = r.x.invert(s[0]),
-                      n = r.y.invert(s[1]);
-                  e.text("(" + i(o) + ", " + i(n) + ")");
-                };
-              }();
-
-              s.axes[o].baseaxes.on("mousemove", r).on("mouseout", function () {
-                e.text("");
-              });
-            }
-          }, T.Figure = O, O.prototype = Object.create(F.prototype), O.prototype.constructor = O, O.prototype.requiredProps = ["width", "height"], O.prototype.defaultProps = {
-            data: {},
-            axes: [],
-            plugins: [{
-              type: "reset"
-            }, {
-              type: "zoom"
-            }, {
-              type: "boxzoom"
-            }]
-          }, O.prototype.addPlugin = function (t) {
-            if (!t.type) return console.warn("unspecified plugin type. Skipping this");
-            var i;
-            if (!(t.type in T.plugin_map)) return console.warn("Skipping unrecognized plugin: " + i);
-            i = T.plugin_map[t.type], (t.clear_toolbar || t.buttons) && console.warn("DEPRECATION WARNING: You are using pluginInfo.clear_toolbar or pluginInfo, which have been deprecated. Please see the build-in plugins for the new method to add buttons, otherwise contact the mpld3 maintainers.");
-            var e = s(t);
-            delete e.type;
-            var o = new i(this, e);
-            this.plugins.push(o), this.pluginsByType[t.type] = o;
-          }, O.prototype.draw = function () {
-            T.insert_css("div#" + this.figid, {
-              "font-family": "Helvetica, sans-serif"
-            }), this.canvas = this.root.append("svg:svg").attr("class", "mpld3-figure").attr("width", this.width).attr("height", this.height);
-
-            for (var t = 0; t < this.axes.length; t++) this.axes[t].draw();
-
-            this.disableZoom();
-
-            for (var t = 0; t < this.plugins.length; t++) this.plugins[t].draw();
-
-            this.toolbar.draw();
-          }, O.prototype.resetBrushForOtherAxes = function (t) {
-            this.axes.forEach(function (s) {
-              s.axid != t && s.resetBrush();
-            });
-          }, O.prototype.updateLinkedBrush = function (t) {
-            this.pluginsByType.linkedbrush && this.pluginsByType.linkedbrush.update(t);
-          }, O.prototype.endLinkedBrush = function () {
-            this.pluginsByType.linkedbrush && this.pluginsByType.linkedbrush.end();
-          }, O.prototype.reset = function (t) {
-            this.axes.forEach(function (t) {
-              t.reset();
-            });
-          }, O.prototype.enableLinkedBrush = function () {
-            this.axes.forEach(function (t) {
-              t.enableLinkedBrush();
-            });
-          }, O.prototype.disableLinkedBrush = function () {
-            this.axes.forEach(function (t) {
-              t.disableLinkedBrush();
-            });
-          }, O.prototype.enableBoxzoom = function () {
-            this.axes.forEach(function (t) {
-              t.enableBoxzoom();
-            });
-          }, O.prototype.disableBoxzoom = function () {
-            this.axes.forEach(function (t) {
-              t.disableBoxzoom();
-            });
-          }, O.prototype.enableZoom = function () {
-            this.axes.forEach(function (t) {
-              t.enableZoom();
-            });
-          }, O.prototype.disableZoom = function () {
-            this.axes.forEach(function (t) {
-              t.disableZoom();
-            });
-          }, O.prototype.toggleZoom = function () {
-            this.isZoomEnabled ? this.disableZoom() : this.enableZoom();
-          }, O.prototype.setTicks = function (t, s, i) {
-            this.axes.forEach(function (e) {
-              e.setTicks(t, s, i);
-            });
-          }, O.prototype.setXTicks = function (t, s) {
-            this.setTicks("x", t, s);
-          }, O.prototype.setYTicks = function (t, s) {
-            this.setTicks("y", t, s);
-          }, O.prototype.removeNaN = function (t) {
-            output = output.map(function (t) {
-              return t.map(function (t) {
-                return "number" == typeof t && isNaN(t) ? 0 : t;
-              });
-            });
-          }, O.prototype.parse_offsets = function (t) {
-            return t.map(function (t) {
-              return t.map(function (t) {
-                return "number" == typeof t && isNaN(t) ? 0 : t;
-              });
-            });
-          }, O.prototype.get_data = function (t) {
-            var s = t;
-            return null === t || "undefined" == typeof t ? s = null : "string" == typeof t && (s = this.data[t]), s;
-          }, T.PlotElement = F, F.prototype.requiredProps = [], F.prototype.defaultProps = {}, F.prototype.processProps = function (t) {
-            t = s(t);
-            var i = {},
-                e = this.name();
-            this.requiredProps.forEach(function (s) {
-              if (!(s in t)) throw "property '" + s + "' must be specified for " + e;
-              i[s] = t[s], delete t[s];
-            });
-
-            for (var o in this.defaultProps) o in t ? (i[o] = t[o], delete t[o]) : i[o] = this.defaultProps[o];
-
-            "id" in t ? (i.id = t.id, delete t.id) : "id" in i || (i.id = T.generateId());
-
-            for (var o in t) console.warn("Unrecognized property '" + o + "' for object " + this.name() + " (value = " + t[o] + ").");
-
-            return i;
-          }, F.prototype.name = function () {
-            var t = /function (.{1,})\(/,
-                s = t.exec(this.constructor.toString());
-            return s && s.length > 1 ? s[1] : "";
-          }, "object" == typeof module && module.exports ? module.exports = T : this.mpld3 = T, console.log("Loaded mpld3 version " + T.version);
-        }(d3);
-      }, {}]
-    }, {}, [1])(1);
-  });
-  });
-
-  /** @module graphs */
+  var mpld3 = null;
+
+  if (typeof d3 !== 'undefined') {
+    mpld3 = require('mpld3');
+  }
 
   function placeholders(vm, startVal) {
-    let indices = [];
+    var indices = [];
 
     if (!startVal) {
       startVal = 0;
     }
 
-    for (let i = startVal; i <= 100; i++) {
+    for (var i = startVal; i <= 100; i++) {
       indices.push(i);
       vm.showGraphDivs.push(false);
       vm.showLegendDivs.push(false);
@@ -11383,15 +11120,15 @@
 
 
   function clearGraphs(vm) {
-    for (let index = 0; index <= 100; index++) {
-      let divlabel = 'fig' + index;
+    for (var index = 0; index <= 100; index++) {
+      var divlabel = 'fig' + index;
 
       if (typeof d3 === 'undefined') {
         console.log("please include d3 to use the clearGraphs function");
         return false;
       }
 
-      mpld3_min.remove_figure(divlabel);
+      mpld3.remove_figure(divlabel);
       vm.hasGraphs = false;
     }
   }
@@ -11405,90 +11142,8 @@
    */
 
 
-  async function makeGraphs(vm, data, routepath) {
-    if (typeof d3 === 'undefined') {
-      console.log("please include d3 to use the makeGraphs function");
-      return false;
-    } // Don't render graphs if we've changed page
-
-
-    if (routepath && routepath !== vm.$route.path) {
-      console.log('Not rendering graphs since route changed: ' + routepath + ' vs. ' + vm.$route.path);
-      return false;
-    }
-
-    let waitingtime = 0.5;
-    var graphdata = data.graphs; // var legenddata = data.legends
-    // Start indicating progress.
-
-    status.start(vm);
-    vm.hasGraphs = true;
-    await utils.sleep(waitingtime * 1000);
-    let n_plots = graphdata.length; // let n_legends = legenddata.length
-
-    console.log('Rendering ' + n_plots + ' graphs'); // if (n_plots !== n_legends) {
-    //   console.log('WARNING: different numbers of plots and legends: ' + n_plots + ' vs. ' + n_legends)
-    // }
-
-    for (var index = 0; index <= n_plots; index++) {
-      console.log('Rendering plot ' + index);
-      var figlabel = 'fig' + index;
-      var figdiv = document.getElementById(figlabel);
-
-      if (!figdiv) {
-        console.log('WARNING: figdiv not found: ' + figlabel);
-      } // Show figure containers
-
-
-      if (index >= 1 && index < n_plots) {
-        var figcontainerlabel = 'figcontainer' + index; // CK: Not sure if this is necessary? To ensure the div is clear first
-
-        var figcontainerdiv = document.getElementById(figcontainerlabel);
-
-        if (figcontainerdiv) {
-          figcontainerdiv.style.display = 'flex';
-        } else {
-          console.log('WARNING: figcontainerdiv not found: ' + figcontainerlabel);
-        } // var legendlabel = 'legend' + index
-        // var legenddiv  = document.getElementById(legendlabel);
-        // if (legenddiv) {
-        //   while (legenddiv.firstChild) {
-        //     legenddiv.removeChild(legenddiv.firstChild);
-        //   }
-        // } else {
-        //   console.log('WARNING: legenddiv not found: ' + legendlabel)
-        // }
-
-      } // Draw figures
-
-
-      try {
-        mpld3_min.draw_figure(figlabel, graphdata[index], function (fig, element) {
-          fig.setXTicks(6, function (d) {
-            return d3.format('.0f')(d);
-          }); // fig.setYTicks(null, function (d) { // Looks too weird with 500m for 0.5
-          //   return d3.format('.2s')(d);
-          // });
-        }, true);
-      } catch (error) {
-        console.log('Could not plot graph: ' + error.message);
-      } // Draw legends
-      // if (index>=1 && index<n_plots) {
-      //   try {
-      //     mpld3.draw_figure(legendlabel, legenddata[index], function (fig, element) {
-      //     });
-      //   } catch (error) {
-      //     console.log(error)
-      //   }
-      //
-      // }
-
-
-      vm.showGraphDivs[index] = true;
-    } // CK: This should be a promise, otherwise this appears before the graphs do
-
-
-    status.succeed(vm, 'Graphs created');
+  function makeGraphs(_x, _x2, _x3) {
+    return _makeGraphs.apply(this, arguments);
   } //
   // Graphs DOM functions
   //
@@ -11500,12 +11155,125 @@
    */
 
 
-  function showBrowserWindowSize() {
-    let w = window.innerWidth;
-    let h = window.innerHeight;
-    let ow = window.outerWidth; //including toolbars and status bar etc.
+  function _makeGraphs() {
+    _makeGraphs = asyncToGenerator(
+    /*#__PURE__*/
+    regenerator.mark(function _callee(vm, data, routepath) {
+      var waitingtime, graphdata, n_plots, index, figlabel, figdiv, figcontainerlabel, figcontainerdiv;
+      return regenerator.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              if (!(typeof d3 === 'undefined')) {
+                _context.next = 3;
+                break;
+              }
 
-    let oh = window.outerHeight;
+              console.log("please include d3 to use the makeGraphs function");
+              return _context.abrupt("return", false);
+
+            case 3:
+              if (!(routepath && routepath !== vm.$route.path)) {
+                _context.next = 6;
+                break;
+              }
+
+              console.log('Not rendering graphs since route changed: ' + routepath + ' vs. ' + vm.$route.path);
+              return _context.abrupt("return", false);
+
+            case 6:
+              waitingtime = 0.5;
+              graphdata = data.graphs; // var legenddata = data.legends
+              // Start indicating progress.
+
+              status.start(vm);
+              vm.hasGraphs = true;
+              _context.next = 12;
+              return utils.sleep(waitingtime * 1000);
+
+            case 12:
+              n_plots = graphdata.length; // let n_legends = legenddata.length
+
+              console.log('Rendering ' + n_plots + ' graphs'); // if (n_plots !== n_legends) {
+              //   console.log('WARNING: different numbers of plots and legends: ' + n_plots + ' vs. ' + n_legends)
+              // }
+
+              for (index = 0; index <= n_plots; index++) {
+                console.log('Rendering plot ' + index);
+                figlabel = 'fig' + index;
+                figdiv = document.getElementById(figlabel);
+
+                if (!figdiv) {
+                  console.log('WARNING: figdiv not found: ' + figlabel);
+                } // Show figure containers
+
+
+                if (index >= 1 && index < n_plots) {
+                  figcontainerlabel = 'figcontainer' + index; // CK: Not sure if this is necessary? To ensure the div is clear first
+
+                  figcontainerdiv = document.getElementById(figcontainerlabel);
+
+                  if (figcontainerdiv) {
+                    figcontainerdiv.style.display = 'flex';
+                  } else {
+                    console.log('WARNING: figcontainerdiv not found: ' + figcontainerlabel);
+                  } // var legendlabel = 'legend' + index
+                  // var legenddiv  = document.getElementById(legendlabel);
+                  // if (legenddiv) {
+                  //   while (legenddiv.firstChild) {
+                  //     legenddiv.removeChild(legenddiv.firstChild);
+                  //   }
+                  // } else {
+                  //   console.log('WARNING: legenddiv not found: ' + legendlabel)
+                  // }
+
+                } // Draw figures
+
+
+                try {
+                  mpld3.draw_figure(figlabel, graphdata[index], function (fig, element) {
+                    fig.setXTicks(6, function (d) {
+                      return d3.format('.0f')(d);
+                    }); // fig.setYTicks(null, function (d) { // Looks too weird with 500m for 0.5
+                    //   return d3.format('.2s')(d);
+                    // });
+                  }, true);
+                } catch (error) {
+                  console.log('Could not plot graph: ' + error.message);
+                } // Draw legends
+                // if (index>=1 && index<n_plots) {
+                //   try {
+                //     mpld3.draw_figure(legendlabel, legenddata[index], function (fig, element) {
+                //     });
+                //   } catch (error) {
+                //     console.log(error)
+                //   }
+                //
+                // }
+
+
+                vm.showGraphDivs[index] = true;
+              } // CK: This should be a promise, otherwise this appears before the graphs do
+
+
+              status.succeed(vm, 'Graphs created');
+
+            case 16:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }));
+    return _makeGraphs.apply(this, arguments);
+  }
+
+  function showBrowserWindowSize() {
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    var ow = window.outerWidth; //including toolbars and status bar etc.
+
+    var oh = window.outerHeight;
     console.log('Browser window size:');
     console.log(w, h, ow, oh);
   }
@@ -11520,9 +11288,9 @@
 
   function scaleElem(svg, frac) {
     // It might ultimately be better to redraw the graph, but this works
-    let width = svg.getAttribute("width");
-    let height = svg.getAttribute("height");
-    let viewBox = svg.getAttribute("viewBox");
+    var width = svg.getAttribute("width");
+    var height = svg.getAttribute("height");
+    var viewBox = svg.getAttribute("viewBox");
 
     if (!viewBox) {
       svg.setAttribute("viewBox", '0 0 ' + width + ' ' + height);
@@ -11549,9 +11317,9 @@
       vm.figscale = 1.0;
     }
 
-    let graphs = window.top.document.querySelectorAll('svg.mpld3-figure');
+    var graphs = window.top.document.querySelectorAll('svg.mpld3-figure');
 
-    for (let g = 0; g < graphs.length; g++) {
+    for (var g = 0; g < graphs.length; g++) {
       scaleElem(graphs[g], frac);
     }
   } //
@@ -11588,35 +11356,35 @@
   }
 
   function createDialogs(vm) {
-    let vals = placeholders(vm);
+    var vals = placeholders(vm);
 
-    for (let val in vals) {
+    for (var val in vals) {
       newDialog(vm, val, 'Dialog ' + val, 'Placeholder content ' + val);
     }
   } // Create a new dialog
 
 
   function newDialog(vm, id, name, content) {
-    let options = {
+    var options = {
       left: 123 + Number(id),
       top: 123
     };
-    let style = {
+    var style = {
       options: options
     };
-    let properties = {
-      id,
-      name,
-      content,
-      style,
-      options
+    var properties = {
+      id: id,
+      name: name,
+      content: content,
+      style: style,
+      options: options
     };
     return vm.openDialogs.push(properties);
   }
 
   function findDialog(vm, id, dialogs) {
     console.log('looking');
-    let index = dialogs.findIndex(val => {
+    var index = dialogs.findIndex(function (val) {
       return String(val.id) === String(id); // Force type conversion
     });
     return index > -1 ? index : null;
@@ -11624,10 +11392,10 @@
 
 
   function maximize(vm, id) {
-    let index = Number(id);
-    let DDlabel = 'DD' + id; // DD for dialog-drag
+    var index = Number(id);
+    var DDlabel = 'DD' + id; // DD for dialog-drag
 
-    let DDdiv = document.getElementById(DDlabel);
+    var DDdiv = document.getElementById(DDlabel);
 
     if (DDdiv) {
       DDdiv.style.left = String(vm.mousex - 80) + 'px';
@@ -11644,8 +11412,8 @@
 
     vm.showLegendDivs[index] = true; // Not really used, but here for completeness
 
-    let containerlabel = 'legendcontainer' + id;
-    let containerdiv = document.getElementById(containerlabel);
+    var containerlabel = 'legendcontainer' + id;
+    var containerdiv = document.getElementById(containerlabel);
 
     if (containerdiv) {
       containerdiv.style.display = 'inline-block'; // Ensure they're invisible
@@ -11656,10 +11424,10 @@
 
 
   function minimize(vm, id) {
-    let index = Number(id);
+    var index = Number(id);
     vm.showLegendDivs[index] = false;
-    let containerlabel = 'legendcontainer' + id;
-    let containerdiv = document.getElementById(containerlabel);
+    var containerlabel = 'legendcontainer' + id;
+    var containerdiv = document.getElementById(containerlabel);
 
     if (containerdiv) {
       containerdiv.style.display = 'none'; // Ensure they're invisible
@@ -11669,22 +11437,21 @@
   }
 
   var graphs = {
-    placeholders,
-    clearGraphs,
-    makeGraphs,
-    scaleFigs,
-    showBrowserWindowSize,
-    addListener,
-    onMouseUpdate,
-    createDialogs,
-    newDialog,
-    findDialog,
-    maximize,
-    minimize,
-    mpld3: mpld3_min
+    placeholders: placeholders,
+    clearGraphs: clearGraphs,
+    makeGraphs: makeGraphs,
+    scaleFigs: scaleFigs,
+    showBrowserWindowSize: showBrowserWindowSize,
+    addListener: addListener,
+    onMouseUpdate: onMouseUpdate,
+    createDialogs: createDialogs,
+    newDialog: newDialog,
+    findDialog: findDialog,
+    maximize: maximize,
+    minimize: minimize,
+    mpld3: mpld3
   };
 
-  /** @module task */
   /**
    * getTaskResultWaiting() -- given a task_id string, a waiting time (in 
    * sec.), and a remote task function name and its args, try to launch 
@@ -11701,28 +11468,8 @@
    * @returns {Promise}
    */
 
-  async function getTaskResultWaiting(task_id, waitingtime, func_name, args, kwargs) {
-    if (!args) {
-      // Set the arguments to an empty list if none are passed in.
-      args = [];
-    }
-
-    try {
-      const task = await rpcs.rpc('launch_task', [task_id, func_name, args, kwargs]);
-      await utils.sleep(waitingtime * 1000);
-      const result = await rpcs.rpc('get_task_result', [task_id]); // Clean up the task_id task.
-
-      await rpcs.rpc('delete_task', [task_id]);
-    } catch (error) {
-      // While we might want to clean up the task as below, the Celery
-      // worker is likely to "resurrect" the task if it actually is
-      // running the task to completion.
-      // Clean up the task_id task.
-      // rpcCall('delete_task', [task_id])
-      throw Error(error);
-    }
-
-    return result;
+  function getTaskResultWaiting(_x, _x2, _x3, _x4, _x5) {
+    return _getTaskResultWaiting.apply(this, arguments);
   }
   /**
    * Given a task_id string, a timeout time (in 
@@ -11742,15 +11489,63 @@
    */
 
 
-  async function getTaskResultPolling(task_id, timeout, pollinterval, func_name, args, kwargs) {
-    if (!args) {
-      // Set the arguments to an empty list if none are passed in.
-      args = [];
-    }
+  function _getTaskResultWaiting() {
+    _getTaskResultWaiting = asyncToGenerator(
+    /*#__PURE__*/
+    regenerator.mark(function _callee(task_id, waitingtime, func_name, args, kwargs) {
+      var task, _result;
 
-    await rpcs.rpc('launch_task', [task_id, func_name, args, kwargs]); // Do the whole sequence of polling steps, starting with the first (recursive) call.
+      return regenerator.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              if (!args) {
+                // Set the arguments to an empty list if none are passed in.
+                args = [];
+              }
 
-    return await pollStep(task_id, timeout, pollinterval, 0);
+              _context.prev = 1;
+              _context.next = 4;
+              return rpcs.rpc('launch_task', [task_id, func_name, args, kwargs]);
+
+            case 4:
+              task = _context.sent;
+              _context.next = 7;
+              return utils.sleep(waitingtime * 1000);
+
+            case 7:
+              _context.next = 9;
+              return rpcs.rpc('get_task_result', [task_id]);
+
+            case 9:
+              _result = _context.sent;
+              _context.next = 12;
+              return rpcs.rpc('delete_task', [task_id]);
+
+            case 12:
+              _context.next = 17;
+              break;
+
+            case 14:
+              _context.prev = 14;
+              _context.t0 = _context["catch"](1);
+              throw Error(_context.t0);
+
+            case 17:
+              return _context.abrupt("return", result);
+
+            case 18:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, null, [[1, 14]]);
+    }));
+    return _getTaskResultWaiting.apply(this, arguments);
+  }
+
+  function getTaskResultPolling(_x6, _x7, _x8, _x9, _x10, _x11) {
+    return _getTaskResultPolling.apply(this, arguments);
   }
   /**
    * A polling step for getTaskResultPolling().  Uses the task_id, 
@@ -11773,38 +11568,115 @@
    */
 
 
-  async function pollStep(task_id, timeout, pollinterval, elapsedtime) {
-    // Check to see if the elapsed time is longer than the timeout 
-    // (and we have a timeout we actually want to check against) and if so, fail.
-    if (elapsedtime > timeout && timeout > 0) {
-      throw Error('Task polling timed out');
-    } // Sleep timeout seconds.
+  function _getTaskResultPolling() {
+    _getTaskResultPolling = asyncToGenerator(
+    /*#__PURE__*/
+    regenerator.mark(function _callee2(task_id, timeout, pollinterval, func_name, args, kwargs) {
+      return regenerator.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              if (!args) {
+                // Set the arguments to an empty list if none are passed in.
+                args = [];
+              }
 
+              _context2.next = 3;
+              return rpcs.rpc('launch_task', [task_id, func_name, args, kwargs]);
 
-    await utils.sleep(pollinterval * 1000); // Check the status of the task.
+            case 3:
+              _context2.next = 5;
+              return pollStep(task_id, timeout, pollinterval, 0);
 
-    const task = await rpcs.rpc('check_task', [task_id]); // There was an issue with executing the taks
+            case 5:
+              return _context2.abrupt("return", _context2.sent);
 
-    if (task.data.task.status == 'error') {
-      throw Error(task.data.task.errorText);
-    } // If the task is completed...
+            case 6:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2);
+    }));
+    return _getTaskResultPolling.apply(this, arguments);
+  }
 
+  function pollStep(_x12, _x13, _x14, _x15) {
+    return _pollStep.apply(this, arguments);
+  }
 
-    if (task.data.task.status == 'completed') {
-      const result = await rpcs.rpc('get_task_result', [task_id]); // Clean up the task_id task.
+  function _pollStep() {
+    _pollStep = asyncToGenerator(
+    /*#__PURE__*/
+    regenerator.mark(function _callee3(task_id, timeout, pollinterval, elapsedtime) {
+      var task, _result2;
 
-      await rpcs.rpc('delete_task', [task_id]);
-      return result;
-    } // Task is still pending processing, do another poll step, passing in an 
-    // incremented elapsed time.
+      return regenerator.wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              if (!(elapsedtime > timeout && timeout > 0)) {
+                _context3.next = 2;
+                break;
+              }
 
+              throw Error('Task polling timed out');
 
-    return await pollStep(task_id, timeout, pollinterval, elapsedtime + pollinterval);
+            case 2:
+              _context3.next = 4;
+              return utils.sleep(pollinterval * 1000);
+
+            case 4:
+              _context3.next = 6;
+              return rpcs.rpc('check_task', [task_id]);
+
+            case 6:
+              task = _context3.sent;
+
+              if (!(task.data.task.status == 'error')) {
+                _context3.next = 9;
+                break;
+              }
+
+              throw Error(task.data.task.errorText);
+
+            case 9:
+              if (!(task.data.task.status == 'completed')) {
+                _context3.next = 16;
+                break;
+              }
+
+              _context3.next = 12;
+              return rpcs.rpc('get_task_result', [task_id]);
+
+            case 12:
+              _result2 = _context3.sent;
+              _context3.next = 15;
+              return rpcs.rpc('delete_task', [task_id]);
+
+            case 15:
+              return _context3.abrupt("return", _result2);
+
+            case 16:
+              _context3.next = 18;
+              return pollStep(task_id, timeout, pollinterval, elapsedtime + pollinterval);
+
+            case 18:
+              return _context3.abrupt("return", _context3.sent);
+
+            case 19:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, _callee3);
+    }));
+    return _pollStep.apply(this, arguments);
   }
 
   var tasks = {
-    getTaskResultWaiting,
-    getTaskResultPolling
+    getTaskResultWaiting: getTaskResultWaiting,
+    getTaskResultPolling: getTaskResultPolling
   };
 
   var core = createCommonjsModule(function (module, exports) {
@@ -12830,7 +12702,6 @@
   }));
   });
 
-  /** @module user */
   /**
    * Using the correct combination of a user's username and email perform a login 
    * The password is hashed using sha244 and sent to the API
@@ -12844,8 +12715,8 @@
 
   function loginCall(username, password) {
     // Get a hex version of a hashed password using the SHA224 algorithm.
-    const hashPassword = sha224(password).toString();
-    const args = [username, hashPassword];
+    var hashPassword = sha224(password).toString();
+    var args = [username, hashPassword];
     return rpcs.rpc('user_login', args);
   }
   /**
@@ -12888,8 +12759,8 @@
 
   function registerUser(username, password, displayname, email) {
     // Get a hex version of a hashed password using the SHA224 algorithm.
-    const hashPassword = sha224(password).toString();
-    const args = [username, hashPassword, displayname, email];
+    var hashPassword = sha224(password).toString();
+    var args = [username, hashPassword, displayname, email];
     return rpcs.rpc('user_register', args);
   }
   /**
@@ -12907,8 +12778,8 @@
 
   function changeUserInfo(username, password, displayname, email) {
     // Get a hex version of a hashed password using the SHA224 algorithm.
-    const hashPassword = sha224(password).toString();
-    const args = [username, hashPassword, displayname, email];
+    var hashPassword = sha224(password).toString();
+    var args = [username, hashPassword, displayname, email];
     return rpcs.rpc('user_change_info', args);
   }
   /**
@@ -12924,9 +12795,9 @@
 
   function changeUserPassword(oldpassword, newpassword) {
     // Get a hex version of the hashed passwords using the SHA224 algorithm.
-    const hashOldPassword = sha224(oldpassword).toString();
-    const hashNewPassword = sha224(newpassword).toString();
-    const args = [hashOldPassword, hashNewPassword];
+    var hashOldPassword = sha224(oldpassword).toString();
+    var hashNewPassword = sha224(newpassword).toString();
+    var args = [hashOldPassword, hashNewPassword];
     return rpcs.rpc('user_change_password', args);
   }
   /**
@@ -12940,7 +12811,7 @@
 
 
   function adminGetUserInfo(username) {
-    const args = [username];
+    var args = [username];
     return rpcs.rpc('admin_get_user_info', args);
   }
   /**
@@ -12954,7 +12825,7 @@
 
 
   function deleteUser(username) {
-    const args = [username];
+    var args = [username];
     return rpcs.rpc('admin_delete_user', args);
   }
   /**
@@ -12968,7 +12839,7 @@
 
 
   function activateUserAccount(username) {
-    const args = [username];
+    var args = [username];
     return rpcs.rpc('admin_activate_account', args);
   }
   /**
@@ -12982,7 +12853,7 @@
 
 
   function deactivateUserAccount(username) {
-    const args = [username];
+    var args = [username];
     return rpcs.rpc('admin_deactivate_account', args);
   }
   /**
@@ -12997,7 +12868,7 @@
 
 
   function grantUserAdminRights(username) {
-    const args = [username];
+    var args = [username];
     return rpcs.rpc('admin_grant_admin', args);
   }
   /**
@@ -13012,7 +12883,7 @@
 
 
   function revokeUserAdminRights(username) {
-    const args = [username];
+    var args = [username];
     return rpcs.rpc('admin_revoke_admin', args);
   }
   /**
@@ -13027,7 +12898,7 @@
 
 
   function resetUserPassword(username) {
-    const args = [username];
+    var args = [username];
     return rpcs.rpc('admin_reset_password', args);
   } // Higher level user functions that call the lower level ones above
 
@@ -13040,16 +12911,8 @@
    */
 
 
-  async function getUserInfo(store) {
-    try {
-      // Set the username to what the server indicates.
-      const response = await getCurrentUserInfo();
-      store.commit('newUser', response.data.user);
-    } catch (error) {
-      // An error probably means the user is not logged in.
-      // Set the username to {}.  
-      store.commit('newUser', {});
-    }
+  function getUserInfo(_x) {
+    return _getUserInfo.apply(this, arguments);
   }
   /**
    * Check if there is a user currently logged in
@@ -13058,6 +12921,42 @@
    * @returns {bool}
    */
 
+
+  function _getUserInfo() {
+    _getUserInfo = asyncToGenerator(
+    /*#__PURE__*/
+    regenerator.mark(function _callee(store) {
+      var response;
+      return regenerator.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.prev = 0;
+              _context.next = 3;
+              return getCurrentUserInfo();
+
+            case 3:
+              response = _context.sent;
+              store.commit('newUser', response.data.user);
+              _context.next = 10;
+              break;
+
+            case 7:
+              _context.prev = 7;
+              _context.t0 = _context["catch"](0);
+              // An error probably means the user is not logged in.
+              // Set the username to {}.  
+              store.commit('newUser', {});
+
+            case 10:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, null, [[0, 7]]);
+    }));
+    return _getUserInfo.apply(this, arguments);
+  }
 
   function checkLoggedIn() {
     if (this.currentUser.displayname === undefined) return false;else return true;
@@ -13079,22 +12978,22 @@
   }
 
   var user = {
-    loginCall,
-    logoutCall,
-    getCurrentUserInfo,
-    registerUser,
-    changeUserInfo,
-    changeUserPassword,
-    adminGetUserInfo,
-    deleteUser,
-    activateUserAccount,
-    deactivateUserAccount,
-    grantUserAdminRights,
-    revokeUserAdminRights,
-    resetUserPassword,
-    getUserInfo,
-    checkLoggedIn,
-    checkAdminLoggedIn
+    loginCall: loginCall,
+    logoutCall: logoutCall,
+    getCurrentUserInfo: getCurrentUserInfo,
+    registerUser: registerUser,
+    changeUserInfo: changeUserInfo,
+    changeUserPassword: changeUserPassword,
+    adminGetUserInfo: adminGetUserInfo,
+    deleteUser: deleteUser,
+    activateUserAccount: activateUserAccount,
+    deactivateUserAccount: deactivateUserAccount,
+    grantUserAdminRights: grantUserAdminRights,
+    revokeUserAdminRights: revokeUserAdminRights,
+    resetUserPassword: resetUserPassword,
+    getUserInfo: getUserInfo,
+    checkLoggedIn: checkLoggedIn,
+    checkAdminLoggedIn: checkAdminLoggedIn
   };
 
   var vueProgressbar = createCommonjsModule(function (module, exports) {
@@ -17474,7 +17373,7 @@
   var script$k = {
     name: 'PopupSpinner',
     components: {
-      FulfillingBouncingCircleSpinner
+      FulfillingBouncingCircleSpinner: FulfillingBouncingCircleSpinner
     },
     props: {
       loading: {
@@ -17510,8 +17409,7 @@
         default: '100%'
       }
     },
-
-    data() {
+    data: function data() {
       return {
         titleStyle: {
           textAlign: 'center'
@@ -17522,26 +17420,25 @@
         opened: false
       };
     },
+    beforeMount: function beforeMount() {
+      var _this = this;
 
-    beforeMount() {
       // Create listener for start event.
-      EventBus.$on('spinner:start', () => {
-        this.show();
+      EventBus.$on('spinner:start', function () {
+        _this.show();
       }); // Create listener for stop event.
 
-      EventBus.$on('spinner:stop', () => {
-        this.hide();
+      EventBus.$on('spinner:stop', function () {
+        _this.hide();
       });
     },
-
     computed: {
-      spinnerSize() {
+      spinnerSize: function spinnerSize() {
         return parseFloat(this.size) - 25;
       },
-
-      modalHeight() {
+      modalHeight: function modalHeight() {
         // Start with the height of the spinner wrapper.
-        let fullHeight = parseFloat(this.size) + 2 * parseFloat(this.padding); // If there is a title there, add space for the text.
+        var fullHeight = parseFloat(this.size) + 2 * parseFloat(this.padding); // If there is a title there, add space for the text.
 
         if (this.title !== '') {
           fullHeight = fullHeight + 20 + parseFloat(this.padding);
@@ -17554,43 +17451,35 @@
 
         return fullHeight + 'px';
       },
-
-      modalWidth() {
+      modalWidth: function modalWidth() {
         return parseFloat(this.size) + 2 * parseFloat(this.padding) + 'px';
       }
-
     },
     methods: {
-      beforeOpen() {
+      beforeOpen: function beforeOpen() {
         window.addEventListener('keyup', this.onKey);
         this.opened = true;
       },
-
-      beforeClose() {
+      beforeClose: function beforeClose() {
         window.removeEventListener('keyup', this.onKey);
         this.opened = false;
       },
-
-      onKey(event) {
+      onKey: function onKey(event) {
         if (event.keyCode == 27) {
           console.log('Exited spinner through Esc key');
           this.cancel();
         }
       },
-
-      cancel() {
+      cancel: function cancel() {
         this.$emit('spinner-cancel');
         this.hide();
       },
-
-      show() {
+      show: function show() {
         this.$modal.show('popup-spinner'); // Bring up the spinner modal.
       },
-
-      hide() {
+      hide: function hide() {
         this.$modal.hide('popup-spinner'); // Dispel the spinner modal.
       }
-
     }
   };
 
@@ -17694,55 +17583,51 @@
       },
       timestamp: {
         type: Date,
-        default: () => new Date()
+        default: function _default() {
+          return new Date();
+        }
       }
     },
-
-    data() {
+    data: function data() {
       return {};
     },
-
     computed: {
-      hasIcon() {
+      hasIcon: function hasIcon() {
         return this.icon && this.icon.length > 0;
       },
-
-      alertType() {
-        return `alert-${this.type}`;
+      alertType: function alertType() {
+        return "alert-".concat(this.type);
       },
+      customPosition: function customPosition() {
+        var _this = this;
 
-      customPosition() {
-        let initialMargin = 20;
-        let alertHeight = 60;
-        let sameAlertsCount = this.$notifications.state.filter(alert => {
-          return alert.horizontalAlign === this.horizontalAlign && alert.verticalAlign === this.verticalAlign;
+        var initialMargin = 20;
+        var alertHeight = 60;
+        var sameAlertsCount = this.$notifications.state.filter(function (alert) {
+          return alert.horizontalAlign === _this.horizontalAlign && alert.verticalAlign === _this.verticalAlign;
         }).length;
-        let pixels = (sameAlertsCount - 1) * alertHeight + initialMargin;
-        let styles = {};
+        var pixels = (sameAlertsCount - 1) * alertHeight + initialMargin;
+        var styles = {};
 
         if (this.verticalAlign === 'top') {
-          styles.top = `${pixels}px`;
+          styles.top = "".concat(pixels, "px");
         } else {
-          styles.bottom = `${pixels}px`;
+          styles.bottom = "".concat(pixels, "px");
         }
 
         return styles;
       }
-
     },
     methods: {
-      close() {
+      close: function close() {
         this.$parent.$emit('on-close', this.timestamp);
       }
-
     },
-
-    mounted() {
+    mounted: function mounted() {
       if (this.timeout) {
         setTimeout(this.close, this.timeout);
       }
     }
-
   };
 
   /* script */
@@ -17783,24 +17668,20 @@
   //
   var script$m = {
     components: {
-      Notification
+      Notification: Notification
     },
-
-    data() {
+    data: function data() {
       return {
         notifications: this.$notifications.state
       };
     },
-
     methods: {
-      removeNotification(timestamp) {
+      removeNotification: function removeNotification(timestamp) {
         this.$notifications.removeNotification(timestamp);
       },
-
-      clearAllNotifications() {
+      clearAllNotifications: function clearAllNotifications() {
         this.$notifications.clear();
       }
-
     }
   };
 
@@ -17873,28 +17754,23 @@
         default: "170px"
       }
     },
-
-    data() {
+    data: function data() {
       return {
         isOpen: false
       };
     },
-
     computed: {
-      style() {
+      style: function style() {
         return 'width: ' + this.width;
       }
-
     },
     methods: {
-      toggleDropDown() {
+      toggleDropDown: function toggleDropDown() {
         this.isOpen = !this.isOpen;
       },
-
-      closeDropDown() {
+      closeDropDown: function closeDropDown() {
         this.isOpen = false;
       }
-
     }
   };
 
@@ -17932,57 +17808,52 @@
       undefined
     );
 
-  const NotificationStore = {
+  var NotificationStore = {
     state: [],
-
     // here the notifications will be added
-    removeNotification(timestamp) {
-      const indexToDelete = this.state.findIndex(n => n.timestamp === timestamp);
+    removeNotification: function removeNotification(timestamp) {
+      var indexToDelete = this.state.findIndex(function (n) {
+        return n.timestamp === timestamp;
+      });
 
       if (indexToDelete !== -1) {
         this.state.splice(indexToDelete, 1);
       }
     },
-
-    notify(notification) {
+    notify: function notify(notification) {
       // Create a timestamp to serve as a unique ID for the notification.
       notification.timestamp = new Date();
       notification.timestamp.setMilliseconds(notification.timestamp.getMilliseconds() + this.state.length);
       this.state.push(notification);
     },
-
-    clear() {
+    clear: function clear() {
       // This removes all of them in a way that the GUI keeps up.
       while (this.state.length > 0) {
         this.removeNotification(this.state[0].timestamp);
       }
     }
-
   };
 
   function setupSpinner(Vue) {
     // Create the global $spinner functions the user can call 
     // from inside any component.
     Vue.prototype.$spinner = {
-      start() {
+      start: function start() {
         // Send a start event to the bus.
         EventBus.$emit('spinner:start');
       },
-
-      stop() {
+      stop: function stop() {
         // Send a stop event to the bus.
         EventBus.$emit('spinner:stop');
       }
-
     };
   }
 
   function setupNotifications(Vue) {
     Object.defineProperty(Vue.prototype, '$notifications', {
-      get() {
+      get: function get() {
         return NotificationStore;
       }
-
     });
   }
 
@@ -17990,7 +17861,8 @@
     Vue.use(vueProgressbar, options);
   }
 
-  function install(Vue, options = {}) {
+  function install(Vue) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     Vue.use(VModal);
 
     if (!options.notifications || !options.notifications.disabled) {
@@ -18017,12 +17889,12 @@
 
   if (typeof window !== 'undefined' && window.Vue) {
     window.Vue.use({
-      install
+      install: install
     });
   }
 
   var ScirisVue = {
-    install
+    install: install
   };
 
   /**
@@ -18031,133 +17903,133 @@
    * @see {@link module:rpcs~rpc|rpcs.rpc} 
    */
 
-  const rpc$1 = rpcs.rpc;
+  var rpc$1 = rpcs.rpc;
   /**
    * @function
    * @async
    * @see {@link module:rpcs~download|rpcs.download} 
    */
 
-  const download$1 = rpcs.download;
+  var download$1 = rpcs.download;
   /**
    * @function
    * @async
    * @see {@link module:rpcs~upload|rpcs.upload} 
    */
 
-  const upload$1 = rpcs.upload;
+  var upload$1 = rpcs.upload;
   /**
    * @function
    * @async
    * @see {@link module:status~succeed|status.succeed} 
    */
 
-  const succeed$1 = status.succeed;
+  var succeed$1 = status.succeed;
   /**
    * @function
    * @async
    * @see {@link module:status~fail|status.fail} 
    */
 
-  const fail$1 = status.fail;
+  var fail$1 = status.fail;
   /**
    * @function
    * @async
    * @see {@link module:status~start|status.start} 
    */
 
-  const start$1 = status.start;
+  var start$1 = status.start;
   /**
    * @function
    * @async
    * @see {@link module:status~notify|status.notify} 
    */
 
-  const notify$1 = status.notify;
+  var notify$1 = status.notify;
   /**
    * @function
    * @async
    * @see {@link module:graphs~placeholders|graphs.placeholders} 
    */
 
-  const placeholders$1 = graphs.placeholders;
+  var placeholders$1 = graphs.placeholders;
   /**
    * @function
    * @async
    * @see {@link module:graphs~clearGraphs|graphs.clearGraphs} 
    */
 
-  const clearGraphs$1 = graphs.clearGraphs;
+  var clearGraphs$1 = graphs.clearGraphs;
   /**
    * @function
    * @async
    * @see {@link module:graphs~makeGraphs|graphs.makeGraphs} 
    */
 
-  const makeGraphs$1 = graphs.makeGraphs;
+  var makeGraphs$1 = graphs.makeGraphs;
   /**
    * @function
    * @async
    * @see {@link module:graphs~scaleFigs|graphs.scaleFigs} 
    */
 
-  const scaleFigs$1 = graphs.scaleFigs;
+  var scaleFigs$1 = graphs.scaleFigs;
   /**
    * @function
    * @async
    * @see {@link module:graphs~showBrowserWindowSize|graphs.showBrowserWindowSize} 
    */
 
-  const showBrowserWindowSize$1 = graphs.showBrowserWindowSize;
+  var showBrowserWindowSize$1 = graphs.showBrowserWindowSize;
   /**
    * @function
    * @async
    * @see {@link module:graphs~addListener|graphs.addListener} 
    */
 
-  const addListener$1 = graphs.addListener;
+  var addListener$1 = graphs.addListener;
   /**
    * @function
    * @async
    * @see {@link module:graphs~onMouseUpdate|graphs.onMouseUpdate} 
    */
 
-  const onMouseUpdate$1 = graphs.onMouseUpdate;
+  var onMouseUpdate$1 = graphs.onMouseUpdate;
   /**
    * @function
    * @async
    * @see {@link module:graphs~createDialogs|graphs.createDialogs} 
    */
 
-  const createDialogs$1 = graphs.createDialogs;
+  var createDialogs$1 = graphs.createDialogs;
   /**
    * @function
    * @async
    * @see {@link module:graphs~newDialog|graphs.newDialog} 
    */
 
-  const newDialog$1 = graphs.newDialog;
+  var newDialog$1 = graphs.newDialog;
   /**
    * @function
    * @async
    * @see {@link module:graphs~findDialog|graphs.findDialog} 
    */
 
-  const findDialog$1 = graphs.findDialog;
+  var findDialog$1 = graphs.findDialog;
   /**
    * @function
    * @async
    * @see {@link module:graphs~maximize|graphs.maximize} 
    */
 
-  const maximize$1 = graphs.maximize;
+  var maximize$1 = graphs.maximize;
   /**
    * @function
    * @async
    * @see {@link module:graphs~minimize|graphs.minimize} 
    */
 
-  const minimize$1 = graphs.minimize;
+  var minimize$1 = graphs.minimize;
   /**
    * Access to the mpld3 instance, only if d3 is included in the global scope
    *
@@ -18166,11 +18038,11 @@
    * @see {@link module:graphs~mpld3|graphs.mpld3} 
    */
 
-  const mpld3 = graphs.mpld3;
-  let draw_figure = null;
+  var mpld3$1 = graphs.mpld3;
+  var draw_figure = null;
 
-  if (mpld3 !== null) {
-    draw_figure = mpld3.draw_figure;
+  if (mpld3$1 !== null) {
+    draw_figure = mpld3$1.draw_figure;
   }
   /**
    * @function
@@ -18179,148 +18051,148 @@
    */
 
 
-  const getTaskResultWaiting$1 = tasks.getTaskResultWaiting;
+  var getTaskResultWaiting$1 = tasks.getTaskResultWaiting;
   /**
    * @function
    * @async
    * @see {@link module:tasks~getTaskResultPolling|tasks.getTaskResultPolling} 
    */
 
-  const getTaskResultPolling$1 = tasks.getTaskResultPolling;
+  var getTaskResultPolling$1 = tasks.getTaskResultPolling;
   /**
    * @function
    * @async
    * @see {@link module:user~loginCall|user.loginCall} 
    */
 
-  const loginCall$1 = user.loginCall;
+  var loginCall$1 = user.loginCall;
   /**
    * @function
    * @async
    * @see {@link module:user~logoutCall|user.logoutCall}
    */
 
-  const logoutCall$1 = user.logoutCall;
+  var logoutCall$1 = user.logoutCall;
   /**
    * @function
    * @async
    * @see {@link module:user~getCurrentUserInfo|user.getCurrentUserInfo} 
    */
 
-  const getCurrentUserInfo$1 = user.getCurrentUserInfo;
+  var getCurrentUserInfo$1 = user.getCurrentUserInfo;
   /**
    * @function
    * @async
    * @see {@link module:user~registerUser|user.registerUser} 
    */
 
-  const registerUser$1 = user.registerUser;
+  var registerUser$1 = user.registerUser;
   /**
    * @function
    * @async
    * @see {@link module:user~changeUserInfo|user.changeUserInfo} 
    */
 
-  const changeUserInfo$1 = user.changeUserInfo;
+  var changeUserInfo$1 = user.changeUserInfo;
   /**
    * @function
    * @async
    * @see {@link module:user~changeUserPassword|user.changeUserPassword} 
    */
 
-  const changeUserPassword$1 = user.changeUserPassword;
+  var changeUserPassword$1 = user.changeUserPassword;
   /**
    * @function
    * @async
    * @see {@link module:user~adminGetUserInfo|user.adminGetUserInfo} 
    */
 
-  const adminGetUserInfo$1 = user.adminGetUserInfo;
+  var adminGetUserInfo$1 = user.adminGetUserInfo;
   /**
    * @function
    * @async
    * @see {@link module:user~deleteUser|user.deleteUser} 
    */
 
-  const deleteUser$1 = user.deleteUser;
+  var deleteUser$1 = user.deleteUser;
   /**
    * @function
    * @async
    * @see {@link module:user~activateUserAccount|user.activateUserAccount} 
    */
 
-  const activateUserAccount$1 = user.activateUserAccount;
+  var activateUserAccount$1 = user.activateUserAccount;
   /**
    * @function
    * @async
    * @see {@link module:user~deactivateUserAccount|user.deactivateUserAccount} 
    */
 
-  const deactivateUserAccount$1 = user.deactivateUserAccount;
+  var deactivateUserAccount$1 = user.deactivateUserAccount;
   /**
    * @function
    * @async
    * @see {@link module:user~grantUserAdminRights|user.grantUserAdminRights} 
    */
 
-  const grantUserAdminRights$1 = user.grantUserAdminRights;
+  var grantUserAdminRights$1 = user.grantUserAdminRights;
   /**
    * @function
    * @async
    * @see {@link module:user~revokeUserAdminRights|user.revokeUserAdminRights} 
    */
 
-  const revokeUserAdminRights$1 = user.revokeUserAdminRights;
+  var revokeUserAdminRights$1 = user.revokeUserAdminRights;
   /**
    * @function
    * @async
    * @see {@link module:user~resetUserPassword|user.resetUserPassword} 
    */
 
-  const resetUserPassword$1 = user.resetUserPassword;
+  var resetUserPassword$1 = user.resetUserPassword;
   /**
    * @function
    * @async
    * @see {@link module:user~getUserInfo|user.getUserInfo} 
    */
 
-  const getUserInfo$1 = user.getUserInfo;
+  var getUserInfo$1 = user.getUserInfo;
   /**
    * @function
    * @async
    * @see {@link module:user~currentUser|user.currentUser} 
    */
 
-  const currentUser = user.currentUser;
+  var currentUser = user.currentUser;
   /**
    * @function
    * @async
    * @see {@link module:user~checkLoggedIn|user.checkLoggedIn} 
    */
 
-  const checkLoggedIn$1 = user.checkLoggedIn;
+  var checkLoggedIn$1 = user.checkLoggedIn;
   /**
    * @function
    * @async
    * @see {@link module:user~checkAdminLoggedIn|user.checkAdminLoggedIn} 
    */
 
-  const checkAdminLoggedIn$1 = user.checkAdminLoggedIn;
+  var checkAdminLoggedIn$1 = user.checkAdminLoggedIn;
   /**
    * @function
    * @async
    * @see {@link module:utils~sleep|utils.sleep} 
    */
 
-  const sleep$1 = utils.sleep;
+  var sleep$1 = utils.sleep;
   /**
    * @function
    * @async
    * @see {@link module:utils~getUniqueName|utils.getUniqueName} 
    */
 
-  const getUniqueName$1 = utils.getUniqueName;
-  const sciris = {
+  var getUniqueName$1 = utils.getUniqueName;
+  var sciris = {
     // rpc-service.js
     rpc: rpc$1,
     download: download$1,
@@ -18338,8 +18210,8 @@
     findDialog: findDialog$1,
     maximize: maximize$1,
     minimize: minimize$1,
-    mpld3,
-    draw_figure,
+    mpld3: mpld3$1,
+    draw_figure: draw_figure,
     // status-service.js
     succeed: succeed$1,
     fail: fail$1,
@@ -18363,20 +18235,20 @@
     revokeUserAdminRights: revokeUserAdminRights$1,
     resetUserPassword: resetUserPassword$1,
     getUserInfo: getUserInfo$1,
-    currentUser,
+    currentUser: currentUser,
     checkLoggedIn: checkLoggedIn$1,
     checkAdminLoggedIn: checkAdminLoggedIn$1,
     // utils.js
     sleep: sleep$1,
     getUniqueName: getUniqueName$1,
-    rpcs,
-    graphs,
-    status,
-    user,
-    tasks,
-    utils,
-    ScirisVue,
-    EventBus
+    rpcs: rpcs,
+    graphs: graphs,
+    status: status,
+    user: user,
+    tasks: tasks,
+    utils: utils,
+    ScirisVue: ScirisVue,
+    EventBus: EventBus
   };
 
   exports.default = sciris;
@@ -18387,10 +18259,19 @@
 })));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"_process":3,"timers":4}],2:[function(require,module,exports){
+},{"_process":4,"mpld3":3,"timers":5}],2:[function(require,module,exports){
 module.exports = require('./dist/sciris-js.js').default;
 
 },{"./dist/sciris-js.js":1}],3:[function(require,module,exports){
+(function (global){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.mpld3 = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+!function(t){function s(t){var s={};for(var i in t)s[i]=t[i];return s}function i(t,s){t="undefined"!=typeof t?t:10,s="undefined"!=typeof s?s:"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";for(var i=s.charAt(Math.round(Math.random()*(s.length-11))),e=1;t>e;e++)i+=s.charAt(Math.round(Math.random()*(s.length-1)));return i}function e(s,i){var e=t.interpolate([s[0].valueOf(),s[1].valueOf()],[i[0].valueOf(),i[1].valueOf()]);return function(t){var s=e(t);return[new Date(s[0]),new Date(s[1])]}}function o(t){return"undefined"==typeof t}function r(t){return null==t||o(t)}function n(t,s){return t.length>0?t[s%t.length]:null}function a(t){function s(t,s){var n=function(t){return"function"==typeof t?t:function(){return t}},a=n(i),p=n(e),h=[],l=[],c=0,u=-1,d=0,f=!1;if(!s){s=["M"];for(var y=1;y<t.length;y++)s.push("L")}for(;++u<s.length;){for(d=c+r[s[u]],h=[];d>c;)o.call(this,t[c],c)?(h.push(a.call(this,t[c],c),p.call(this,t[c],c)),c++):(h=null,c=d);h?f&&h.length>0?(l.push("M",h[0],h[1]),f=!1):(l.push(s[u]),l=l.concat(h)):f=!0}return c!=t.length&&console.warn("Warning: not all vertices used in Path"),l.join(" ")}var i=function(t,s){return t[0]},e=function(t,s){return t[1]},o=function(t,s){return!0},r={M:1,m:1,L:1,l:1,Q:2,q:2,T:1,t:1,S:2,s:2,C:3,c:3,Z:0,z:0};return s.x=function(t){return arguments.length?(i=t,s):i},s.y=function(t){return arguments.length?(e=t,s):e},s.defined=function(t){return arguments.length?(o=t,s):o},s.call=s,s}function p(t){function s(t){return i.forEach(function(s){t=s(t)}),t}var i=Array.prototype.slice.call(arguments,0),e=i.length;return s.domain=function(t){return arguments.length?(i[0].domain(t),s):i[0].domain()},s.range=function(t){return arguments.length?(i[e-1].range(t),s):i[e-1].range()},s.step=function(t){return i[t]},s}function h(t,s){if(M.call(this,t,s),this.cssclass="mpld3-"+this.props.xy+"grid","x"==this.props.xy)this.transform="translate(0,"+this.ax.height+")",this.position="bottom",this.scale=this.ax.xdom,this.tickSize=-this.ax.height;else{if("y"!=this.props.xy)throw"unrecognized grid xy specifier: should be 'x' or 'y'";this.transform="translate(0,0)",this.position="left",this.scale=this.ax.ydom,this.tickSize=-this.ax.width}}function l(t,s){M.call(this,t,s);var i={bottom:[0,this.ax.height],top:[0,0],left:[0,0],right:[this.ax.width,0]},e={bottom:"x",top:"x",left:"y",right:"y"};this.transform="translate("+i[this.props.position]+")",this.props.xy=e[this.props.position],this.cssclass="mpld3-"+this.props.xy+"axis",this.scale=this.ax[this.props.xy+"dom"],this.tickNr=null,this.tickFormat=null}function c(t,s){if(this.trans=t,"undefined"==typeof s){if(this.ax=null,this.fig=null,"display"!==this.trans)throw"ax must be defined if transform != 'display'"}else this.ax=s,this.fig=s.fig;if(this.zoomable="data"===this.trans,this.x=this["x_"+this.trans],this.y=this["y_"+this.trans],"undefined"==typeof this.x||"undefined"==typeof this.y)throw"unrecognized coordinate code: "+this.trans}function u(t,s){M.call(this,t,s),this.data=t.fig.get_data(this.props.data),this.pathcodes=this.props.pathcodes,this.pathcoords=new c(this.props.coordinates,this.ax),this.offsetcoords=new c(this.props.offsetcoordinates,this.ax),this.datafunc=a()}function d(t,s){M.call(this,t,s),(null==this.props.facecolors||0==this.props.facecolors.length)&&(this.props.facecolors=["none"]),(null==this.props.edgecolors||0==this.props.edgecolors.length)&&(this.props.edgecolors=["none"]);var i=this.ax.fig.get_data(this.props.offsets);(null===i||0===i.length)&&(i=[null]);var e=Math.max(this.props.paths.length,i.length);if(i.length===e)this.offsets=i;else{this.offsets=[];for(var o=0;e>o;o++)this.offsets.push(n(i,o))}this.pathcoords=new c(this.props.pathcoordinates,this.ax),this.offsetcoords=new c(this.props.offsetcoordinates,this.ax)}function f(s,i){M.call(this,s,i);var e=this.props;switch(e.facecolor="none",e.edgecolor=e.color,delete e.color,e.edgewidth=e.linewidth,delete e.linewidth,drawstyle=e.drawstyle,delete e.drawstyle,this.defaultProps=u.prototype.defaultProps,u.call(this,s,e),drawstyle){case"steps":case"steps-pre":this.datafunc=t.line().curve(t.curveStepBefore);break;case"steps-post":this.datafunc=t.line().curve(t.curveStepAfter);break;case"steps-mid":this.datafunc=t.line().curve(t.curveStep);break;default:this.datafunc=t.line().curve(t.curveLinear)}}function y(s,i){M.call(this,s,i),null!==this.props.markerpath?this.marker=0==this.props.markerpath[0].length?null:F.path().call(this.props.markerpath[0],this.props.markerpath[1]):this.marker=null===this.props.markername?null:t.svg.symbol(this.props.markername).size(Math.pow(this.props.markersize,2))();var e={paths:[this.props.markerpath],offsets:s.fig.get_data(this.props.data),xindex:this.props.xindex,yindex:this.props.yindex,offsetcoordinates:this.props.coordinates,edgecolors:[this.props.edgecolor],edgewidths:[this.props.edgewidth],facecolors:[this.props.facecolor],alphas:[this.props.alpha],zorder:this.props.zorder,id:this.props.id};this.requiredProps=d.prototype.requiredProps,this.defaultProps=d.prototype.defaultProps,d.call(this,s,e)}function g(t,s){M.call(this,t,s),this.coords=new c(this.props.coordinates,this.ax)}function m(t,s){M.call(this,t,s),this.text=this.props.text,this.position=this.props.position,this.coords=new c(this.props.coordinates,this.ax)}function x(s,i){function e(t){return new Date(t[0],t[1],t[2],t[3],t[4],t[5])}function o(t,s){return"date"!==t?s:[e(s[0]),e(s[1])]}function r(s,i,e){var o="date"===s?t.scaleTime():"log"===s?t.scaleLog():t.scaleLinear();return o.domain(i).range(e)}M.call(this,s,i),this.axnum=this.fig.axes.length,this.axid=this.fig.figid+"_ax"+(this.axnum+1),this.clipid=this.axid+"_clip",this.props.xdomain=this.props.xdomain||this.props.xlim,this.props.ydomain=this.props.ydomain||this.props.ylim,this.sharex=[],this.sharey=[],this.elements=[],this.axisList=[];var n=this.props.bbox;this.position=[n[0]*this.fig.width,(1-n[1]-n[3])*this.fig.height],this.width=n[2]*this.fig.width,this.height=n[3]*this.fig.height,this.isZoomEnabled=null,this.zoom=null,this.lastTransform=t.zoomIdentity,this.isBoxzoomEnabled=null,this.isLinkedBrushEnabled=null,this.isCurrentLinkedBrushTarget=!1,this.brushG=null,this.props.xdomain=o(this.props.xscale,this.props.xdomain),this.props.ydomain=o(this.props.yscale,this.props.ydomain),this.x=this.xdom=r(this.props.xscale,this.props.xdomain,[0,this.width]),this.y=this.ydom=r(this.props.yscale,this.props.ydomain,[this.height,0]),"date"===this.props.xscale&&(this.x=F.multiscale(t.scaleLinear().domain(this.props.xlim).range(this.props.xdomain.map(Number)),this.xdom)),"date"===this.props.yscale&&(this.y=F.multiscale(t.scaleLinear().domain(this.props.ylim).range(this.props.ydomain.map(Number)),this.ydom));for(var a=this.props.axes,p=0;p<a.length;p++){var h=new F.Axis(this,a[p]);this.axisList.push(h),this.elements.push(h),(this.props.gridOn||h.props.grid.gridOn)&&this.elements.push(h.getGrid())}for(var l=this.props.paths,p=0;p<l.length;p++)this.elements.push(new F.Path(this,l[p]));for(var c=this.props.lines,p=0;p<c.length;p++)this.elements.push(new F.Line(this,c[p]));for(var u=this.props.markers,p=0;p<u.length;p++)this.elements.push(new F.Markers(this,u[p]));for(var d=this.props.texts,p=0;p<d.length;p++)this.elements.push(new F.Text(this,d[p]));for(var f=this.props.collections,p=0;p<f.length;p++)this.elements.push(new F.PathCollection(this,f[p]));for(var y=this.props.images,p=0;p<y.length;p++)this.elements.push(new F.Image(this,y[p]));this.elements.sort(function(t,s){return t.props.zorder-s.props.zorder})}function b(t,s){M.call(this,t,s),this.buttons=[],this.props.buttons.forEach(this.addButton.bind(this))}function v(t,s){M.call(this,t),this.toolbar=t,this.fig=this.toolbar.fig,this.cssclass="mpld3-"+s+"button",this.active=!1}function A(t,s){M.call(this,t,s)}function k(t,s){A.call(this,t,s);var i=F.ButtonFactory({buttonID:"reset",sticky:!1,onActivate:function(){this.toolbar.fig.reset()},icon:function(){return F.icons.reset}});this.fig.buttons.push(i)}function w(t,s){A.call(this,t,s),null===this.props.enabled&&(this.props.enabled=!this.props.button);var i=this.props.enabled;if(this.props.button){var e=F.ButtonFactory({buttonID:"zoom",sticky:!0,actions:["scroll","drag"],onActivate:this.activate.bind(this),onDeactivate:this.deactivate.bind(this),onDraw:function(){this.setState(i)},icon:function(){return F.icons.move}});this.fig.buttons.push(e)}}function B(t,s){A.call(this,t,s),null===this.props.enabled&&(this.props.enabled=!this.props.button);var i=this.props.enabled;if(this.props.button){var e=F.ButtonFactory({buttonID:"boxzoom",sticky:!0,actions:["drag"],onActivate:this.activate.bind(this),onDeactivate:this.deactivate.bind(this),onDraw:function(){this.setState(i)},icon:function(){return F.icons.zoom}});this.fig.buttons.push(e)}this.extentClass="boxzoombrush"}function z(t,s){A.call(this,t,s)}function E(t,s){F.Plugin.call(this,t,s),null===this.props.enabled&&(this.props.enabled=!this.props.button);var i=this.props.enabled;if(this.props.button){var e=F.ButtonFactory({buttonID:"linkedbrush",sticky:!0,actions:["drag"],onActivate:this.activate.bind(this),onDeactivate:this.deactivate.bind(this),onDraw:function(){this.setState(i)},icon:function(){return F.icons.brush}});this.fig.buttons.push(e)}this.pathCollectionsByAxes=[],this.objectsByAxes=[],this.allObjects=[],this.extentClass="linkedbrush",this.dataKey="offsets",this.objectClass=null}function P(t,s){F.Plugin.call(this,t,s)}function O(s,i){M.call(this,null,i),this.figid=s,this.width=this.props.width,this.height=this.props.height,this.data=this.props.data,this.buttons=[],this.root=t.select("#"+s).append("div").style("position","relative"),this.axes=[];for(var e=0;e<this.props.axes.length;e++)this.axes.push(new x(this,this.props.axes[e]));this.plugins=[],this.pluginsByType={},this.props.plugins.forEach(function(t){this.addPlugin(t)}.bind(this)),this.toolbar=new F.Toolbar(this,{buttons:this.buttons})}function M(t,s){this.parent=r(t)?null:t,this.props=r(s)?{}:this.processProps(s),this.fig=t instanceof O?t:t&&"fig"in t?t.fig:null,this.ax=t instanceof x?t:t&&"ax"in t?t.ax:null}var F={_mpld3IsLoaded:!0,figures:[],plugin_map:{}};F.version="0.4.1",F.register_plugin=function(t,s){F.plugin_map[t]=s},F.draw_figure=function(t,s,i){var e=document.getElementById(t);if(null===e)throw t+" is not a valid id";var o=new F.Figure(t,s);return i&&i(o,e),F.figures.push(o),o.draw(),o},F.cloneObj=s,F.boundsToTransform=function(t,s){var i=t.width,e=t.height,o=s[1][0]-s[0][0],r=s[1][1]-s[0][1],n=(s[0][0]+s[1][0])/2,a=(s[0][1]+s[1][1])/2,p=Math.max(1,Math.min(8,.9/Math.max(o/i,r/e))),h=[i/2-p*n,e/2-p*a];return{translate:h,scale:p}},F.getTransformation=function(t){var s=document.createElementNS("http://www.w3.org/2000/svg","g");s.setAttributeNS(null,"transform",t);var i,e,o,r=s.transform.baseVal.consolidate().matrix,n=r.a,a=r.b,p=r.c,h=r.d,l=r.e,c=r.f;(i=Math.sqrt(n*n+a*a))&&(n/=i,a/=i),(o=n*p+a*h)&&(p-=n*o,h-=a*o),(e=Math.sqrt(p*p+h*h))&&(p/=e,h/=e,o/=e),a*p>n*h&&(n=-n,a=-a,o=-o,i=-i);var u={translateX:l,translateY:c,rotate:180*Math.atan2(a,n)/Math.PI,skewX:180*Math.atan(o)/Math.PI,scaleX:i,scaleY:e},d="translate("+u.translateX+","+u.translateY+")rotate("+u.rotate+")skewX("+u.skewX+")scale("+u.scaleX+","+u.scaleY+")";return d},F.merge_objects=function(t){for(var s,i={},e=0;e<arguments.length;e++){s=arguments[e];for(var o in s)i[o]=s[o]}return i},F.generate_id=function(t,s){return console.warn("mpld3.generate_id is deprecated. Use mpld3.generateId instead."),i(t,s)},F.generateId=i,F.get_element=function(t,s){var i,e,o;i="undefined"==typeof s?F.figures:"undefined"==typeof s.length?[s]:s;for(var r=0;r<i.length;r++){if(s=i[r],s.props.id===t)return s;for(var n=0;n<s.axes.length;n++){if(e=s.axes[n],e.props.id===t)return e;for(var a=0;a<e.elements.length;a++)if(o=e.elements[a],o.props.id===t)return o}}return null},F.insert_css=function(t,s){var i=document.head||document.getElementsByTagName("head")[0],e=document.createElement("style"),o=t+" {";for(var r in s)o+=r+":"+s[r]+"; ";o+="}",e.type="text/css",e.styleSheet?e.styleSheet.cssText=o:e.appendChild(document.createTextNode(o)),i.appendChild(e)},F.process_props=function(t,s,i,e){function o(t){M.call(this,null,t)}console.warn("mpld3.process_props is deprecated. Plot elements should derive from mpld3.PlotElement"),o.prototype=Object.create(M.prototype),o.prototype.constructor=o,o.prototype.requiredProps=e,o.prototype.defaultProps=i;var r=new o(s);return r.props},F.interpolateDates=e,F.path=function(){return a()},F.multiscale=p,F.icons={reset:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gIcACMoD/OzIwAAAJhJREFUOMtjYKAx4KDUgNsMDAx7\nyNV8i4GB4T8U76VEM8mGYNNMtCH4NBM0hBjNMIwSsMzQ0MamcDkDA8NmQi6xggpUoikwQbIkHk2u\nE0rLI7vCBknBSyxeRDZAE6qHgQkq+ZeBgYERSfFPAoHNDNUDN4BswIRmKgxwEasP2dlsDAwMYlA/\n/mVgYHiBpkkGKscIDaPfVMmuAGnOTaGsXF0MAAAAAElFTkSuQmCC\n",move:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gIcACQMfLHBNQAAANZJREFUOMud07FKA0EQBuAviaKB\nlFr7COJrpAyYRlKn8hECEkFEn8ROCCm0sBMRYgh5EgVFtEhsRjiO27vkBoZd/vn5d3b+XcrjFI9q\nxgXWkc8pUjOB93GMd3zgB9d1unjDSxmhWSHQqOJki+MtOuv/b3ZifUqctIrMxwhHuG1gim4Ma5kR\nWuEkXFgU4B0MW1Ho4TeyjX3s4TDq3zn8ALvZ7q5wX9DqLOHCDA95cFBAnOO1AL/ZdNopgY3fQcqF\nyriMe37hM9w521ZkkvlMo7o/8g7nZYQ/QDctp1nTCf0AAAAASUVORK5CYII=\n",zoom:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gMPDiIRPL/2oQAAANBJREFUOMvF0b9KgzEcheHHVnCT\nKoI4uXbtLXgB3oJDJxevw1VwkoJ/NjepQ2/BrZRCx0ILFURQKV2kyOeSQpAmn7WDB0Lg955zEhLy\n2scdXlBggits+4WOQqjAJ3qYR7NGLrwXGU9+sGbEtlIF18FwmuBngZ+nCt6CIacC3Rx8LSl4xzgF\nn0tusBn4UyVhuA/7ZYIv5g+pE3ail25hN/qdmzCfpsJVjKKCZesDBwtzrAqGOMQj6vhCDRsY4ALH\nmOVObltR/xeG/jph6OD2r+Fv5lZBWEhMx58AAAAASUVORK5CYII=\n",brush:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAEQkAABEJAFAZ8RUAAAAB3RJTUUH3gMCEiQKB9YaAgAAAWtJREFUOMuN0r1qVVEQhuFn700k\nnfEvBq0iNiIiOKXgH4KCaBeIhWARK/EibLwFCwVLjyAWaQzRGG9grC3URkHUBKKgRuWohWvL5pjj\nyTSLxcz7rZlZHyMiItqzFxGTEVF18/UoODNFxDIO4x12dkXqTcBPsCUzD+AK3ndFqhHwEsYz82gn\nN4dbmMRK9R/4KY7jAvbiWmYeHBT5Z4QCP8J1rGAeN3GvU3Mbl/Gq3qCDcxjLzOV+v78fq/iFIxFx\nPyJ2lNJpfBy2g59YzMyzEbEVLzGBJjOriLiBq5gaJrCIU3hcRCbwAtuwjm/Yg/V6I9NgDA1OR8RC\nZq6Vcd7iUwtn5h8fdMBdETGPE+Xe4ExELDRNs4bX2NfCUHe+7UExyfkCP8MhzOA7PuAkvrbwXyNF\nxF3MDqxiqlhXC7SPdaOKiN14g0u4g3H0MvOiTUSNY3iemb0ywmfMdfYyUmAJ2yPiBx6Wr/oy2Oqw\n+A1SupBzAOuE/AAAAABJRU5ErkJggg==\n"},F.Grid=h,h.prototype=Object.create(M.prototype),h.prototype.constructor=h,h.prototype.requiredProps=["xy"],h.prototype.defaultProps={color:"gray",dasharray:"2,2",alpha:"0.5",nticks:10,gridOn:!0,tickvalues:null,zorder:0},h.prototype.draw=function(){var s={left:"axisLeft",right:"axisRight",top:"axisTop",bottom:"axisBottom"}[this.position];this.grid=t[s](this.scale).ticks(this.props.nticks).tickValues(this.props.tickvalues).tickSize(this.tickSize,0,0).tickFormat(""),this.elem=this.ax.axes.append("g").attr("class",this.cssclass).attr("transform",this.transform).call(this.grid),F.insert_css("div#"+this.ax.fig.figid+" ."+this.cssclass+" .tick",{stroke:this.props.color,"stroke-dasharray":this.props.dasharray,"stroke-opacity":this.props.alpha}),F.insert_css("div#"+this.ax.fig.figid+" ."+this.cssclass+" path",{"stroke-width":0}),F.insert_css("div#"+this.ax.fig.figid+" ."+this.cssclass+" .domain",{"pointer-events":"none"})},h.prototype.zoomed=function(t){t?"x"==this.props.xy?this.elem.call(this.grid.scale(t.rescaleX(this.scale))):this.elem.call(this.grid.scale(t.rescaleY(this.scale))):this.elem.call(this.grid)},F.Axis=l,l.prototype=Object.create(M.prototype),l.prototype.constructor=l,l.prototype.requiredProps=["position"],l.prototype.defaultProps={nticks:10,tickvalues:null,tickformat:null,fontsize:"11px",fontcolor:"black",axiscolor:"black",scale:"linear",grid:{},zorder:0,visible:!0},l.prototype.getGrid=function(){var t={nticks:this.props.nticks,zorder:this.props.zorder,tickvalues:this.props.tickvalues,xy:this.props.xy};if(this.props.grid)for(var s in this.props.grid)t[s]=this.props.grid[s];return new h(this.ax,t)},l.prototype.draw=function(){function s(s,i,e){e=e||1.2,s.each(function(){for(var s,o=t.select(this),r=o.node().getBBox(),n=r.height,a=o.text().split(/\s+/).reverse(),p=[],h=0,l=o.attr("y"),c=n,u=o.text(null).append("tspan").attr("x",0).attr("y",l).attr("dy",c);s=a.pop();)p.push(s),u.text(p.join(" ")),u.node().getComputedTextLength()>i&&(p.pop(),u.text(p.join(" ")),p=[s],u=o.append("tspan").attr("x",0).attr("y",l).attr("dy",++h*(n*e)+c).text(s))})}var i=80,e="x"===this.props.xy?this.parent.props.xscale:this.parent.props.yscale;if("date"===e&&this.props.tickvalues){var o="x"===this.props.xy?this.parent.x.domain():this.parent.y.domain(),r="x"===this.props.xy?this.parent.xdom.domain():this.parent.ydom.domain(),n=t.scaleLinear().domain(o).range(r);this.props.tickvalues=this.props.tickvalues.map(function(t){return new Date(n(t))})}var a={left:"axisLeft",right:"axisRight",top:"axisTop",bottom:"axisBottom"}[this.props.position];this.axis=t[a](this.scale),this.props.tickformat&&this.props.tickvalues?this.axis=this.axis.tickValues(this.props.tickvalues).tickFormat(function(t,s){return this.props.tickformat[s]}.bind(this)):(this.tickNr&&(this.axis=this.axis.ticks(this.tickNr)),this.tickFormat&&(this.axis=this.axis.tickFormat(this.tickFormat))),this.filter_ticks(this.axis.tickValues,this.axis.scale().domain()),this.elem=this.ax.baseaxes.append("g").attr("transform",this.transform).attr("class",this.cssclass).call(this.axis),"x"==this.props.xy&&this.elem.selectAll("text").call(s,i),F.insert_css("div#"+this.ax.fig.figid+" ."+this.cssclass+" line,  ."+this.cssclass+" path",{"shape-rendering":"crispEdges",stroke:this.props.axiscolor,fill:"none"}),F.insert_css("div#"+this.ax.fig.figid+" ."+this.cssclass+" text",{"font-family":"sans-serif","font-size":this.props.fontsize+"px",fill:this.props.fontcolor,stroke:"none"})},l.prototype.zoomed=function(t){t?"x"==this.props.xy?this.elem.call(this.axis.scale(t.rescaleX(this.scale))):this.elem.call(this.axis.scale(t.rescaleY(this.scale))):this.elem.call(this.axis)},l.prototype.setTicks=function(t,s){this.tickNr=t,this.tickFormat=s},l.prototype.filter_ticks=function(t,s){null!=this.props.tickvalues&&t(this.props.tickvalues.filter(function(t){return t>=s[0]&&t<=s[1]}))},F.Coordinates=c,c.prototype.xy=function(t,s,i){return s="undefined"==typeof s?0:s,i="undefined"==typeof i?1:i,[this.x(t[s]),this.y(t[i])]},c.prototype.x_data=function(t){return this.ax.x(t)},c.prototype.y_data=function(t){return this.ax.y(t)},c.prototype.x_display=function(t){return t},c.prototype.y_display=function(t){return t},c.prototype.x_axes=function(t){return t*this.ax.width},c.prototype.y_axes=function(t){return this.ax.height*(1-t)},c.prototype.x_figure=function(t){return t*this.fig.width-this.ax.position[0]},c.prototype.y_figure=function(t){return(1-t)*this.fig.height-this.ax.position[1]},F.Path=u,u.prototype=Object.create(M.prototype),u.prototype.constructor=u,u.prototype.requiredProps=["data"],u.prototype.defaultProps={xindex:0,yindex:1,coordinates:"data",facecolor:"green",edgecolor:"black",edgewidth:1,dasharray:"none",pathcodes:null,offset:null,offsetcoordinates:"data",alpha:1,zorder:1},u.prototype.finiteFilter=function(t,s){return isFinite(this.pathcoords.x(t[this.props.xindex]))&&isFinite(this.pathcoords.y(t[this.props.yindex]))},u.prototype.draw=function(){if(this.datafunc.defined(this.finiteFilter.bind(this)).x(function(t){return this.pathcoords.x(t[this.props.xindex])}.bind(this)).y(function(t){return this.pathcoords.y(t[this.props.yindex])}.bind(this)),this.pathcoords.zoomable?this.path=this.ax.paths.append("svg:path"):this.path=this.ax.staticPaths.append("svg:path"),this.path=this.path.attr("d",this.datafunc(this.data,this.pathcodes)).attr("class","mpld3-path").style("stroke",this.props.edgecolor).style("stroke-width",this.props.edgewidth).style("stroke-dasharray",this.props.dasharray).style("stroke-opacity",this.props.alpha).style("fill",this.props.facecolor).style("fill-opacity",this.props.alpha).attr("vector-effect","non-scaling-stroke"),null!==this.props.offset){var t=this.offsetcoords.xy(this.props.offset);this.path.attr("transform","translate("+t+")")}},u.prototype.elements=function(t){return this.path},F.PathCollection=d,d.prototype=Object.create(M.prototype),d.prototype.constructor=d,d.prototype.requiredProps=["paths","offsets"],d.prototype.defaultProps={xindex:0,yindex:1,pathtransforms:[],pathcoordinates:"display",offsetcoordinates:"data",offsetorder:"before",edgecolors:["#000000"],edgewidths:[1],facecolors:["#0000FF"],alphas:[1],zorder:2},d.prototype.transformFunc=function(t,s){var i=this.props.pathtransforms,e=0==i.length?"":F.getTransformation("matrix("+n(i,s)+")").toString(),o=null===t||"undefined"==typeof t?"translate(0, 0)":"translate("+this.offsetcoords.xy(t,this.props.xindex,this.props.yindex)+")";return"after"===this.props.offsetorder?e+o:o+e},d.prototype.pathFunc=function(t,s){return a().x(function(t){return this.pathcoords.x(t[0])}.bind(this)).y(function(t){return this.pathcoords.y(t[1])}.bind(this)).apply(this,n(this.props.paths,s))},d.prototype.styleFunc=function(t,s){var i={stroke:n(this.props.edgecolors,s),"stroke-width":n(this.props.edgewidths,s),"stroke-opacity":n(this.props.alphas,s),fill:n(this.props.facecolors,s),"fill-opacity":n(this.props.alphas,s)},e="";for(var o in i)e+=o+":"+i[o]+";";return e},d.prototype.allFinite=function(t){return t instanceof Array?t.length==t.filter(isFinite).length:!0},d.prototype.draw=function(){this.offsetcoords.zoomable||this.pathcoords.zoomable?this.group=this.ax.paths.append("svg:g"):this.group=this.ax.staticPaths.append("svg:g"),this.pathsobj=this.group.selectAll("paths").data(this.offsets.filter(this.allFinite)).enter().append("svg:path").attr("d",this.pathFunc.bind(this)).attr("class","mpld3-path").attr("transform",this.transformFunc.bind(this)).attr("style",this.styleFunc.bind(this)).attr("vector-effect","non-scaling-stroke")},d.prototype.elements=function(t){return this.group.selectAll("path")},F.Line=f,f.prototype=Object.create(u.prototype),f.prototype.constructor=f,f.prototype.requiredProps=["data"],f.prototype.defaultProps={xindex:0,yindex:1,coordinates:"data",color:"salmon",linewidth:2,dasharray:"none",alpha:1,zorder:2,drawstyle:"none"},F.Markers=y,y.prototype=Object.create(d.prototype),y.prototype.constructor=y,y.prototype.requiredProps=["data"],y.prototype.defaultProps={xindex:0,yindex:1,coordinates:"data",facecolor:"salmon",edgecolor:"black",edgewidth:1,alpha:1,markersize:6,markername:"circle",markerpath:null,zorder:3},y.prototype.pathFunc=function(t,s){return this.marker},F.Image=g,g.prototype=Object.create(M.prototype),g.prototype.constructor=g,g.prototype.requiredProps=["data","extent"],g.prototype.defaultProps={alpha:1,coordinates:"data",zorder:1},g.prototype.draw=function(){this.image=this.ax.paths.append("svg:image"),this.image=this.image.attr("class","mpld3-image").attr("xlink:href","data:image/png;base64,"+this.props.data).style("opacity",this.props.alpha).attr("preserveAspectRatio","none"),this.updateDimensions()},g.prototype.elements=function(s){return t.select(this.image)},g.prototype.updateDimensions=function(){var t=this.props.extent;this.image.attr("x",this.coords.x(t[0])).attr("y",this.coords.y(t[3])).attr("width",this.coords.x(t[1])-this.coords.x(t[0])).attr("height",this.coords.y(t[2])-this.coords.y(t[3]))},F.Text=m,m.prototype=Object.create(M.prototype),m.prototype.constructor=m,m.prototype.requiredProps=["text","position"],m.prototype.defaultProps={coordinates:"data",h_anchor:"start",v_baseline:"auto",rotation:0,fontsize:11,color:"black",alpha:1,zorder:3},m.prototype.draw=function(){"data"==this.props.coordinates?this.coords.zoomable?this.obj=this.ax.paths.append("text"):this.obj=this.ax.staticPaths.append("text"):this.obj=this.ax.baseaxes.append("text"),this.obj.attr("class","mpld3-text").text(this.text).style("text-anchor",this.props.h_anchor).style("dominant-baseline",this.props.v_baseline).style("font-size",this.props.fontsize).style("fill",this.props.color).style("opacity",this.props.alpha),this.applyTransform()},m.prototype.elements=function(s){return t.select(this.obj)},m.prototype.applyTransform=function(){var t=this.coords.xy(this.position);this.obj.attr("x",t[0]).attr("y",t[1]),this.props.rotation&&this.obj.attr("transform","rotate("+this.props.rotation+","+t+")")},F.Axes=x,x.prototype=Object.create(M.prototype),x.prototype.constructor=x,x.prototype.requiredProps=["xlim","ylim"],x.prototype.defaultProps={bbox:[.1,.1,.8,.8],axesbg:"#FFFFFF",axesbgalpha:1,gridOn:!1,xdomain:null,ydomain:null,xscale:"linear",yscale:"linear",zoomable:!0,axes:[{position:"left"},{position:"bottom"}],lines:[],paths:[],markers:[],texts:[],collections:[],sharex:[],sharey:[],images:[]},x.prototype.draw=function(){for(var s=0;s<this.props.sharex.length;s++)this.sharex.push(F.get_element(this.props.sharex[s]));for(var s=0;s<this.props.sharey.length;s++)this.sharey.push(F.get_element(this.props.sharey[s]));this.baseaxes=this.fig.canvas.append("g").attr("transform","translate("+this.position[0]+","+this.position[1]+")").attr("width",this.width).attr("height",this.height).attr("class","mpld3-baseaxes"),this.axes=this.baseaxes.append("g").attr("class","mpld3-axes").style("pointer-events","visiblefill"),this.clip=this.axes.append("svg:clipPath").attr("id",this.clipid).append("svg:rect").attr("x",0).attr("y",0).attr("width",this.width).attr("height",this.height),this.axesbg=this.axes.append("svg:rect").attr("width",this.width).attr("height",this.height).attr("class","mpld3-axesbg").style("fill",this.props.axesbg).style("fill-opacity",this.props.axesbgalpha),this.pathsContainer=this.axes.append("g").attr("clip-path","url(#"+this.clipid+")").attr("x",0).attr("y",0).attr("width",this.width).attr("height",this.height).attr("class","mpld3-paths-container"),this.paths=this.pathsContainer.append("g").attr("class","mpld3-paths"),this.staticPaths=this.axes.append("g").attr("class","mpld3-staticpaths"),this.brush=t.brush().extent([[0,0],[this.fig.width,this.fig.height]]).on("start",this.brushStart.bind(this)).on("brush",this.brushMove.bind(this)).on("end",this.brushEnd.bind(this)).on("start.nokey",function(){t.select(window).on("keydown.brush keyup.brush",null)});for(var s=0;s<this.elements.length;s++)this.elements[s].draw()},x.prototype.bindZoom=function(){this.zoom||(this.zoom=t.zoom(),this.zoom.on("zoom",this.zoomed.bind(this)),this.axes.call(this.zoom))},x.prototype.unbindZoom=function(){this.zoom&&(this.zoom.on("zoom",null),this.axes.on(".zoom",null),this.zoom=null)},x.prototype.bindBrush=function(){this.brushG||(this.brushG=this.axes.append("g").attr("class","mpld3-brush").call(this.brush))},x.prototype.unbindBrush=function(){this.brushG&&(this.brushG.remove(),this.brushG.on(".brush",null),this.brushG=null)},x.prototype.reset=function(){this.zoom?this.doZoom(!1,t.zoomIdentity,750):(this.bindZoom(),this.doZoom(!1,t.zoomIdentity,750,function(){this.isSomeTypeOfZoomEnabled||this.unbindZoom()}.bind(this)))},x.prototype.enableOrDisableBrushing=function(){this.isBoxzoomEnabled||this.isLinkedBrushEnabled?this.bindBrush():this.unbindBrush()},x.prototype.isSomeTypeOfZoomEnabled=function(){return this.isZoomEnabled||this.isBoxzoomEnabled},x.prototype.enableOrDisableZooming=function(){this.isSomeTypeOfZoomEnabled()?this.bindZoom():this.unbindZoom()},x.prototype.enableLinkedBrush=function(){this.isLinkedBrushEnabled=!0,this.enableOrDisableBrushing()},x.prototype.disableLinkedBrush=function(){this.isLinkedBrushEnabled=!1,this.enableOrDisableBrushing()},x.prototype.enableBoxzoom=function(){this.isBoxzoomEnabled=!0,this.enableOrDisableBrushing(),this.enableOrDisableZooming()},x.prototype.disableBoxzoom=function(){this.isBoxzoomEnabled=!1,this.enableOrDisableBrushing(),this.enableOrDisableZooming()},x.prototype.enableZoom=function(){this.isZoomEnabled=!0,this.enableOrDisableZooming(),this.axes.style("cursor","move")},x.prototype.disableZoom=function(){this.isZoomEnabled=!1,this.enableOrDisableZooming(),this.axes.style("cursor",null)},x.prototype.doZoom=function(t,s,i,e){if(this.props.zoomable&&this.zoom){if(i){var o=this.axes.transition().duration(i).call(this.zoom.transform,s);e&&o.on("end",e)}else this.axes.call(this.zoom.transform,s);t?(this.lastTransform=s,this.sharex.forEach(function(t){t.doZoom(!1,s,i)}),this.sharey.forEach(function(t){t.doZoom(!1,s,i)})):this.lastTransform=s}},x.prototype.zoomed=function(){var s=t.event.sourceEvent&&"zoom"!=t.event.sourceEvent.type;if(s)this.doZoom(!0,t.event.transform,!1);else{var i=t.event.transform;this.paths.attr("transform",i),this.elements.forEach(function(t){t.zoomed&&t.zoomed(i)}.bind(this))}},x.prototype.resetBrush=function(){this.brushG.call(this.brush.move,null)},x.prototype.doBoxzoom=function(s){if(s&&this.brushG){var i=s.map(this.lastTransform.invert,this.lastTransform),e=i[1][0]-i[0][0],o=i[1][1]-i[0][1],r=(i[0][0]+i[1][0])/2,n=(i[0][1]+i[1][1])/2,a=e>o?this.width/e:this.height/o,p=this.width/2-a*r,h=this.height/2-a*n,l=t.zoomIdentity.translate(p,h).scale(a);this.doZoom(!0,l,750),this.resetBrush()}},x.prototype.brushStart=function(){this.isLinkedBrushEnabled&&(this.isCurrentLinkedBrushTarget="MouseEvent"==t.event.sourceEvent.constructor.name,this.isCurrentLinkedBrushTarget&&this.fig.resetBrushForOtherAxes(this.axid))},x.prototype.brushMove=function(){var s=t.event.selection;this.isLinkedBrushEnabled&&this.fig.updateLinkedBrush(s)},x.prototype.brushEnd=function(){var s=t.event.selection;this.isBoxzoomEnabled&&this.doBoxzoom(s),this.isLinkedBrushEnabled&&(s||this.fig.endLinkedBrush(),this.isCurrentLinkedBrushTarget=!1)},x.prototype.setTicks=function(t,s,i){this.axisList.forEach(function(e){e.props.xy==t&&e.setTicks(s,i)})},F.Toolbar=b,b.prototype=Object.create(M.prototype),b.prototype.constructor=b,b.prototype.defaultProps={buttons:["reset","move"]},b.prototype.addButton=function(t){this.buttons.push(new t(this))},b.prototype.draw=function(){function s(){this.buttonsobj.transition(750).attr("y",0)}function i(){this.buttonsobj.transition(750).delay(250).attr("y",16)}F.insert_css("div#"+this.fig.figid+" .mpld3-toolbar image",{cursor:"pointer",opacity:.2,display:"inline-block",margin:"0px"}),F.insert_css("div#"+this.fig.figid+" .mpld3-toolbar image.active",{opacity:.4}),F.insert_css("div#"+this.fig.figid+" .mpld3-toolbar image.pressed",{opacity:.6}),this.fig.canvas.on("mouseenter",s.bind(this)).on("mouseleave",i.bind(this)).on("touchenter",s.bind(this)).on("touchstart",s.bind(this)),this.toolbar=this.fig.canvas.append("svg:svg").attr("width",16*this.buttons.length).attr("height",16).attr("x",2).attr("y",this.fig.height-16-2).attr("class","mpld3-toolbar"),this.buttonsobj=this.toolbar.append("svg:g").selectAll("buttons").data(this.buttons).enter().append("svg:image").attr("class",function(t){return t.cssclass}).attr("xlink:href",function(t){return t.icon()}).attr("width",16).attr("height",16).attr("x",function(t,s){return 16*s}).attr("y",16).on("click",function(t){t.click()}).on("mouseenter",function(){t.select(this).classed("active",!0)}).on("mouseleave",function(){t.select(this).classed("active",!1)});for(var e=0;e<this.buttons.length;e++)this.buttons[e].onDraw()},b.prototype.deactivate_all=function(){this.buttons.forEach(function(t){t.deactivate()})},b.prototype.deactivate_by_action=function(t){function s(s){return-1!==t.indexOf(s)}t.length>0&&this.buttons.forEach(function(t){t.actions.filter(s).length>0&&t.deactivate()})},F.Button=v,v.prototype=Object.create(M.prototype),v.prototype.constructor=v,v.prototype.setState=function(t){t?this.activate():this.deactivate()},v.prototype.click=function(){this.active?this.deactivate():this.activate()},v.prototype.activate=function(){this.toolbar.deactivate_by_action(this.actions),this.onActivate(),this.active=!0,this.toolbar.toolbar.select("."+this.cssclass).classed("pressed",!0),
+this.sticky||this.deactivate()},v.prototype.deactivate=function(){this.onDeactivate(),this.active=!1,this.toolbar.toolbar.select("."+this.cssclass).classed("pressed",!1)},v.prototype.sticky=!1,v.prototype.actions=[],v.prototype.icon=function(){return""},v.prototype.onActivate=function(){},v.prototype.onDeactivate=function(){},v.prototype.onDraw=function(){},F.ButtonFactory=function(t){function s(t){v.call(this,t,this.buttonID)}if("string"!=typeof t.buttonID)throw"ButtonFactory: buttonID must be present and be a string";s.prototype=Object.create(v.prototype),s.prototype.constructor=s;for(var i in t)s.prototype[i]=t[i];return s},F.Plugin=A,A.prototype=Object.create(M.prototype),A.prototype.constructor=A,A.prototype.requiredProps=[],A.prototype.defaultProps={},A.prototype.draw=function(){},F.ResetPlugin=k,F.register_plugin("reset",k),k.prototype=Object.create(A.prototype),k.prototype.constructor=k,k.prototype.requiredProps=[],k.prototype.defaultProps={},F.ZoomPlugin=w,F.register_plugin("zoom",w),w.prototype=Object.create(A.prototype),w.prototype.constructor=w,w.prototype.requiredProps=[],w.prototype.defaultProps={button:!0,enabled:null},w.prototype.activate=function(){this.fig.enableZoom()},w.prototype.deactivate=function(){this.fig.disableZoom()},w.prototype.draw=function(){this.props.enabled?this.activate():this.deactivate()},F.BoxZoomPlugin=B,F.register_plugin("boxzoom",B),B.prototype=Object.create(A.prototype),B.prototype.constructor=B,B.prototype.requiredProps=[],B.prototype.defaultProps={button:!0,enabled:null},B.prototype.activate=function(){this.fig.enableBoxzoom()},B.prototype.deactivate=function(){this.fig.disableBoxzoom()},B.prototype.draw=function(){this.props.enabled?this.activate():this.deactivate()},F.TooltipPlugin=z,F.register_plugin("tooltip",z),z.prototype=Object.create(A.prototype),z.prototype.constructor=z,z.prototype.requiredProps=["id"],z.prototype.defaultProps={labels:null,hoffset:0,voffset:10,location:"mouse"},z.prototype.draw=function(){function s(t,s){this.tooltip.style("visibility","visible").text(null===r?"("+t+")":n(r,s))}function i(s,i){if("mouse"===a){var e=t.mouse(this.fig.canvas.node());this.x=e[0]+this.props.hoffset,this.y=e[1]-this.props.voffset}this.tooltip.attr("x",this.x).attr("y",this.y)}function e(t,s){this.tooltip.style("visibility","hidden")}var o=F.get_element(this.props.id,this.fig),r=this.props.labels,a=this.props.location;this.tooltip=this.fig.canvas.append("text").attr("class","mpld3-tooltip-text").attr("x",0).attr("y",0).text("").style("visibility","hidden"),"bottom left"==a||"top left"==a?(this.x=o.ax.position[0]+5+this.props.hoffset,this.tooltip.style("text-anchor","beginning")):"bottom right"==a||"top right"==a?(this.x=o.ax.position[0]+o.ax.width-5+this.props.hoffset,this.tooltip.style("text-anchor","end")):this.tooltip.style("text-anchor","middle"),"bottom left"==a||"bottom right"==a?this.y=o.ax.position[1]+o.ax.height-5+this.props.voffset:("top left"==a||"top right"==a)&&(this.y=o.ax.position[1]+5+this.props.voffset),o.elements().on("mouseover",s.bind(this)).on("mousemove",i.bind(this)).on("mouseout",e.bind(this))},F.LinkedBrushPlugin=E,F.register_plugin("linkedbrush",E),E.prototype=Object.create(F.Plugin.prototype),E.prototype.constructor=E,E.prototype.requiredProps=["id"],E.prototype.defaultProps={button:!0,enabled:null},E.prototype.activate=function(){this.fig.enableLinkedBrush()},E.prototype.deactivate=function(){this.fig.disableLinkedBrush()},E.prototype.isPathInSelection=function(t,s,i,e){var o=e[0][0]<t[s]&&e[1][0]>t[s]&&e[0][1]<t[i]&&e[1][1]>t[i];return o},E.prototype.invertSelection=function(t,s){var i=[s.x.invert(t[0][0]),s.x.invert(t[1][0])],e=[s.y.invert(t[1][1]),s.y.invert(t[0][1])];return[[Math.min.apply(Math,i),Math.min.apply(Math,e)],[Math.max.apply(Math,i),Math.max.apply(Math,e)]]},E.prototype.update=function(t){t&&this.pathCollectionsByAxes.forEach(function(s,i){var e=s[0],o=this.objectsByAxes[i],r=this.invertSelection(t,this.fig.axes[i]),n=e.props.xindex,a=e.props.yindex;o.selectAll("path").classed("mpld3-hidden",function(t,s){return!this.isPathInSelection(t,n,a,r)}.bind(this))}.bind(this))},E.prototype.end=function(){this.allObjects.selectAll("path").classed("mpld3-hidden",!1)},E.prototype.draw=function(){F.insert_css("#"+this.fig.figid+" path.mpld3-hidden",{stroke:"#ccc !important",fill:"#ccc !important"});var t=F.get_element(this.props.id);if(!t)throw new Error("[LinkedBrush] Could not find path collection");if(!("offsets"in t.props))throw new Error("[LinkedBrush] Figure is not a scatter plot.");this.objectClass="mpld3-brushtarget-"+t.props[this.dataKey],this.pathCollectionsByAxes=this.fig.axes.map(function(s){return s.elements.map(function(s){return s.props[this.dataKey]==t.props[this.dataKey]?(s.group.classed(this.objectClass,!0),s):void 0}.bind(this)).filter(function(t){return t})}.bind(this)),this.objectsByAxes=this.fig.axes.map(function(t){return t.axes.selectAll("."+this.objectClass)}.bind(this)),this.allObjects=this.fig.canvas.selectAll("."+this.objectClass)},F.register_plugin("mouseposition",P),P.prototype=Object.create(F.Plugin.prototype),P.prototype.constructor=P,P.prototype.requiredProps=[],P.prototype.defaultProps={fontsize:12,fmt:".3g"},P.prototype.draw=function(){for(var s=this.fig,i=t.format(this.props.fmt),e=s.canvas.append("text").attr("class","mpld3-coordinates").style("text-anchor","end").style("font-size",this.props.fontsize).attr("x",this.fig.width-5).attr("y",this.fig.height-5),o=0;o<this.fig.axes.length;o++){var r=function(){var r=s.axes[o];return function(){var s=t.mouse(this),o=r.x.invert(s[0]),n=r.y.invert(s[1]);e.text("("+i(o)+", "+i(n)+")")}}();s.axes[o].baseaxes.on("mousemove",r).on("mouseout",function(){e.text("")})}},F.Figure=O,O.prototype=Object.create(M.prototype),O.prototype.constructor=O,O.prototype.requiredProps=["width","height"],O.prototype.defaultProps={data:{},axes:[],plugins:[{type:"reset"},{type:"zoom"},{type:"boxzoom"}]},O.prototype.addPlugin=function(t){if(!t.type)return console.warn("unspecified plugin type. Skipping this");var i;if(!(t.type in F.plugin_map))return console.warn("Skipping unrecognized plugin: "+i);i=F.plugin_map[t.type],(t.clear_toolbar||t.buttons)&&console.warn("DEPRECATION WARNING: You are using pluginInfo.clear_toolbar or pluginInfo, which have been deprecated. Please see the build-in plugins for the new method to add buttons, otherwise contact the mpld3 maintainers.");var e=s(t);delete e.type;var o=new i(this,e);this.plugins.push(o),this.pluginsByType[t.type]=o},O.prototype.draw=function(){F.insert_css("div#"+this.figid,{"font-family":"Helvetica, sans-serif"}),this.canvas=this.root.append("svg:svg").attr("class","mpld3-figure").attr("width",this.width).attr("height",this.height);for(var t=0;t<this.axes.length;t++)this.axes[t].draw();this.disableZoom();for(var t=0;t<this.plugins.length;t++)this.plugins[t].draw();this.toolbar.draw()},O.prototype.resetBrushForOtherAxes=function(t){this.axes.forEach(function(s){s.axid!=t&&s.resetBrush()})},O.prototype.updateLinkedBrush=function(t){this.pluginsByType.linkedbrush&&this.pluginsByType.linkedbrush.update(t)},O.prototype.endLinkedBrush=function(){this.pluginsByType.linkedbrush&&this.pluginsByType.linkedbrush.end()},O.prototype.reset=function(t){this.axes.forEach(function(t){t.reset()})},O.prototype.enableLinkedBrush=function(){this.axes.forEach(function(t){t.enableLinkedBrush()})},O.prototype.disableLinkedBrush=function(){this.axes.forEach(function(t){t.disableLinkedBrush()})},O.prototype.enableBoxzoom=function(){this.axes.forEach(function(t){t.enableBoxzoom()})},O.prototype.disableBoxzoom=function(){this.axes.forEach(function(t){t.disableBoxzoom()})},O.prototype.enableZoom=function(){this.axes.forEach(function(t){t.enableZoom()})},O.prototype.disableZoom=function(){this.axes.forEach(function(t){t.disableZoom()})},O.prototype.toggleZoom=function(){this.isZoomEnabled?this.disableZoom():this.enableZoom()},O.prototype.setTicks=function(t,s,i){this.axes.forEach(function(e){e.setTicks(t,s,i)})},O.prototype.setXTicks=function(t,s){this.setTicks("x",t,s)},O.prototype.setYTicks=function(t,s){this.setTicks("y",t,s)},O.prototype.get_data=function(t){return null===t||"undefined"==typeof t?null:"string"==typeof t?this.data[t]:t},F.PlotElement=M,M.prototype.requiredProps=[],M.prototype.defaultProps={},M.prototype.processProps=function(t){t=s(t);var i={},e=this.name();this.requiredProps.forEach(function(s){if(!(s in t))throw"property '"+s+"' must be specified for "+e;i[s]=t[s],delete t[s]});for(var o in this.defaultProps)o in t?(i[o]=t[o],delete t[o]):i[o]=this.defaultProps[o];"id"in t?(i.id=t.id,delete t.id):"id"in i||(i.id=F.generateId());for(var o in t)console.warn("Unrecognized property '"+o+"' for object "+this.name()+" (value = "+t[o]+").");return i},M.prototype.name=function(){var t=/function (.{1,})\(/,s=t.exec(this.constructor.toString());return s&&s.length>1?s[1]:""},"object"==typeof module&&module.exports?module.exports=F:this.mpld3=F,console.log("Loaded mpld3 version "+F.version)}(d3);
+},{}]},{},[1])(1)
+});
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],4:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -18576,7 +18457,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 (function (setImmediate,clearImmediate){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -18655,5 +18536,5 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":3,"timers":4}]},{},[2])(2)
+},{"process/browser.js":4,"timers":5}]},{},[2])(2)
 });

@@ -10,9 +10,10 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var Vue = _interopDefault(require('vue'));
+var _regeneratorRuntime = _interopDefault(require('@babel/runtime/regenerator'));
+var _asyncToGenerator = _interopDefault(require('@babel/runtime/helpers/asyncToGenerator'));
 var axios = _interopDefault(require('axios'));
 var saveAs = _interopDefault(require('file-saver'));
-var mpld3 = _interopDefault(require('mpld3'));
 var sha224 = _interopDefault(require('crypto-js/sha224'));
 var epicSpinners = require('epic-spinners');
 var VueProgressBar = _interopDefault(require('vue-progressbar'));
@@ -20,34 +21,34 @@ var VModal = _interopDefault(require('vue-js-modal'));
 var vueClickaway = require('vue-clickaway');
 var DialogDrag = _interopDefault(require('vue-dialog-drag'));
 
-const EVENT_STATUS_START = 'status:start';
-const EVENT_STATUS_UPDATE = 'status:update';
-const EVENT_STATUS_SUCCEED = 'status:success';
-const EVENT_STATUS_NOTIFY = 'status:notify';
-const EVENT_STATUS_FAIL = 'status:fail';
-const events = {
-  EVENT_STATUS_START,
-  EVENT_STATUS_UPDATE,
-  EVENT_STATUS_SUCCEED,
-  EVENT_STATUS_NOTIFY,
-  EVENT_STATUS_FAIL
+var EVENT_STATUS_START = 'status:start';
+var EVENT_STATUS_UPDATE = 'status:update';
+var EVENT_STATUS_SUCCEED = 'status:success';
+var EVENT_STATUS_NOTIFY = 'status:notify';
+var EVENT_STATUS_FAIL = 'status:fail';
+var events = {
+  EVENT_STATUS_START: EVENT_STATUS_START,
+  EVENT_STATUS_UPDATE: EVENT_STATUS_UPDATE,
+  EVENT_STATUS_SUCCEED: EVENT_STATUS_SUCCEED,
+  EVENT_STATUS_NOTIFY: EVENT_STATUS_NOTIFY,
+  EVENT_STATUS_FAIL: EVENT_STATUS_FAIL
 };
-const EventBus = new Vue();
-EventBus.$on(events.EVENT_STATUS_START, vm => {
+var EventBus = new Vue();
+EventBus.$on(events.EVENT_STATUS_START, function (vm) {
   if (vm.$spinner) vm.$spinner.start();
 });
-EventBus.$on(events.EVENT_STATUS_UPDATE, (vm, progress) => {
+EventBus.$on(events.EVENT_STATUS_UPDATE, function (vm, progress) {
   if (vm.$Progress) vm.$Progress.set(progress);
 });
-EventBus.$on(events.EVENT_STATUS_SUCCEED, (vm, notif) => {
+EventBus.$on(events.EVENT_STATUS_SUCCEED, function (vm, notif) {
   if (vm.$spinner) vm.$spinner.stop();
   if (vm.$Progress) vm.$Progress.finish();
   if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
 });
-EventBus.$on(events.EVENT_STATUS_NOTIFY, (vm, notif) => {
+EventBus.$on(events.EVENT_STATUS_NOTIFY, function (vm, notif) {
   if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
 });
-EventBus.$on(events.EVENT_STATUS_FAIL, (vm, notif) => {
+EventBus.$on(events.EVENT_STATUS_FAIL, function (vm, notif) {
   if (vm.$spinner) vm.$spinner.stop();
   if (vm.$Progress) vm.$Progress.fail();
   if (notif && notif.message && vm.$notifications) vm.$notifications.notify(notif);
@@ -198,10 +199,10 @@ function notify(vm, notifyMessage) {
 }
 
 var status = {
-  start,
-  succeed,
-  fail,
-  notify
+  start: start,
+  succeed: succeed,
+  fail: fail,
+  notify: notify
 };
 
 /** @module utils */
@@ -215,7 +216,9 @@ var status = {
  * @returns {Promise}
  */
 function sleep(time) {
-  return new Promise(resolve => setTimeout(resolve, time));
+  return new Promise(function (resolve) {
+    return setTimeout(resolve, time);
+  });
 }
 /**
  * Create a unique filename, if a name already exists then append it with "(x)"
@@ -228,8 +231,8 @@ function sleep(time) {
 
 
 function getUniqueName(fileName, otherNames) {
-  let tryName = fileName;
-  let numAdded = 0;
+  var tryName = fileName;
+  var numAdded = 0;
 
   while (otherNames.indexOf(tryName) > -1) {
     numAdded = numAdded + 1;
@@ -240,11 +243,9 @@ function getUniqueName(fileName, otherNames) {
 }
 
 var utils = {
-  sleep,
-  getUniqueName
+  sleep: sleep,
+  getUniqueName: getUniqueName
 };
-
-/** @module rpcs */
 
 function consoleLogCommand(type, funcname, args, kwargs) {
   // Don't show any arguments if none are passed in.
@@ -269,21 +270,8 @@ function consoleLogCommand(type, funcname, args, kwargs) {
  */
 
 
-async function readJsonFromBlob(theBlob) {
-  // Create a FileReader; reader.result contains the contents of blob as text when this is called
-  const reader = new FileReader(); // Create a callback for after the load attempt is finished
-
-  reader.addEventListener("loadend", async function () {
-    try {
-      // Try the conversion.
-      return await JSON.parse(reader.result);
-    } catch (e) {
-      // On failure to convert to JSON, reject the Promise.
-      throw Error('Failed to convert blob to JSON');
-    }
-  }); // Start the load attempt, trying to read the blob in as text.
-
-  reader.readAsText(theBlob);
+function readJsonFromBlob(_x) {
+  return _readJsonFromBlob.apply(this, arguments);
 }
 /**
  * Call an RPC defined using scirisweb 
@@ -297,41 +285,61 @@ async function readJsonFromBlob(theBlob) {
  */
 
 
-async function rpc(funcname, args, kwargs) {
-  // Log the RPC call.
-  consoleLogCommand("normal", funcname, args, kwargs); // Do the RPC processing, returning results as a Promise.
-  // Send the POST request for the RPC call.
+function _readJsonFromBlob() {
+  _readJsonFromBlob = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee3(theBlob) {
+    var reader;
+    return _regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            // Create a FileReader; reader.result contains the contents of blob as text when this is called
+            reader = new FileReader(); // Create a callback for after the load attempt is finished
 
-  try {
-    const response = await axios.post('/api/rpcs', {
-      funcname: funcname,
-      args: args,
-      kwargs: kwargs
-    }); // If there is not error in the POST response.
+            reader.addEventListener("loadend",
+            /*#__PURE__*/
+            _asyncToGenerator(
+            /*#__PURE__*/
+            _regeneratorRuntime.mark(function _callee2() {
+              return _regeneratorRuntime.wrap(function _callee2$(_context2) {
+                while (1) {
+                  switch (_context2.prev = _context2.next) {
+                    case 0:
+                      _context2.prev = 0;
+                      _context2.next = 3;
+                      return JSON.parse(reader.result);
 
-    if (typeof response.data.error === 'undefined') {
-      console.log('RPC succeeded'); // Signal success with the response.
+                    case 3:
+                      return _context2.abrupt("return", _context2.sent);
 
-      return response;
-    }
+                    case 6:
+                      _context2.prev = 6;
+                      _context2.t0 = _context2["catch"](0);
+                      throw Error('Failed to convert blob to JSON');
 
-    console.log('RPC error: ' + response.data.error);
-    throw Error(response.data.error);
-  } catch (error) {
-    console.log('RPC error: ' + error); // If there was an actual response returned from the server...
+                    case 9:
+                    case "end":
+                      return _context2.stop();
+                  }
+                }
+              }, _callee2, null, [[0, 6]]);
+            }))); // Start the load attempt, trying to read the blob in as text.
 
-    if (error.response) {
-      // If we have exception information in the response 
-      // (which indicates an exception on the server side)...
-      if (typeof error.response.data.exception !== 'undefined') {
-        // For now, reject with an error message matching the exception.
-        throw Error(error.response.data.exception);
+            reader.readAsText(theBlob);
+
+          case 3:
+          case "end":
+            return _context3.stop();
+        }
       }
-    } else {
-      // Reject with the error axios got.
-      throw Error(error);
-    }
-  }
+    }, _callee3);
+  }));
+  return _readJsonFromBlob.apply(this, arguments);
+}
+
+function rpc(_x2, _x3, _x4) {
+  return _rpc.apply(this, arguments);
 }
 /**
  * Call an Download RPC defined using scirisweb via /api/download
@@ -346,10 +354,84 @@ async function rpc(funcname, args, kwargs) {
 // #NOTE Parham: Need to confirm how this works before refactoring
 
 
+function _rpc() {
+  _rpc = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee4(funcname, args, kwargs) {
+    var response;
+    return _regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            // Log the RPC call.
+            consoleLogCommand("normal", funcname, args, kwargs); // Do the RPC processing, returning results as a Promise.
+            // Send the POST request for the RPC call.
+
+            _context4.prev = 1;
+            _context4.next = 4;
+            return axios.post('/api/rpcs', {
+              funcname: funcname,
+              args: args,
+              kwargs: kwargs
+            });
+
+          case 4:
+            response = _context4.sent;
+
+            if (!(typeof response.data.error === 'undefined')) {
+              _context4.next = 8;
+              break;
+            }
+
+            console.log('RPC succeeded'); // Signal success with the response.
+
+            return _context4.abrupt("return", response);
+
+          case 8:
+            //console.log('RPC error: ' + response.data.error);
+            console.log(response.data);
+            throw Error(response.data.error);
+
+          case 12:
+            _context4.prev = 12;
+            _context4.t0 = _context4["catch"](1);
+            console.log('RPC error: ' + _context4.t0);
+            console.log(_context4.t0);
+            console.log("herkjhsdflkjahsdflkjhasdkljfhaslkjdfhalksjdhfkajsdhfkajsdhflkjasdhf>>>>>>>>>>>>"); // If there was an actual response returned from the server...
+
+            if (!_context4.t0.response) {
+              _context4.next = 22;
+              break;
+            }
+
+            if (!(typeof _context4.t0.response.data.exception !== 'undefined')) {
+              _context4.next = 20;
+              break;
+            }
+
+            throw Error(_context4.t0.response.data.exception);
+
+          case 20:
+            _context4.next = 23;
+            break;
+
+          case 22:
+            throw Error(_context4.t0);
+
+          case 23:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4, null, [[1, 12]]);
+  }));
+  return _rpc.apply(this, arguments);
+}
+
 function download(funcname, args, kwargs) {
   consoleLogCommand("download", funcname, args, kwargs); // Log the download RPC call.
 
-  return new Promise((resolve, reject) => {
+  return new Promise(function (resolve, reject) {
     // Do the RPC processing, returning results as a Promise.
     axios.post('/api/rpcs', {
       // Send the POST request for the RPC call.
@@ -358,13 +440,13 @@ function download(funcname, args, kwargs) {
       kwargs: kwargs
     }, {
       responseType: 'blob'
-    }).then(response => {
-      readJsonFromBlob(response.data).then(responsedata => {
+    }).then(function (response) {
+      readJsonFromBlob(response.data).then(function (responsedata) {
         if (typeof responsedata.error != 'undefined') {
           // If we have error information in the response (which indicates a logical error on the server side)...
           reject(Error(responsedata.error)); // For now, reject with an error message matching the error.
         }
-      }).catch(error2 => {
+      }).catch(function (error2) {
         // An error here indicates we do in fact have a file to download.
         var blob = new Blob([response.data]); // Create a new blob object (containing the file data) from the response.data component.
 
@@ -374,15 +456,15 @@ function download(funcname, args, kwargs) {
 
         resolve(response); // Signal success with the response.
       });
-    }).catch(error => {
+    }).catch(function (error) {
       if (error.response) {
         // If there was an actual response returned from the server...
-        readJsonFromBlob(error.response.data).then(responsedata => {
+        readJsonFromBlob(error.response.data).then(function (responsedata) {
           if (typeof responsedata.exception !== 'undefined') {
             // If we have exception information in the response (which indicates an exception on the server side)...
             reject(Error(responsedata.exception)); // For now, reject with an error message matching the exception.
           }
-        }).catch(error2 => {
+        }).catch(function (error2) {
           reject(error); // Reject with the error axios got.
         });
       } else {
@@ -407,50 +489,89 @@ function download(funcname, args, kwargs) {
 function upload(funcname, args, kwargs, fileType) {
   consoleLogCommand("upload", funcname, args, kwargs); // Function for trapping the change event that has the user-selected file.
 
-  const onFileChange = async e => {
-    // Pull out the files (should only be 1) that were selected.
-    var files = e.target.files || e.dataTransfer.files; // If no files were selected, reject the promise.
+  var onFileChange =
+  /*#__PURE__*/
+  function () {
+    var _ref = _asyncToGenerator(
+    /*#__PURE__*/
+    _regeneratorRuntime.mark(function _callee(e) {
+      var files, formData, response;
+      return _regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              // Pull out the files (should only be 1) that were selected.
+              files = e.target.files || e.dataTransfer.files; // If no files were selected, reject the promise.
 
-    if (!files.length) {
-      throw Error('No file selected');
-    } // Create a FormData object for holding the file.
+              if (files.length) {
+                _context.next = 3;
+                break;
+              }
 
+              throw Error('No file selected');
 
-    const formData = new FormData(); // Put the selected file in the formData object with 'uploadfile' key.
+            case 3:
+              // Create a FormData object for holding the file.
+              formData = new FormData(); // Put the selected file in the formData object with 'uploadfile' key.
 
-    formData.append('uploadfile', files[0]); // Add the RPC function name to the form data.
+              formData.append('uploadfile', files[0]); // Add the RPC function name to the form data.
 
-    formData.append('funcname', funcname); // Add args and kwargs to the form data.
+              formData.append('funcname', funcname); // Add args and kwargs to the form data.
 
-    formData.append('args', JSON.stringify(args));
-    formData.append('kwargs', JSON.stringify(kwargs));
+              formData.append('args', JSON.stringify(args));
+              formData.append('kwargs', JSON.stringify(kwargs));
+              _context.prev = 8;
+              _context.next = 11;
+              return axios.post('/api/rpcs', formData);
 
-    try {
-      const response = await axios.post('/api/rpcs', formData);
+            case 11:
+              response = _context.sent;
 
-      if (typeof response.data.error != 'undefined') {
-        throw Error(response.data.error);
-      }
+              if (!(typeof response.data.error != 'undefined')) {
+                _context.next = 14;
+                break;
+              }
 
-      return response;
-    } catch (error) {
-      // If there was an actual response returned from the server...
-      if (!error.response) {
-        throw Error(error);
-      } // If we have exception information in the response (which 
-      // indicates an exception on the server side)...
+              throw Error(response.data.error);
 
+            case 14:
+              return _context.abrupt("return", response);
 
-      if (typeof error.response.data.exception != 'undefined') {
-        // For now, reject with an error message matching the exception.
-        throw Error(error.response.data.exception);
-      }
-    }
-  }; // Create an invisible file input element and set its change callback 
+            case 17:
+              _context.prev = 17;
+              _context.t0 = _context["catch"](8);
+
+              if (_context.t0.response) {
+                _context.next = 21;
+                break;
+              }
+
+              throw Error(_context.t0);
+
+            case 21:
+              if (!(typeof _context.t0.response.data.exception != 'undefined')) {
+                _context.next = 23;
+                break;
+              }
+
+              throw Error(_context.t0.response.data.exception);
+
+            case 23:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, null, [[8, 17]]);
+    }));
+
+    return function onFileChange(_x5) {
+      return _ref.apply(this, arguments);
+    };
+  }(); // Create an invisible file input element and set its change callback 
   // to our onFileChange function.
 
 
-  const inElem = document.createElement('input');
+  var inElem = document.createElement('input');
   inElem.setAttribute('type', 'file');
   inElem.setAttribute('accept', fileType);
   inElem.addEventListener('change', onFileChange); // Manually click the button to open the file dialog.
@@ -459,21 +580,25 @@ function upload(funcname, args, kwargs, fileType) {
 }
 
 var rpcs = {
-  rpc,
-  download,
-  upload
+  rpc: rpc,
+  download: download,
+  upload: upload
 };
 
-/** @module graphs */
+var mpld3 = null;
+
+if (typeof d3 !== 'undefined') {
+  mpld3 = require('mpld3');
+}
 
 function placeholders(vm, startVal) {
-  let indices = [];
+  var indices = [];
 
   if (!startVal) {
     startVal = 0;
   }
 
-  for (let i = startVal; i <= 100; i++) {
+  for (var i = startVal; i <= 100; i++) {
     indices.push(i);
     vm.showGraphDivs.push(false);
     vm.showLegendDivs.push(false);
@@ -490,8 +615,8 @@ function placeholders(vm, startVal) {
 
 
 function clearGraphs(vm) {
-  for (let index = 0; index <= 100; index++) {
-    let divlabel = 'fig' + index;
+  for (var index = 0; index <= 100; index++) {
+    var divlabel = 'fig' + index;
 
     if (typeof d3 === 'undefined') {
       console.log("please include d3 to use the clearGraphs function");
@@ -512,90 +637,8 @@ function clearGraphs(vm) {
  */
 
 
-async function makeGraphs(vm, data, routepath) {
-  if (typeof d3 === 'undefined') {
-    console.log("please include d3 to use the makeGraphs function");
-    return false;
-  } // Don't render graphs if we've changed page
-
-
-  if (routepath && routepath !== vm.$route.path) {
-    console.log('Not rendering graphs since route changed: ' + routepath + ' vs. ' + vm.$route.path);
-    return false;
-  }
-
-  let waitingtime = 0.5;
-  var graphdata = data.graphs; // var legenddata = data.legends
-  // Start indicating progress.
-
-  status.start(vm);
-  vm.hasGraphs = true;
-  await utils.sleep(waitingtime * 1000);
-  let n_plots = graphdata.length; // let n_legends = legenddata.length
-
-  console.log('Rendering ' + n_plots + ' graphs'); // if (n_plots !== n_legends) {
-  //   console.log('WARNING: different numbers of plots and legends: ' + n_plots + ' vs. ' + n_legends)
-  // }
-
-  for (var index = 0; index <= n_plots; index++) {
-    console.log('Rendering plot ' + index);
-    var figlabel = 'fig' + index;
-    var figdiv = document.getElementById(figlabel);
-
-    if (!figdiv) {
-      console.log('WARNING: figdiv not found: ' + figlabel);
-    } // Show figure containers
-
-
-    if (index >= 1 && index < n_plots) {
-      var figcontainerlabel = 'figcontainer' + index; // CK: Not sure if this is necessary? To ensure the div is clear first
-
-      var figcontainerdiv = document.getElementById(figcontainerlabel);
-
-      if (figcontainerdiv) {
-        figcontainerdiv.style.display = 'flex';
-      } else {
-        console.log('WARNING: figcontainerdiv not found: ' + figcontainerlabel);
-      } // var legendlabel = 'legend' + index
-      // var legenddiv  = document.getElementById(legendlabel);
-      // if (legenddiv) {
-      //   while (legenddiv.firstChild) {
-      //     legenddiv.removeChild(legenddiv.firstChild);
-      //   }
-      // } else {
-      //   console.log('WARNING: legenddiv not found: ' + legendlabel)
-      // }
-
-    } // Draw figures
-
-
-    try {
-      mpld3.draw_figure(figlabel, graphdata[index], function (fig, element) {
-        fig.setXTicks(6, function (d) {
-          return d3.format('.0f')(d);
-        }); // fig.setYTicks(null, function (d) { // Looks too weird with 500m for 0.5
-        //   return d3.format('.2s')(d);
-        // });
-      }, true);
-    } catch (error) {
-      console.log('Could not plot graph: ' + error.message);
-    } // Draw legends
-    // if (index>=1 && index<n_plots) {
-    //   try {
-    //     mpld3.draw_figure(legendlabel, legenddata[index], function (fig, element) {
-    //     });
-    //   } catch (error) {
-    //     console.log(error)
-    //   }
-    //
-    // }
-
-
-    vm.showGraphDivs[index] = true;
-  } // CK: This should be a promise, otherwise this appears before the graphs do
-
-
-  status.succeed(vm, 'Graphs created');
+function makeGraphs(_x, _x2, _x3) {
+  return _makeGraphs.apply(this, arguments);
 } //
 // Graphs DOM functions
 //
@@ -607,12 +650,125 @@ async function makeGraphs(vm, data, routepath) {
  */
 
 
-function showBrowserWindowSize() {
-  let w = window.innerWidth;
-  let h = window.innerHeight;
-  let ow = window.outerWidth; //including toolbars and status bar etc.
+function _makeGraphs() {
+  _makeGraphs = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee(vm, data, routepath) {
+    var waitingtime, graphdata, n_plots, index, figlabel, figdiv, figcontainerlabel, figcontainerdiv;
+    return _regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            if (!(typeof d3 === 'undefined')) {
+              _context.next = 3;
+              break;
+            }
 
-  let oh = window.outerHeight;
+            console.log("please include d3 to use the makeGraphs function");
+            return _context.abrupt("return", false);
+
+          case 3:
+            if (!(routepath && routepath !== vm.$route.path)) {
+              _context.next = 6;
+              break;
+            }
+
+            console.log('Not rendering graphs since route changed: ' + routepath + ' vs. ' + vm.$route.path);
+            return _context.abrupt("return", false);
+
+          case 6:
+            waitingtime = 0.5;
+            graphdata = data.graphs; // var legenddata = data.legends
+            // Start indicating progress.
+
+            status.start(vm);
+            vm.hasGraphs = true;
+            _context.next = 12;
+            return utils.sleep(waitingtime * 1000);
+
+          case 12:
+            n_plots = graphdata.length; // let n_legends = legenddata.length
+
+            console.log('Rendering ' + n_plots + ' graphs'); // if (n_plots !== n_legends) {
+            //   console.log('WARNING: different numbers of plots and legends: ' + n_plots + ' vs. ' + n_legends)
+            // }
+
+            for (index = 0; index <= n_plots; index++) {
+              console.log('Rendering plot ' + index);
+              figlabel = 'fig' + index;
+              figdiv = document.getElementById(figlabel);
+
+              if (!figdiv) {
+                console.log('WARNING: figdiv not found: ' + figlabel);
+              } // Show figure containers
+
+
+              if (index >= 1 && index < n_plots) {
+                figcontainerlabel = 'figcontainer' + index; // CK: Not sure if this is necessary? To ensure the div is clear first
+
+                figcontainerdiv = document.getElementById(figcontainerlabel);
+
+                if (figcontainerdiv) {
+                  figcontainerdiv.style.display = 'flex';
+                } else {
+                  console.log('WARNING: figcontainerdiv not found: ' + figcontainerlabel);
+                } // var legendlabel = 'legend' + index
+                // var legenddiv  = document.getElementById(legendlabel);
+                // if (legenddiv) {
+                //   while (legenddiv.firstChild) {
+                //     legenddiv.removeChild(legenddiv.firstChild);
+                //   }
+                // } else {
+                //   console.log('WARNING: legenddiv not found: ' + legendlabel)
+                // }
+
+              } // Draw figures
+
+
+              try {
+                mpld3.draw_figure(figlabel, graphdata[index], function (fig, element) {
+                  fig.setXTicks(6, function (d) {
+                    return d3.format('.0f')(d);
+                  }); // fig.setYTicks(null, function (d) { // Looks too weird with 500m for 0.5
+                  //   return d3.format('.2s')(d);
+                  // });
+                }, true);
+              } catch (error) {
+                console.log('Could not plot graph: ' + error.message);
+              } // Draw legends
+              // if (index>=1 && index<n_plots) {
+              //   try {
+              //     mpld3.draw_figure(legendlabel, legenddata[index], function (fig, element) {
+              //     });
+              //   } catch (error) {
+              //     console.log(error)
+              //   }
+              //
+              // }
+
+
+              vm.showGraphDivs[index] = true;
+            } // CK: This should be a promise, otherwise this appears before the graphs do
+
+
+            status.succeed(vm, 'Graphs created');
+
+          case 16:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+  return _makeGraphs.apply(this, arguments);
+}
+
+function showBrowserWindowSize() {
+  var w = window.innerWidth;
+  var h = window.innerHeight;
+  var ow = window.outerWidth; //including toolbars and status bar etc.
+
+  var oh = window.outerHeight;
   console.log('Browser window size:');
   console.log(w, h, ow, oh);
 }
@@ -627,9 +783,9 @@ function showBrowserWindowSize() {
 
 function scaleElem(svg, frac) {
   // It might ultimately be better to redraw the graph, but this works
-  let width = svg.getAttribute("width");
-  let height = svg.getAttribute("height");
-  let viewBox = svg.getAttribute("viewBox");
+  var width = svg.getAttribute("width");
+  var height = svg.getAttribute("height");
+  var viewBox = svg.getAttribute("viewBox");
 
   if (!viewBox) {
     svg.setAttribute("viewBox", '0 0 ' + width + ' ' + height);
@@ -656,9 +812,9 @@ function scaleFigs(vm, frac) {
     vm.figscale = 1.0;
   }
 
-  let graphs = window.top.document.querySelectorAll('svg.mpld3-figure');
+  var graphs = window.top.document.querySelectorAll('svg.mpld3-figure');
 
-  for (let g = 0; g < graphs.length; g++) {
+  for (var g = 0; g < graphs.length; g++) {
     scaleElem(graphs[g], frac);
   }
 } //
@@ -695,35 +851,35 @@ function onMouseUpdate(e, vm) {
 }
 
 function createDialogs(vm) {
-  let vals = placeholders(vm);
+  var vals = placeholders(vm);
 
-  for (let val in vals) {
+  for (var val in vals) {
     newDialog(vm, val, 'Dialog ' + val, 'Placeholder content ' + val);
   }
 } // Create a new dialog
 
 
 function newDialog(vm, id, name, content) {
-  let options = {
+  var options = {
     left: 123 + Number(id),
     top: 123
   };
-  let style = {
+  var style = {
     options: options
   };
-  let properties = {
-    id,
-    name,
-    content,
-    style,
-    options
+  var properties = {
+    id: id,
+    name: name,
+    content: content,
+    style: style,
+    options: options
   };
   return vm.openDialogs.push(properties);
 }
 
 function findDialog(vm, id, dialogs) {
   console.log('looking');
-  let index = dialogs.findIndex(val => {
+  var index = dialogs.findIndex(function (val) {
     return String(val.id) === String(id); // Force type conversion
   });
   return index > -1 ? index : null;
@@ -731,10 +887,10 @@ function findDialog(vm, id, dialogs) {
 
 
 function maximize(vm, id) {
-  let index = Number(id);
-  let DDlabel = 'DD' + id; // DD for dialog-drag
+  var index = Number(id);
+  var DDlabel = 'DD' + id; // DD for dialog-drag
 
-  let DDdiv = document.getElementById(DDlabel);
+  var DDdiv = document.getElementById(DDlabel);
 
   if (DDdiv) {
     DDdiv.style.left = String(vm.mousex - 80) + 'px';
@@ -751,8 +907,8 @@ function maximize(vm, id) {
 
   vm.showLegendDivs[index] = true; // Not really used, but here for completeness
 
-  let containerlabel = 'legendcontainer' + id;
-  let containerdiv = document.getElementById(containerlabel);
+  var containerlabel = 'legendcontainer' + id;
+  var containerdiv = document.getElementById(containerlabel);
 
   if (containerdiv) {
     containerdiv.style.display = 'inline-block'; // Ensure they're invisible
@@ -763,10 +919,10 @@ function maximize(vm, id) {
 
 
 function minimize(vm, id) {
-  let index = Number(id);
+  var index = Number(id);
   vm.showLegendDivs[index] = false;
-  let containerlabel = 'legendcontainer' + id;
-  let containerdiv = document.getElementById(containerlabel);
+  var containerlabel = 'legendcontainer' + id;
+  var containerdiv = document.getElementById(containerlabel);
 
   if (containerdiv) {
     containerdiv.style.display = 'none'; // Ensure they're invisible
@@ -776,22 +932,21 @@ function minimize(vm, id) {
 }
 
 var graphs = {
-  placeholders,
-  clearGraphs,
-  makeGraphs,
-  scaleFigs,
-  showBrowserWindowSize,
-  addListener,
-  onMouseUpdate,
-  createDialogs,
-  newDialog,
-  findDialog,
-  maximize,
-  minimize,
-  mpld3
+  placeholders: placeholders,
+  clearGraphs: clearGraphs,
+  makeGraphs: makeGraphs,
+  scaleFigs: scaleFigs,
+  showBrowserWindowSize: showBrowserWindowSize,
+  addListener: addListener,
+  onMouseUpdate: onMouseUpdate,
+  createDialogs: createDialogs,
+  newDialog: newDialog,
+  findDialog: findDialog,
+  maximize: maximize,
+  minimize: minimize,
+  mpld3: mpld3
 };
 
-/** @module task */
 /**
  * getTaskResultWaiting() -- given a task_id string, a waiting time (in 
  * sec.), and a remote task function name and its args, try to launch 
@@ -808,28 +963,8 @@ var graphs = {
  * @returns {Promise}
  */
 
-async function getTaskResultWaiting(task_id, waitingtime, func_name, args, kwargs) {
-  if (!args) {
-    // Set the arguments to an empty list if none are passed in.
-    args = [];
-  }
-
-  try {
-    const task = await rpcs.rpc('launch_task', [task_id, func_name, args, kwargs]);
-    await utils.sleep(waitingtime * 1000);
-    const result = await rpcs.rpc('get_task_result', [task_id]); // Clean up the task_id task.
-
-    await rpcs.rpc('delete_task', [task_id]);
-  } catch (error) {
-    // While we might want to clean up the task as below, the Celery
-    // worker is likely to "resurrect" the task if it actually is
-    // running the task to completion.
-    // Clean up the task_id task.
-    // rpcCall('delete_task', [task_id])
-    throw Error(error);
-  }
-
-  return result;
+function getTaskResultWaiting(_x, _x2, _x3, _x4, _x5) {
+  return _getTaskResultWaiting.apply(this, arguments);
 }
 /**
  * Given a task_id string, a timeout time (in 
@@ -849,15 +984,63 @@ async function getTaskResultWaiting(task_id, waitingtime, func_name, args, kwarg
  */
 
 
-async function getTaskResultPolling(task_id, timeout, pollinterval, func_name, args, kwargs) {
-  if (!args) {
-    // Set the arguments to an empty list if none are passed in.
-    args = [];
-  }
+function _getTaskResultWaiting() {
+  _getTaskResultWaiting = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee(task_id, waitingtime, func_name, args, kwargs) {
+    var task, _result;
 
-  await rpcs.rpc('launch_task', [task_id, func_name, args, kwargs]); // Do the whole sequence of polling steps, starting with the first (recursive) call.
+    return _regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            if (!args) {
+              // Set the arguments to an empty list if none are passed in.
+              args = [];
+            }
 
-  return await pollStep(task_id, timeout, pollinterval, 0);
+            _context.prev = 1;
+            _context.next = 4;
+            return rpcs.rpc('launch_task', [task_id, func_name, args, kwargs]);
+
+          case 4:
+            task = _context.sent;
+            _context.next = 7;
+            return utils.sleep(waitingtime * 1000);
+
+          case 7:
+            _context.next = 9;
+            return rpcs.rpc('get_task_result', [task_id]);
+
+          case 9:
+            _result = _context.sent;
+            _context.next = 12;
+            return rpcs.rpc('delete_task', [task_id]);
+
+          case 12:
+            _context.next = 17;
+            break;
+
+          case 14:
+            _context.prev = 14;
+            _context.t0 = _context["catch"](1);
+            throw Error(_context.t0);
+
+          case 17:
+            return _context.abrupt("return", result);
+
+          case 18:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, null, [[1, 14]]);
+  }));
+  return _getTaskResultWaiting.apply(this, arguments);
+}
+
+function getTaskResultPolling(_x6, _x7, _x8, _x9, _x10, _x11) {
+  return _getTaskResultPolling.apply(this, arguments);
 }
 /**
  * A polling step for getTaskResultPolling().  Uses the task_id, 
@@ -880,41 +1063,117 @@ async function getTaskResultPolling(task_id, timeout, pollinterval, func_name, a
  */
 
 
-async function pollStep(task_id, timeout, pollinterval, elapsedtime) {
-  // Check to see if the elapsed time is longer than the timeout 
-  // (and we have a timeout we actually want to check against) and if so, fail.
-  if (elapsedtime > timeout && timeout > 0) {
-    throw Error('Task polling timed out');
-  } // Sleep timeout seconds.
+function _getTaskResultPolling() {
+  _getTaskResultPolling = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee2(task_id, timeout, pollinterval, func_name, args, kwargs) {
+    return _regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            if (!args) {
+              // Set the arguments to an empty list if none are passed in.
+              args = [];
+            }
 
+            _context2.next = 3;
+            return rpcs.rpc('launch_task', [task_id, func_name, args, kwargs]);
 
-  await utils.sleep(pollinterval * 1000); // Check the status of the task.
+          case 3:
+            _context2.next = 5;
+            return pollStep(task_id, timeout, pollinterval, 0);
 
-  const task = await rpcs.rpc('check_task', [task_id]); // There was an issue with executing the taks
+          case 5:
+            return _context2.abrupt("return", _context2.sent);
 
-  if (task.data.task.status == 'error') {
-    throw Error(task.data.task.errorText);
-  } // If the task is completed...
+          case 6:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+  return _getTaskResultPolling.apply(this, arguments);
+}
 
+function pollStep(_x12, _x13, _x14, _x15) {
+  return _pollStep.apply(this, arguments);
+}
 
-  if (task.data.task.status == 'completed') {
-    const result = await rpcs.rpc('get_task_result', [task_id]); // Clean up the task_id task.
+function _pollStep() {
+  _pollStep = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee3(task_id, timeout, pollinterval, elapsedtime) {
+    var task, _result2;
 
-    await rpcs.rpc('delete_task', [task_id]);
-    return result;
-  } // Task is still pending processing, do another poll step, passing in an 
-  // incremented elapsed time.
+    return _regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            if (!(elapsedtime > timeout && timeout > 0)) {
+              _context3.next = 2;
+              break;
+            }
 
+            throw Error('Task polling timed out');
 
-  return await pollStep(task_id, timeout, pollinterval, elapsedtime + pollinterval);
+          case 2:
+            _context3.next = 4;
+            return utils.sleep(pollinterval * 1000);
+
+          case 4:
+            _context3.next = 6;
+            return rpcs.rpc('check_task', [task_id]);
+
+          case 6:
+            task = _context3.sent;
+
+            if (!(task.data.task.status == 'error')) {
+              _context3.next = 9;
+              break;
+            }
+
+            throw Error(task.data.task.errorText);
+
+          case 9:
+            if (!(task.data.task.status == 'completed')) {
+              _context3.next = 16;
+              break;
+            }
+
+            _context3.next = 12;
+            return rpcs.rpc('get_task_result', [task_id]);
+
+          case 12:
+            _result2 = _context3.sent;
+            _context3.next = 15;
+            return rpcs.rpc('delete_task', [task_id]);
+
+          case 15:
+            return _context3.abrupt("return", _result2);
+
+          case 16:
+            _context3.next = 18;
+            return pollStep(task_id, timeout, pollinterval, elapsedtime + pollinterval);
+
+          case 18:
+            return _context3.abrupt("return", _context3.sent);
+
+          case 19:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3);
+  }));
+  return _pollStep.apply(this, arguments);
 }
 
 var tasks = {
-  getTaskResultWaiting,
-  getTaskResultPolling
+  getTaskResultWaiting: getTaskResultWaiting,
+  getTaskResultPolling: getTaskResultPolling
 };
 
-/** @module user */
 /**
  * Using the correct combination of a user's username and email perform a login 
  * The password is hashed using sha244 and sent to the API
@@ -928,8 +1187,8 @@ var tasks = {
 
 function loginCall(username, password) {
   // Get a hex version of a hashed password using the SHA224 algorithm.
-  const hashPassword = sha224(password).toString();
-  const args = [username, hashPassword];
+  var hashPassword = sha224(password).toString();
+  var args = [username, hashPassword];
   return rpcs.rpc('user_login', args);
 }
 /**
@@ -972,8 +1231,8 @@ function getCurrentUserInfo() {
 
 function registerUser(username, password, displayname, email) {
   // Get a hex version of a hashed password using the SHA224 algorithm.
-  const hashPassword = sha224(password).toString();
-  const args = [username, hashPassword, displayname, email];
+  var hashPassword = sha224(password).toString();
+  var args = [username, hashPassword, displayname, email];
   return rpcs.rpc('user_register', args);
 }
 /**
@@ -991,8 +1250,8 @@ function registerUser(username, password, displayname, email) {
 
 function changeUserInfo(username, password, displayname, email) {
   // Get a hex version of a hashed password using the SHA224 algorithm.
-  const hashPassword = sha224(password).toString();
-  const args = [username, hashPassword, displayname, email];
+  var hashPassword = sha224(password).toString();
+  var args = [username, hashPassword, displayname, email];
   return rpcs.rpc('user_change_info', args);
 }
 /**
@@ -1008,9 +1267,9 @@ function changeUserInfo(username, password, displayname, email) {
 
 function changeUserPassword(oldpassword, newpassword) {
   // Get a hex version of the hashed passwords using the SHA224 algorithm.
-  const hashOldPassword = sha224(oldpassword).toString();
-  const hashNewPassword = sha224(newpassword).toString();
-  const args = [hashOldPassword, hashNewPassword];
+  var hashOldPassword = sha224(oldpassword).toString();
+  var hashNewPassword = sha224(newpassword).toString();
+  var args = [hashOldPassword, hashNewPassword];
   return rpcs.rpc('user_change_password', args);
 }
 /**
@@ -1024,7 +1283,7 @@ function changeUserPassword(oldpassword, newpassword) {
 
 
 function adminGetUserInfo(username) {
-  const args = [username];
+  var args = [username];
   return rpcs.rpc('admin_get_user_info', args);
 }
 /**
@@ -1038,7 +1297,7 @@ function adminGetUserInfo(username) {
 
 
 function deleteUser(username) {
-  const args = [username];
+  var args = [username];
   return rpcs.rpc('admin_delete_user', args);
 }
 /**
@@ -1052,7 +1311,7 @@ function deleteUser(username) {
 
 
 function activateUserAccount(username) {
-  const args = [username];
+  var args = [username];
   return rpcs.rpc('admin_activate_account', args);
 }
 /**
@@ -1066,7 +1325,7 @@ function activateUserAccount(username) {
 
 
 function deactivateUserAccount(username) {
-  const args = [username];
+  var args = [username];
   return rpcs.rpc('admin_deactivate_account', args);
 }
 /**
@@ -1081,7 +1340,7 @@ function deactivateUserAccount(username) {
 
 
 function grantUserAdminRights(username) {
-  const args = [username];
+  var args = [username];
   return rpcs.rpc('admin_grant_admin', args);
 }
 /**
@@ -1096,7 +1355,7 @@ function grantUserAdminRights(username) {
 
 
 function revokeUserAdminRights(username) {
-  const args = [username];
+  var args = [username];
   return rpcs.rpc('admin_revoke_admin', args);
 }
 /**
@@ -1111,7 +1370,7 @@ function revokeUserAdminRights(username) {
 
 
 function resetUserPassword(username) {
-  const args = [username];
+  var args = [username];
   return rpcs.rpc('admin_reset_password', args);
 } // Higher level user functions that call the lower level ones above
 
@@ -1124,16 +1383,8 @@ function resetUserPassword(username) {
  */
 
 
-async function getUserInfo(store) {
-  try {
-    // Set the username to what the server indicates.
-    const response = await getCurrentUserInfo();
-    store.commit('newUser', response.data.user);
-  } catch (error) {
-    // An error probably means the user is not logged in.
-    // Set the username to {}.  
-    store.commit('newUser', {});
-  }
+function getUserInfo(_x) {
+  return _getUserInfo.apply(this, arguments);
 }
 /**
  * Check if there is a user currently logged in
@@ -1142,6 +1393,42 @@ async function getUserInfo(store) {
  * @returns {bool}
  */
 
+
+function _getUserInfo() {
+  _getUserInfo = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee(store) {
+    var response;
+    return _regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            _context.prev = 0;
+            _context.next = 3;
+            return getCurrentUserInfo();
+
+          case 3:
+            response = _context.sent;
+            store.commit('newUser', response.data.user);
+            _context.next = 10;
+            break;
+
+          case 7:
+            _context.prev = 7;
+            _context.t0 = _context["catch"](0);
+            // An error probably means the user is not logged in.
+            // Set the username to {}.  
+            store.commit('newUser', {});
+
+          case 10:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, null, [[0, 7]]);
+  }));
+  return _getUserInfo.apply(this, arguments);
+}
 
 function checkLoggedIn() {
   if (this.currentUser.displayname === undefined) return false;else return true;
@@ -1163,22 +1450,22 @@ function checkAdminLoggedIn() {
 }
 
 var user = {
-  loginCall,
-  logoutCall,
-  getCurrentUserInfo,
-  registerUser,
-  changeUserInfo,
-  changeUserPassword,
-  adminGetUserInfo,
-  deleteUser,
-  activateUserAccount,
-  deactivateUserAccount,
-  grantUserAdminRights,
-  revokeUserAdminRights,
-  resetUserPassword,
-  getUserInfo,
-  checkLoggedIn,
-  checkAdminLoggedIn
+  loginCall: loginCall,
+  logoutCall: logoutCall,
+  getCurrentUserInfo: getCurrentUserInfo,
+  registerUser: registerUser,
+  changeUserInfo: changeUserInfo,
+  changeUserPassword: changeUserPassword,
+  adminGetUserInfo: adminGetUserInfo,
+  deleteUser: deleteUser,
+  activateUserAccount: activateUserAccount,
+  deactivateUserAccount: deactivateUserAccount,
+  grantUserAdminRights: grantUserAdminRights,
+  revokeUserAdminRights: revokeUserAdminRights,
+  resetUserPassword: resetUserPassword,
+  getUserInfo: getUserInfo,
+  checkLoggedIn: checkLoggedIn,
+  checkAdminLoggedIn: checkAdminLoggedIn
 };
 
 //
@@ -1221,8 +1508,7 @@ var script = {
       default: '100%'
     }
   },
-
-  data() {
+  data: function data() {
     return {
       titleStyle: {
         textAlign: 'center'
@@ -1233,26 +1519,25 @@ var script = {
       opened: false
     };
   },
+  beforeMount: function beforeMount() {
+    var _this = this;
 
-  beforeMount() {
     // Create listener for start event.
-    EventBus.$on('spinner:start', () => {
-      this.show();
+    EventBus.$on('spinner:start', function () {
+      _this.show();
     }); // Create listener for stop event.
 
-    EventBus.$on('spinner:stop', () => {
-      this.hide();
+    EventBus.$on('spinner:stop', function () {
+      _this.hide();
     });
   },
-
   computed: {
-    spinnerSize() {
+    spinnerSize: function spinnerSize() {
       return parseFloat(this.size) - 25;
     },
-
-    modalHeight() {
+    modalHeight: function modalHeight() {
       // Start with the height of the spinner wrapper.
-      let fullHeight = parseFloat(this.size) + 2 * parseFloat(this.padding); // If there is a title there, add space for the text.
+      var fullHeight = parseFloat(this.size) + 2 * parseFloat(this.padding); // If there is a title there, add space for the text.
 
       if (this.title !== '') {
         fullHeight = fullHeight + 20 + parseFloat(this.padding);
@@ -1265,43 +1550,35 @@ var script = {
 
       return fullHeight + 'px';
     },
-
-    modalWidth() {
+    modalWidth: function modalWidth() {
       return parseFloat(this.size) + 2 * parseFloat(this.padding) + 'px';
     }
-
   },
   methods: {
-    beforeOpen() {
+    beforeOpen: function beforeOpen() {
       window.addEventListener('keyup', this.onKey);
       this.opened = true;
     },
-
-    beforeClose() {
+    beforeClose: function beforeClose() {
       window.removeEventListener('keyup', this.onKey);
       this.opened = false;
     },
-
-    onKey(event) {
+    onKey: function onKey(event) {
       if (event.keyCode == 27) {
         console.log('Exited spinner through Esc key');
         this.cancel();
       }
     },
-
-    cancel() {
+    cancel: function cancel() {
       this.$emit('spinner-cancel');
       this.hide();
     },
-
-    show() {
+    show: function show() {
       this.$modal.show('popup-spinner'); // Bring up the spinner modal.
     },
-
-    hide() {
+    hide: function hide() {
       this.$modal.hide('popup-spinner'); // Dispel the spinner modal.
     }
-
   }
 };
 
@@ -1540,55 +1817,51 @@ var script$1 = {
     },
     timestamp: {
       type: Date,
-      default: () => new Date()
+      default: function _default() {
+        return new Date();
+      }
     }
   },
-
-  data() {
+  data: function data() {
     return {};
   },
-
   computed: {
-    hasIcon() {
+    hasIcon: function hasIcon() {
       return this.icon && this.icon.length > 0;
     },
-
-    alertType() {
-      return `alert-${this.type}`;
+    alertType: function alertType() {
+      return "alert-".concat(this.type);
     },
+    customPosition: function customPosition() {
+      var _this = this;
 
-    customPosition() {
-      let initialMargin = 20;
-      let alertHeight = 60;
-      let sameAlertsCount = this.$notifications.state.filter(alert => {
-        return alert.horizontalAlign === this.horizontalAlign && alert.verticalAlign === this.verticalAlign;
+      var initialMargin = 20;
+      var alertHeight = 60;
+      var sameAlertsCount = this.$notifications.state.filter(function (alert) {
+        return alert.horizontalAlign === _this.horizontalAlign && alert.verticalAlign === _this.verticalAlign;
       }).length;
-      let pixels = (sameAlertsCount - 1) * alertHeight + initialMargin;
-      let styles = {};
+      var pixels = (sameAlertsCount - 1) * alertHeight + initialMargin;
+      var styles = {};
 
       if (this.verticalAlign === 'top') {
-        styles.top = `${pixels}px`;
+        styles.top = "".concat(pixels, "px");
       } else {
-        styles.bottom = `${pixels}px`;
+        styles.bottom = "".concat(pixels, "px");
       }
 
       return styles;
     }
-
   },
   methods: {
-    close() {
+    close: function close() {
       this.$parent.$emit('on-close', this.timestamp);
     }
-
   },
-
-  mounted() {
+  mounted: function mounted() {
     if (this.timeout) {
       setTimeout(this.close, this.timeout);
     }
   }
-
 };
 
 /* script */
@@ -1629,24 +1902,20 @@ var __vue_staticRenderFns__$1 = [];
 //
 var script$2 = {
   components: {
-    Notification
+    Notification: Notification
   },
-
-  data() {
+  data: function data() {
     return {
       notifications: this.$notifications.state
     };
   },
-
   methods: {
-    removeNotification(timestamp) {
+    removeNotification: function removeNotification(timestamp) {
       this.$notifications.removeNotification(timestamp);
     },
-
-    clearAllNotifications() {
+    clearAllNotifications: function clearAllNotifications() {
       this.$notifications.clear();
     }
-
   }
 };
 
@@ -1719,28 +1988,23 @@ var script$3 = {
       default: "170px"
     }
   },
-
-  data() {
+  data: function data() {
     return {
       isOpen: false
     };
   },
-
   computed: {
-    style() {
+    style: function style() {
       return 'width: ' + this.width;
     }
-
   },
   methods: {
-    toggleDropDown() {
+    toggleDropDown: function toggleDropDown() {
       this.isOpen = !this.isOpen;
     },
-
-    closeDropDown() {
+    closeDropDown: function closeDropDown() {
       this.isOpen = false;
     }
-
   }
 };
 
@@ -1778,57 +2042,52 @@ var __vue_staticRenderFns__$3 = [];
     undefined
   );
 
-const NotificationStore = {
+var NotificationStore = {
   state: [],
-
   // here the notifications will be added
-  removeNotification(timestamp) {
-    const indexToDelete = this.state.findIndex(n => n.timestamp === timestamp);
+  removeNotification: function removeNotification(timestamp) {
+    var indexToDelete = this.state.findIndex(function (n) {
+      return n.timestamp === timestamp;
+    });
 
     if (indexToDelete !== -1) {
       this.state.splice(indexToDelete, 1);
     }
   },
-
-  notify(notification) {
+  notify: function notify(notification) {
     // Create a timestamp to serve as a unique ID for the notification.
     notification.timestamp = new Date();
     notification.timestamp.setMilliseconds(notification.timestamp.getMilliseconds() + this.state.length);
     this.state.push(notification);
   },
-
-  clear() {
+  clear: function clear() {
     // This removes all of them in a way that the GUI keeps up.
     while (this.state.length > 0) {
       this.removeNotification(this.state[0].timestamp);
     }
   }
-
 };
 
 function setupSpinner(Vue$$1) {
   // Create the global $spinner functions the user can call 
   // from inside any component.
   Vue$$1.prototype.$spinner = {
-    start() {
+    start: function start() {
       // Send a start event to the bus.
       EventBus.$emit('spinner:start');
     },
-
-    stop() {
+    stop: function stop() {
       // Send a stop event to the bus.
       EventBus.$emit('spinner:stop');
     }
-
   };
 }
 
 function setupNotifications(Vue$$1) {
   Object.defineProperty(Vue$$1.prototype, '$notifications', {
-    get() {
+    get: function get() {
       return NotificationStore;
     }
-
   });
 }
 
@@ -1836,7 +2095,8 @@ function setupProgressBar(Vue$$1, options) {
   Vue$$1.use(VueProgressBar, options);
 }
 
-function install(Vue$$1, options = {}) {
+function install(Vue$$1) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   Vue$$1.use(VModal);
 
   if (!options.notifications || !options.notifications.disabled) {
@@ -1863,12 +2123,12 @@ function install(Vue$$1, options = {}) {
 
 if (typeof window !== 'undefined' && window.Vue) {
   window.Vue.use({
-    install
+    install: install
   });
 }
 
 var ScirisVue = {
-  install
+  install: install
 };
 
 /**
@@ -1877,133 +2137,133 @@ var ScirisVue = {
  * @see {@link module:rpcs~rpc|rpcs.rpc} 
  */
 
-const rpc$1 = rpcs.rpc;
+var rpc$1 = rpcs.rpc;
 /**
  * @function
  * @async
  * @see {@link module:rpcs~download|rpcs.download} 
  */
 
-const download$1 = rpcs.download;
+var download$1 = rpcs.download;
 /**
  * @function
  * @async
  * @see {@link module:rpcs~upload|rpcs.upload} 
  */
 
-const upload$1 = rpcs.upload;
+var upload$1 = rpcs.upload;
 /**
  * @function
  * @async
  * @see {@link module:status~succeed|status.succeed} 
  */
 
-const succeed$1 = status.succeed;
+var succeed$1 = status.succeed;
 /**
  * @function
  * @async
  * @see {@link module:status~fail|status.fail} 
  */
 
-const fail$1 = status.fail;
+var fail$1 = status.fail;
 /**
  * @function
  * @async
  * @see {@link module:status~start|status.start} 
  */
 
-const start$1 = status.start;
+var start$1 = status.start;
 /**
  * @function
  * @async
  * @see {@link module:status~notify|status.notify} 
  */
 
-const notify$1 = status.notify;
+var notify$1 = status.notify;
 /**
  * @function
  * @async
  * @see {@link module:graphs~placeholders|graphs.placeholders} 
  */
 
-const placeholders$1 = graphs.placeholders;
+var placeholders$1 = graphs.placeholders;
 /**
  * @function
  * @async
  * @see {@link module:graphs~clearGraphs|graphs.clearGraphs} 
  */
 
-const clearGraphs$1 = graphs.clearGraphs;
+var clearGraphs$1 = graphs.clearGraphs;
 /**
  * @function
  * @async
  * @see {@link module:graphs~makeGraphs|graphs.makeGraphs} 
  */
 
-const makeGraphs$1 = graphs.makeGraphs;
+var makeGraphs$1 = graphs.makeGraphs;
 /**
  * @function
  * @async
  * @see {@link module:graphs~scaleFigs|graphs.scaleFigs} 
  */
 
-const scaleFigs$1 = graphs.scaleFigs;
+var scaleFigs$1 = graphs.scaleFigs;
 /**
  * @function
  * @async
  * @see {@link module:graphs~showBrowserWindowSize|graphs.showBrowserWindowSize} 
  */
 
-const showBrowserWindowSize$1 = graphs.showBrowserWindowSize;
+var showBrowserWindowSize$1 = graphs.showBrowserWindowSize;
 /**
  * @function
  * @async
  * @see {@link module:graphs~addListener|graphs.addListener} 
  */
 
-const addListener$1 = graphs.addListener;
+var addListener$1 = graphs.addListener;
 /**
  * @function
  * @async
  * @see {@link module:graphs~onMouseUpdate|graphs.onMouseUpdate} 
  */
 
-const onMouseUpdate$1 = graphs.onMouseUpdate;
+var onMouseUpdate$1 = graphs.onMouseUpdate;
 /**
  * @function
  * @async
  * @see {@link module:graphs~createDialogs|graphs.createDialogs} 
  */
 
-const createDialogs$1 = graphs.createDialogs;
+var createDialogs$1 = graphs.createDialogs;
 /**
  * @function
  * @async
  * @see {@link module:graphs~newDialog|graphs.newDialog} 
  */
 
-const newDialog$1 = graphs.newDialog;
+var newDialog$1 = graphs.newDialog;
 /**
  * @function
  * @async
  * @see {@link module:graphs~findDialog|graphs.findDialog} 
  */
 
-const findDialog$1 = graphs.findDialog;
+var findDialog$1 = graphs.findDialog;
 /**
  * @function
  * @async
  * @see {@link module:graphs~maximize|graphs.maximize} 
  */
 
-const maximize$1 = graphs.maximize;
+var maximize$1 = graphs.maximize;
 /**
  * @function
  * @async
  * @see {@link module:graphs~minimize|graphs.minimize} 
  */
 
-const minimize$1 = graphs.minimize;
+var minimize$1 = graphs.minimize;
 /**
  * Access to the mpld3 instance, only if d3 is included in the global scope
  *
@@ -2012,8 +2272,8 @@ const minimize$1 = graphs.minimize;
  * @see {@link module:graphs~mpld3|graphs.mpld3} 
  */
 
-const mpld3$1 = graphs.mpld3;
-let draw_figure = null;
+var mpld3$1 = graphs.mpld3;
+var draw_figure = null;
 
 if (mpld3$1 !== null) {
   draw_figure = mpld3$1.draw_figure;
@@ -2025,148 +2285,148 @@ if (mpld3$1 !== null) {
  */
 
 
-const getTaskResultWaiting$1 = tasks.getTaskResultWaiting;
+var getTaskResultWaiting$1 = tasks.getTaskResultWaiting;
 /**
  * @function
  * @async
  * @see {@link module:tasks~getTaskResultPolling|tasks.getTaskResultPolling} 
  */
 
-const getTaskResultPolling$1 = tasks.getTaskResultPolling;
+var getTaskResultPolling$1 = tasks.getTaskResultPolling;
 /**
  * @function
  * @async
  * @see {@link module:user~loginCall|user.loginCall} 
  */
 
-const loginCall$1 = user.loginCall;
+var loginCall$1 = user.loginCall;
 /**
  * @function
  * @async
  * @see {@link module:user~logoutCall|user.logoutCall}
  */
 
-const logoutCall$1 = user.logoutCall;
+var logoutCall$1 = user.logoutCall;
 /**
  * @function
  * @async
  * @see {@link module:user~getCurrentUserInfo|user.getCurrentUserInfo} 
  */
 
-const getCurrentUserInfo$1 = user.getCurrentUserInfo;
+var getCurrentUserInfo$1 = user.getCurrentUserInfo;
 /**
  * @function
  * @async
  * @see {@link module:user~registerUser|user.registerUser} 
  */
 
-const registerUser$1 = user.registerUser;
+var registerUser$1 = user.registerUser;
 /**
  * @function
  * @async
  * @see {@link module:user~changeUserInfo|user.changeUserInfo} 
  */
 
-const changeUserInfo$1 = user.changeUserInfo;
+var changeUserInfo$1 = user.changeUserInfo;
 /**
  * @function
  * @async
  * @see {@link module:user~changeUserPassword|user.changeUserPassword} 
  */
 
-const changeUserPassword$1 = user.changeUserPassword;
+var changeUserPassword$1 = user.changeUserPassword;
 /**
  * @function
  * @async
  * @see {@link module:user~adminGetUserInfo|user.adminGetUserInfo} 
  */
 
-const adminGetUserInfo$1 = user.adminGetUserInfo;
+var adminGetUserInfo$1 = user.adminGetUserInfo;
 /**
  * @function
  * @async
  * @see {@link module:user~deleteUser|user.deleteUser} 
  */
 
-const deleteUser$1 = user.deleteUser;
+var deleteUser$1 = user.deleteUser;
 /**
  * @function
  * @async
  * @see {@link module:user~activateUserAccount|user.activateUserAccount} 
  */
 
-const activateUserAccount$1 = user.activateUserAccount;
+var activateUserAccount$1 = user.activateUserAccount;
 /**
  * @function
  * @async
  * @see {@link module:user~deactivateUserAccount|user.deactivateUserAccount} 
  */
 
-const deactivateUserAccount$1 = user.deactivateUserAccount;
+var deactivateUserAccount$1 = user.deactivateUserAccount;
 /**
  * @function
  * @async
  * @see {@link module:user~grantUserAdminRights|user.grantUserAdminRights} 
  */
 
-const grantUserAdminRights$1 = user.grantUserAdminRights;
+var grantUserAdminRights$1 = user.grantUserAdminRights;
 /**
  * @function
  * @async
  * @see {@link module:user~revokeUserAdminRights|user.revokeUserAdminRights} 
  */
 
-const revokeUserAdminRights$1 = user.revokeUserAdminRights;
+var revokeUserAdminRights$1 = user.revokeUserAdminRights;
 /**
  * @function
  * @async
  * @see {@link module:user~resetUserPassword|user.resetUserPassword} 
  */
 
-const resetUserPassword$1 = user.resetUserPassword;
+var resetUserPassword$1 = user.resetUserPassword;
 /**
  * @function
  * @async
  * @see {@link module:user~getUserInfo|user.getUserInfo} 
  */
 
-const getUserInfo$1 = user.getUserInfo;
+var getUserInfo$1 = user.getUserInfo;
 /**
  * @function
  * @async
  * @see {@link module:user~currentUser|user.currentUser} 
  */
 
-const currentUser = user.currentUser;
+var currentUser = user.currentUser;
 /**
  * @function
  * @async
  * @see {@link module:user~checkLoggedIn|user.checkLoggedIn} 
  */
 
-const checkLoggedIn$1 = user.checkLoggedIn;
+var checkLoggedIn$1 = user.checkLoggedIn;
 /**
  * @function
  * @async
  * @see {@link module:user~checkAdminLoggedIn|user.checkAdminLoggedIn} 
  */
 
-const checkAdminLoggedIn$1 = user.checkAdminLoggedIn;
+var checkAdminLoggedIn$1 = user.checkAdminLoggedIn;
 /**
  * @function
  * @async
  * @see {@link module:utils~sleep|utils.sleep} 
  */
 
-const sleep$1 = utils.sleep;
+var sleep$1 = utils.sleep;
 /**
  * @function
  * @async
  * @see {@link module:utils~getUniqueName|utils.getUniqueName} 
  */
 
-const getUniqueName$1 = utils.getUniqueName;
-const sciris = {
+var getUniqueName$1 = utils.getUniqueName;
+var sciris = {
   // rpc-service.js
   rpc: rpc$1,
   download: download$1,
@@ -2185,7 +2445,7 @@ const sciris = {
   maximize: maximize$1,
   minimize: minimize$1,
   mpld3: mpld3$1,
-  draw_figure,
+  draw_figure: draw_figure,
   // status-service.js
   succeed: succeed$1,
   fail: fail$1,
@@ -2209,20 +2469,20 @@ const sciris = {
   revokeUserAdminRights: revokeUserAdminRights$1,
   resetUserPassword: resetUserPassword$1,
   getUserInfo: getUserInfo$1,
-  currentUser,
+  currentUser: currentUser,
   checkLoggedIn: checkLoggedIn$1,
   checkAdminLoggedIn: checkAdminLoggedIn$1,
   // utils.js
   sleep: sleep$1,
   getUniqueName: getUniqueName$1,
-  rpcs,
-  graphs,
-  status,
-  user,
-  tasks,
-  utils,
-  ScirisVue,
-  EventBus
+  rpcs: rpcs,
+  graphs: graphs,
+  status: status,
+  user: user,
+  tasks: tasks,
+  utils: utils,
+  ScirisVue: ScirisVue,
+  EventBus: EventBus
 };
 
 exports.default = sciris;

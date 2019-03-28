@@ -7,7 +7,11 @@
 import utils from './utils.js'
 import rpcs from './rpc-service.js'
 import status from './status-service.js'
-import mpld3 from 'mpld3'
+
+let mpld3 = null;
+if (typeof d3 !== 'undefined'){
+  mpld3 = require('mpld3');
+}
 
 function placeholders(vm, startVal) {
   let indices = []
