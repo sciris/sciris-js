@@ -1,12 +1,11 @@
 /*!
- * sciris-js v0.2.10
+ * sciris-js v0.2.11
  * (c) 2019-present Sciris <info@sciris.org>
  * Released under the MIT License.
  */
 import Vue from 'vue';
 import axios from 'axios';
 import saveAs from 'file-saver';
-import mpld3 from 'mpld3';
 import sha224 from 'crypto-js/sha224';
 import { FulfillingBouncingCircleSpinner } from 'epic-spinners';
 import VueProgressBar from 'vue-progressbar';
@@ -357,6 +356,11 @@ var rpcs = {
 /*
  * Graphing functions (shared between calibration, scenarios, and optimization)
  */
+let mpld3 = null;
+
+if (typeof d3 !== 'undefined') {
+  mpld3 = require('mpld3');
+}
 
 function placeholders(vm, startVal) {
   let indices = [];
