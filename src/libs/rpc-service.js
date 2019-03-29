@@ -80,13 +80,10 @@ async function rpc(funcname, args, kwargs) {
     }
 
     //console.log('RPC error: ' + response.data.error);
-    console.log(response.data);
     throw Error(response.data.error);
 
   } catch (error) {
     console.log('RPC error: ' + error);
-    console.log(error);
-    console.log("herkjhsdflkjahsdflkjhasdkljfhaslkjdfhalksjdhfkajsdhfkajsdhflkjasdhf>>>>>>>>>>>>");
     // If there was an actual response returned from the server...
     if (error.response) { 
 

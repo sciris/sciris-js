@@ -16,8 +16,15 @@ describe('Check RPCs', function () {
             includeNodeLocations: true
         }
     )
-    const scope = nock(TARGET_ORIGIN)
-      .post('/api/rpcs').reply(200)
+    nock(TARGET_ORIGIN)
+      .post('/api/rpcs')
+      .once()
+      .reply(200, {"success": ""})
+
+    nock(TARGET_ORIGIN)
+      .post('/api/rpcs')
+      .once()
+      .reply(200, {"error": ""})
   }); 
 
   after(function () {
@@ -25,8 +32,9 @@ describe('Check RPCs', function () {
   });
 
   it('what happens', async () => {
-    const response = await sciris.rpc("helloworld", [], {});
-    console.log(response);
+    const response_1 = await sciris.rpc("helloworld", ["sup"], {});
+    console.log(response_1.data);
+    const response_2 = await sciris.rpc("helloworld", ["sup"], {});
   });
 
 });

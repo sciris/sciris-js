@@ -67,6 +67,7 @@
     "babel-loader": "^8.0.5",
     "bili": "^3.4.2",
     "browserify": "^16.2.3",
+    "chai": "^4.2.0",
     "docdash": "^1.0.3",
     "esmify": "^2.0.0",
     "jsdoc": "^3.5.5",
