@@ -1,5 +1,5 @@
 /*!
- * sciris-js v0.2.10
+ * sciris-js v0.2.11
  * (c) 2019-present Sciris <info@sciris.org>
  * Released under the MIT License.
  */
@@ -264,14 +264,38 @@ function consoleLogCommand(type, funcname, args, kwargs) {
  * Attempt to convert a Blob passed in to a JSON. 
  *
  * @function
+ * @private
  * @async
  * @param {string} theBlob - username of the user 
  * @returns {Promise}
  */
 
 
-function readJsonFromBlob(_x) {
-  return _readJsonFromBlob.apply(this, arguments);
+function readJsonFromBlob(theBlob) {
+  // Create a FileReader; reader.result contains the contents of blob as text when this is called
+  return new Promise(function (resolve, reject) {
+    var reader = null;
+
+    try {
+      reader = new FileReader();
+    } catch (e) {
+      // incase we're using node for testing
+      reader = new window.FileReader();
+    }
+
+    reader.addEventListener("loadend", function () {
+      // Create a callback for after the load attempt is finished
+      try {
+        // Call a resolve passing back a JSON version of this.
+        var jsonresult = JSON.parse(reader.result); // Try the conversion.
+
+        resolve(jsonresult); // (Assuming successful) make the Promise resolve with the JSON result.
+      } catch (e) {
+        reject(Error('Failed to convert blob to JSON')); // On failure to convert to JSON, reject the Promise.
+      }
+    });
+    reader.readAsText(theBlob); // Start the load attempt, trying to read the blob in as text.
+  });
 }
 /**
  * Call an RPC defined using scirisweb 
@@ -285,60 +309,7 @@ function readJsonFromBlob(_x) {
  */
 
 
-function _readJsonFromBlob() {
-  _readJsonFromBlob = _asyncToGenerator(
-  /*#__PURE__*/
-  _regeneratorRuntime.mark(function _callee3(theBlob) {
-    var reader;
-    return _regeneratorRuntime.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            // Create a FileReader; reader.result contains the contents of blob as text when this is called
-            reader = new FileReader(); // Create a callback for after the load attempt is finished
-
-            reader.addEventListener("loadend",
-            /*#__PURE__*/
-            _asyncToGenerator(
-            /*#__PURE__*/
-            _regeneratorRuntime.mark(function _callee2() {
-              return _regeneratorRuntime.wrap(function _callee2$(_context2) {
-                while (1) {
-                  switch (_context2.prev = _context2.next) {
-                    case 0:
-                      _context2.prev = 0;
-                      _context2.next = 3;
-                      return JSON.parse(reader.result);
-
-                    case 3:
-                      return _context2.abrupt("return", _context2.sent);
-
-                    case 6:
-                      _context2.prev = 6;
-                      _context2.t0 = _context2["catch"](0);
-                      throw Error('Failed to convert blob to JSON');
-
-                    case 9:
-                    case "end":
-                      return _context2.stop();
-                  }
-                }
-              }, _callee2, null, [[0, 6]]);
-            }))); // Start the load attempt, trying to read the blob in as text.
-
-            reader.readAsText(theBlob);
-
-          case 3:
-          case "end":
-            return _context3.stop();
-        }
-      }
-    }, _callee3);
-  }));
-  return _readJsonFromBlob.apply(this, arguments);
-}
-
-function rpc(_x2, _x3, _x4) {
+function rpc(_x, _x2, _x3) {
   return _rpc.apply(this, arguments);
 }
 /**
@@ -357,18 +328,18 @@ function rpc(_x2, _x3, _x4) {
 function _rpc() {
   _rpc = _asyncToGenerator(
   /*#__PURE__*/
-  _regeneratorRuntime.mark(function _callee4(funcname, args, kwargs) {
+  _regeneratorRuntime.mark(function _callee(funcname, args, kwargs) {
     var response;
-    return _regeneratorRuntime.wrap(function _callee4$(_context4) {
+    return _regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
-        switch (_context4.prev = _context4.next) {
+        switch (_context.prev = _context.next) {
           case 0:
             // Log the RPC call.
             consoleLogCommand("normal", funcname, args, kwargs); // Do the RPC processing, returning results as a Promise.
             // Send the POST request for the RPC call.
 
-            _context4.prev = 1;
-            _context4.next = 4;
+            _context.prev = 1;
+            _context.next = 4;
             return axios.post('/api/rpcs', {
               funcname: funcname,
               args: args,
@@ -376,54 +347,50 @@ function _rpc() {
             });
 
           case 4:
-            response = _context4.sent;
+            response = _context.sent;
 
             if (!(typeof response.data.error === 'undefined')) {
-              _context4.next = 8;
+              _context.next = 8;
               break;
             }
 
             console.log('RPC succeeded'); // Signal success with the response.
 
-            return _context4.abrupt("return", response);
+            return _context.abrupt("return", response);
 
           case 8:
-            //console.log('RPC error: ' + response.data.error);
-            console.log(response.data);
-            throw Error(response.data.error);
+            throw new Error(response.data.error);
 
-          case 12:
-            _context4.prev = 12;
-            _context4.t0 = _context4["catch"](1);
-            console.log('RPC error: ' + _context4.t0);
-            console.log(_context4.t0);
-            console.log("herkjhsdflkjahsdflkjhasdkljfhaslkjdfhalksjdhfkajsdhfkajsdhflkjasdhf>>>>>>>>>>>>"); // If there was an actual response returned from the server...
+          case 11:
+            _context.prev = 11;
+            _context.t0 = _context["catch"](1);
+            console.log('RPC error: ' + _context.t0); // If there was an actual response returned from the server...
 
-            if (!_context4.t0.response) {
-              _context4.next = 22;
+            if (!_context.t0.response) {
+              _context.next = 19;
               break;
             }
 
-            if (!(typeof _context4.t0.response.data.exception !== 'undefined')) {
-              _context4.next = 20;
+            if (!(typeof _context.t0.response.data.exception !== 'undefined')) {
+              _context.next = 17;
               break;
             }
 
-            throw Error(_context4.t0.response.data.exception);
+            throw new Error(_context.t0.response.data.exception);
 
-          case 20:
-            _context4.next = 23;
+          case 17:
+            _context.next = 20;
             break;
 
-          case 22:
-            throw Error(_context4.t0);
+          case 19:
+            throw new Error(_context.t0);
 
-          case 23:
+          case 20:
           case "end":
-            return _context4.stop();
+            return _context.stop();
         }
       }
-    }, _callee4, null, [[1, 12]]);
+    }, _callee, null, [[1, 11]]);
   }));
   return _rpc.apply(this, arguments);
 }
@@ -486,100 +453,122 @@ function download(funcname, args, kwargs) {
  */
 
 
-function upload(funcname, args, kwargs, fileType) {
-  consoleLogCommand("upload", funcname, args, kwargs); // Function for trapping the change event that has the user-selected file.
+function upload(_x4, _x5, _x6, _x7) {
+  return _upload.apply(this, arguments);
+}
 
-  var onFileChange =
+function _upload() {
+  _upload = _asyncToGenerator(
   /*#__PURE__*/
-  function () {
-    var _ref = _asyncToGenerator(
-    /*#__PURE__*/
-    _regeneratorRuntime.mark(function _callee(e) {
-      var files, formData, response;
-      return _regeneratorRuntime.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              // Pull out the files (should only be 1) that were selected.
-              files = e.target.files || e.dataTransfer.files; // If no files were selected, reject the promise.
+  _regeneratorRuntime.mark(function _callee3(funcname, args, kwargs, fileType) {
+    var onFileChange, inElem;
+    return _regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            consoleLogCommand("upload", funcname, args, kwargs); // Function for trapping the change event that has the user-selected file.
 
-              if (files.length) {
-                _context.next = 3;
-                break;
-              }
+            onFileChange =
+            /*#__PURE__*/
+            function () {
+              var _ref = _asyncToGenerator(
+              /*#__PURE__*/
+              _regeneratorRuntime.mark(function _callee2(e) {
+                var files, formData, response;
+                return _regeneratorRuntime.wrap(function _callee2$(_context2) {
+                  while (1) {
+                    switch (_context2.prev = _context2.next) {
+                      case 0:
+                        // Pull out the files (should only be 1) that were selected.
+                        files = e.target.files || e.dataTransfer.files; // If no files were selected, reject the promise.
 
-              throw Error('No file selected');
+                        if (files.length) {
+                          _context2.next = 3;
+                          break;
+                        }
 
-            case 3:
-              // Create a FormData object for holding the file.
-              formData = new FormData(); // Put the selected file in the formData object with 'uploadfile' key.
+                        throw new Error('No file selected');
 
-              formData.append('uploadfile', files[0]); // Add the RPC function name to the form data.
+                      case 3:
+                        // Create a FormData object for holding the file.
+                        formData = new FormData(); // Put the selected file in the formData object with 'uploadfile' key.
 
-              formData.append('funcname', funcname); // Add args and kwargs to the form data.
+                        formData.append('uploadfile', files[0]); // Add the RPC function name to the form data.
 
-              formData.append('args', JSON.stringify(args));
-              formData.append('kwargs', JSON.stringify(kwargs));
-              _context.prev = 8;
-              _context.next = 11;
-              return axios.post('/api/rpcs', formData);
+                        formData.append('funcname', funcname); // Add args and kwargs to the form data.
 
-            case 11:
-              response = _context.sent;
+                        formData.append('args', JSON.stringify(args));
+                        formData.append('kwargs', JSON.stringify(kwargs));
+                        _context2.prev = 8;
+                        _context2.next = 11;
+                        return axios.post('/api/rpcs', formData);
 
-              if (!(typeof response.data.error != 'undefined')) {
-                _context.next = 14;
-                break;
-              }
+                      case 11:
+                        response = _context2.sent;
 
-              throw Error(response.data.error);
+                        if (!(typeof response.data.error != 'undefined')) {
+                          _context2.next = 14;
+                          break;
+                        }
 
-            case 14:
-              return _context.abrupt("return", response);
+                        throw new Error(response.data.error);
 
-            case 17:
-              _context.prev = 17;
-              _context.t0 = _context["catch"](8);
+                      case 14:
+                        return _context2.abrupt("return", response);
 
-              if (_context.t0.response) {
-                _context.next = 21;
-                break;
-              }
+                      case 17:
+                        _context2.prev = 17;
+                        _context2.t0 = _context2["catch"](8);
 
-              throw Error(_context.t0);
+                        if (_context2.t0.response) {
+                          _context2.next = 21;
+                          break;
+                        }
 
-            case 21:
-              if (!(typeof _context.t0.response.data.exception != 'undefined')) {
-                _context.next = 23;
-                break;
-              }
+                        throw new Error(_context2.t0);
 
-              throw Error(_context.t0.response.data.exception);
+                      case 21:
+                        if (!(typeof _context2.t0.response.data.exception != 'undefined')) {
+                          _context2.next = 23;
+                          break;
+                        }
 
-            case 23:
-            case "end":
-              return _context.stop();
-          }
+                        throw new Error(_context2.t0.response.data.exception);
+
+                      case 23:
+                      case "end":
+                        return _context2.stop();
+                    }
+                  }
+                }, _callee2, null, [[8, 17]]);
+              }));
+
+              return function onFileChange(_x8) {
+                return _ref.apply(this, arguments);
+              };
+            }(); // Create an invisible file input element and set its change callback 
+            // to our onFileChange function.
+
+
+            inElem = document.createElement('input');
+            inElem.setAttribute('type', 'file');
+            inElem.setAttribute('accept', fileType);
+            inElem.addEventListener('change', onFileChange); // Manually click the button to open the file dialog.
+
+            inElem.click();
+
+          case 7:
+          case "end":
+            return _context3.stop();
         }
-      }, _callee, null, [[8, 17]]);
-    }));
-
-    return function onFileChange(_x5) {
-      return _ref.apply(this, arguments);
-    };
-  }(); // Create an invisible file input element and set its change callback 
-  // to our onFileChange function.
-
-
-  var inElem = document.createElement('input');
-  inElem.setAttribute('type', 'file');
-  inElem.setAttribute('accept', fileType);
-  inElem.addEventListener('change', onFileChange); // Manually click the button to open the file dialog.
-
-  inElem.click();
+      }
+    }, _callee3);
+  }));
+  return _upload.apply(this, arguments);
 }
 
 var rpcs = {
+  readJsonFromBlob: readJsonFromBlob,
   rpc: rpc,
   download: download,
   upload: upload
@@ -956,7 +945,7 @@ var graphs = {
  * @function
  * @async
  * @param {number} task_id - id of the task to keep track of
- * @param {number} waitingtime - time to wait before checking the status of the task 
+ * @param {number} waitingtime - time to wait in seconds before checking the status of the task 
  * @param {string} func_name - name of the remote task function 
  * @param {string[]} args - Python style args to pass to the function 
  * @param {Object} kwargs - Python style kwatgs to pass to the function
@@ -988,8 +977,7 @@ function _getTaskResultWaiting() {
   _getTaskResultWaiting = _asyncToGenerator(
   /*#__PURE__*/
   _regeneratorRuntime.mark(function _callee(task_id, waitingtime, func_name, args, kwargs) {
-    var task, _result;
-
+    var task, result;
     return _regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -1013,28 +1001,24 @@ function _getTaskResultWaiting() {
             return rpcs.rpc('get_task_result', [task_id]);
 
           case 9:
-            _result = _context.sent;
+            result = _context.sent;
             _context.next = 12;
             return rpcs.rpc('delete_task', [task_id]);
 
           case 12:
-            _context.next = 17;
-            break;
-
-          case 14:
-            _context.prev = 14;
-            _context.t0 = _context["catch"](1);
-            throw Error(_context.t0);
-
-          case 17:
             return _context.abrupt("return", result);
+
+          case 15:
+            _context.prev = 15;
+            _context.t0 = _context["catch"](1);
+            throw new Error(_context.t0);
 
           case 18:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[1, 14]]);
+    }, _callee, null, [[1, 15]]);
   }));
   return _getTaskResultWaiting.apply(this, arguments);
 }
@@ -1104,8 +1088,7 @@ function _pollStep() {
   _pollStep = _asyncToGenerator(
   /*#__PURE__*/
   _regeneratorRuntime.mark(function _callee3(task_id, timeout, pollinterval, elapsedtime) {
-    var task, _result2;
-
+    var task, result;
     return _regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -1115,7 +1098,7 @@ function _pollStep() {
               break;
             }
 
-            throw Error('Task polling timed out');
+            throw new Error('Task polling timed out');
 
           case 2:
             _context3.next = 4;
@@ -1133,7 +1116,7 @@ function _pollStep() {
               break;
             }
 
-            throw Error(task.data.task.errorText);
+            throw new Error(task.data.task.errorText);
 
           case 9:
             if (!(task.data.task.status == 'completed')) {
@@ -1145,12 +1128,12 @@ function _pollStep() {
             return rpcs.rpc('get_task_result', [task_id]);
 
           case 12:
-            _result2 = _context3.sent;
+            result = _context3.sent;
             _context3.next = 15;
             return rpcs.rpc('delete_task', [task_id]);
 
           case 15:
-            return _context3.abrupt("return", _result2);
+            return _context3.abrupt("return", result);
 
           case 16:
             _context3.next = 18;
@@ -1185,11 +1168,8 @@ var tasks = {
  * @returns {Promise}
  */
 
-function loginCall(username, password) {
-  // Get a hex version of a hashed password using the SHA224 algorithm.
-  var hashPassword = sha224(password).toString();
-  var args = [username, hashPassword];
-  return rpcs.rpc('user_login', args);
+function loginCall(_x, _x2) {
+  return _loginCall.apply(this, arguments);
 }
 /**
  * Call rpc() for performing a logout. 
@@ -1201,8 +1181,36 @@ function loginCall(username, password) {
  */
 
 
+function _loginCall() {
+  _loginCall = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee(username, password) {
+    var hashPassword, args;
+    return _regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            // Get a hex version of a hashed password using the SHA224 algorithm.
+            hashPassword = sha224(password).toString();
+            args = [username, hashPassword];
+            _context.next = 4;
+            return rpcs.rpc('user_login', args);
+
+          case 4:
+            return _context.abrupt("return", _context.sent);
+
+          case 5:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+  return _loginCall.apply(this, arguments);
+}
+
 function logoutCall() {
-  return rpcs.rpc('user_logout');
+  return _logoutCall.apply(this, arguments);
 }
 /**
  * Call rpc() for reading the currently logged in user.
@@ -1213,8 +1221,32 @@ function logoutCall() {
  */
 
 
+function _logoutCall() {
+  _logoutCall = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee2() {
+    return _regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.next = 2;
+            return rpcs.rpc('user_logout');
+
+          case 2:
+            return _context2.abrupt("return", _context2.sent);
+
+          case 3:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+  return _logoutCall.apply(this, arguments);
+}
+
 function getCurrentUserInfo() {
-  return rpcs.rpc('get_current_user_info');
+  return _getCurrentUserInfo.apply(this, arguments);
 }
 /**
  * Call rpc() for registering a new user.
@@ -1229,11 +1261,32 @@ function getCurrentUserInfo() {
  */
 
 
-function registerUser(username, password, displayname, email) {
-  // Get a hex version of a hashed password using the SHA224 algorithm.
-  var hashPassword = sha224(password).toString();
-  var args = [username, hashPassword, displayname, email];
-  return rpcs.rpc('user_register', args);
+function _getCurrentUserInfo() {
+  _getCurrentUserInfo = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee3() {
+    return _regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            _context3.next = 2;
+            return rpcs.rpc('get_current_user_info');
+
+          case 2:
+            return _context3.abrupt("return", _context3.sent);
+
+          case 3:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3);
+  }));
+  return _getCurrentUserInfo.apply(this, arguments);
+}
+
+function registerUser(_x3, _x4, _x5, _x6) {
+  return _registerUser.apply(this, arguments);
 }
 /**
  * Change a user's displayname and/or email. It does not require the user to be logged in.
@@ -1248,11 +1301,36 @@ function registerUser(username, password, displayname, email) {
  */
 
 
-function changeUserInfo(username, password, displayname, email) {
-  // Get a hex version of a hashed password using the SHA224 algorithm.
-  var hashPassword = sha224(password).toString();
-  var args = [username, hashPassword, displayname, email];
-  return rpcs.rpc('user_change_info', args);
+function _registerUser() {
+  _registerUser = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee4(username, password, displayname, email) {
+    var hashPassword, args;
+    return _regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            // Get a hex version of a hashed password using the SHA224 algorithm.
+            hashPassword = sha224(password).toString();
+            args = [username, hashPassword, displayname, email];
+            _context4.next = 4;
+            return rpcs.rpc('user_register', args);
+
+          case 4:
+            return _context4.abrupt("return", _context4.sent);
+
+          case 5:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+  return _registerUser.apply(this, arguments);
+}
+
+function changeUserInfo(_x7, _x8, _x9, _x10) {
+  return _changeUserInfo.apply(this, arguments);
 }
 /**
  * Change the password of the currently logged in user
@@ -1265,12 +1343,36 @@ function changeUserInfo(username, password, displayname, email) {
  */
 
 
-function changeUserPassword(oldpassword, newpassword) {
-  // Get a hex version of the hashed passwords using the SHA224 algorithm.
-  var hashOldPassword = sha224(oldpassword).toString();
-  var hashNewPassword = sha224(newpassword).toString();
-  var args = [hashOldPassword, hashNewPassword];
-  return rpcs.rpc('user_change_password', args);
+function _changeUserInfo() {
+  _changeUserInfo = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee5(username, password, displayname, email) {
+    var hashPassword, args;
+    return _regeneratorRuntime.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            // Get a hex version of a hashed password using the SHA224 algorithm.
+            hashPassword = sha224(password).toString();
+            args = [username, hashPassword, displayname, email];
+            _context5.next = 4;
+            return rpcs.rpc('user_change_info', args);
+
+          case 4:
+            return _context5.abrupt("return", _context5.sent);
+
+          case 5:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee5);
+  }));
+  return _changeUserInfo.apply(this, arguments);
+}
+
+function changeUserPassword(_x11, _x12) {
+  return _changeUserPassword.apply(this, arguments);
 }
 /**
  * Allow a logged in user who is an admin to retreive information about a user 
@@ -1282,9 +1384,37 @@ function changeUserPassword(oldpassword, newpassword) {
  */
 
 
-function adminGetUserInfo(username) {
-  var args = [username];
-  return rpcs.rpc('admin_get_user_info', args);
+function _changeUserPassword() {
+  _changeUserPassword = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee6(oldpassword, newpassword) {
+    var hashOldPassword, hashNewPassword, args;
+    return _regeneratorRuntime.wrap(function _callee6$(_context6) {
+      while (1) {
+        switch (_context6.prev = _context6.next) {
+          case 0:
+            // Get a hex version of the hashed passwords using the SHA224 algorithm.
+            hashOldPassword = sha224(oldpassword).toString();
+            hashNewPassword = sha224(newpassword).toString();
+            args = [hashOldPassword, hashNewPassword];
+            _context6.next = 5;
+            return rpcs.rpc('user_change_password', args);
+
+          case 5:
+            return _context6.abrupt("return", _context6.sent);
+
+          case 6:
+          case "end":
+            return _context6.stop();
+        }
+      }
+    }, _callee6);
+  }));
+  return _changeUserPassword.apply(this, arguments);
+}
+
+function adminGetUserInfo(_x13) {
+  return _adminGetUserInfo.apply(this, arguments);
 }
 /**
  * Allow a logged in user who is an admin to delete a user 
@@ -1296,9 +1426,34 @@ function adminGetUserInfo(username) {
  */
 
 
-function deleteUser(username) {
-  var args = [username];
-  return rpcs.rpc('admin_delete_user', args);
+function _adminGetUserInfo() {
+  _adminGetUserInfo = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee7(username) {
+    var args;
+    return _regeneratorRuntime.wrap(function _callee7$(_context7) {
+      while (1) {
+        switch (_context7.prev = _context7.next) {
+          case 0:
+            args = [username];
+            _context7.next = 3;
+            return rpcs.rpc('admin_get_user_info', args);
+
+          case 3:
+            return _context7.abrupt("return", _context7.sent);
+
+          case 4:
+          case "end":
+            return _context7.stop();
+        }
+      }
+    }, _callee7);
+  }));
+  return _adminGetUserInfo.apply(this, arguments);
+}
+
+function deleteUser(_x14) {
+  return _deleteUser.apply(this, arguments);
 }
 /**
  * Allow a logged in user who is an admin to activate a user's account 
@@ -1310,9 +1465,34 @@ function deleteUser(username) {
  */
 
 
-function activateUserAccount(username) {
-  var args = [username];
-  return rpcs.rpc('admin_activate_account', args);
+function _deleteUser() {
+  _deleteUser = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee8(username) {
+    var args;
+    return _regeneratorRuntime.wrap(function _callee8$(_context8) {
+      while (1) {
+        switch (_context8.prev = _context8.next) {
+          case 0:
+            args = [username];
+            _context8.next = 3;
+            return rpcs.rpc('admin_delete_user', args);
+
+          case 3:
+            return _context8.abrupt("return", _context8.sent);
+
+          case 4:
+          case "end":
+            return _context8.stop();
+        }
+      }
+    }, _callee8);
+  }));
+  return _deleteUser.apply(this, arguments);
+}
+
+function activateUserAccount(_x15) {
+  return _activateUserAccount.apply(this, arguments);
 }
 /**
  * Allow a logged in user who is an admin to deactivate a user's account 
@@ -1324,9 +1504,34 @@ function activateUserAccount(username) {
  */
 
 
-function deactivateUserAccount(username) {
-  var args = [username];
-  return rpcs.rpc('admin_deactivate_account', args);
+function _activateUserAccount() {
+  _activateUserAccount = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee9(username) {
+    var args;
+    return _regeneratorRuntime.wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            args = [username];
+            _context9.next = 3;
+            return rpcs.rpc('admin_activate_account', args);
+
+          case 3:
+            return _context9.abrupt("return", _context9.sent);
+
+          case 4:
+          case "end":
+            return _context9.stop();
+        }
+      }
+    }, _callee9);
+  }));
+  return _activateUserAccount.apply(this, arguments);
+}
+
+function deactivateUserAccount(_x16) {
+  return _deactivateUserAccount.apply(this, arguments);
 }
 /**
  * Allow a logged in user who is an admin to make another user an 
@@ -1339,9 +1544,34 @@ function deactivateUserAccount(username) {
  */
 
 
-function grantUserAdminRights(username) {
-  var args = [username];
-  return rpcs.rpc('admin_grant_admin', args);
+function _deactivateUserAccount() {
+  _deactivateUserAccount = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee10(username) {
+    var args;
+    return _regeneratorRuntime.wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            args = [username];
+            _context10.next = 3;
+            return rpcs.rpc('admin_deactivate_account', args);
+
+          case 3:
+            return _context10.abrupt("return", _context10.sent);
+
+          case 4:
+          case "end":
+            return _context10.stop();
+        }
+      }
+    }, _callee10);
+  }));
+  return _deactivateUserAccount.apply(this, arguments);
+}
+
+function grantUserAdminRights(_x17) {
+  return _grantUserAdminRights.apply(this, arguments);
 }
 /**
  * Allow a logged in user who is an admin to remove another admin by
@@ -1354,9 +1584,34 @@ function grantUserAdminRights(username) {
  */
 
 
-function revokeUserAdminRights(username) {
-  var args = [username];
-  return rpcs.rpc('admin_revoke_admin', args);
+function _grantUserAdminRights() {
+  _grantUserAdminRights = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee11(username) {
+    var args;
+    return _regeneratorRuntime.wrap(function _callee11$(_context11) {
+      while (1) {
+        switch (_context11.prev = _context11.next) {
+          case 0:
+            args = [username];
+            _context11.next = 3;
+            return rpcs.rpc('admin_grant_admin', args);
+
+          case 3:
+            return _context11.abrupt("return", _context11.sent);
+
+          case 4:
+          case "end":
+            return _context11.stop();
+        }
+      }
+    }, _callee11);
+  }));
+  return _grantUserAdminRights.apply(this, arguments);
+}
+
+function revokeUserAdminRights(_x18) {
+  return _revokeUserAdminRights.apply(this, arguments);
 }
 /**
  * Allow a logged in user who is an admin to set a user's 
@@ -1369,9 +1624,34 @@ function revokeUserAdminRights(username) {
  */
 
 
-function resetUserPassword(username) {
-  var args = [username];
-  return rpcs.rpc('admin_reset_password', args);
+function _revokeUserAdminRights() {
+  _revokeUserAdminRights = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee12(username) {
+    var args;
+    return _regeneratorRuntime.wrap(function _callee12$(_context12) {
+      while (1) {
+        switch (_context12.prev = _context12.next) {
+          case 0:
+            args = [username];
+            _context12.next = 3;
+            return rpcs.rpc('admin_revoke_admin', args);
+
+          case 3:
+            return _context12.abrupt("return", _context12.sent);
+
+          case 4:
+          case "end":
+            return _context12.stop();
+        }
+      }
+    }, _callee12);
+  }));
+  return _revokeUserAdminRights.apply(this, arguments);
+}
+
+function resetUserPassword(_x19) {
+  return _resetUserPassword.apply(this, arguments);
 } // Higher level user functions that call the lower level ones above
 
 /**
@@ -1383,7 +1663,33 @@ function resetUserPassword(username) {
  */
 
 
-function getUserInfo(_x) {
+function _resetUserPassword() {
+  _resetUserPassword = _asyncToGenerator(
+  /*#__PURE__*/
+  _regeneratorRuntime.mark(function _callee13(username) {
+    var args;
+    return _regeneratorRuntime.wrap(function _callee13$(_context13) {
+      while (1) {
+        switch (_context13.prev = _context13.next) {
+          case 0:
+            args = [username];
+            _context13.next = 3;
+            return rpcs.rpc('admin_reset_password', args);
+
+          case 3:
+            return _context13.abrupt("return", _context13.sent);
+
+          case 4:
+          case "end":
+            return _context13.stop();
+        }
+      }
+    }, _callee13);
+  }));
+  return _resetUserPassword.apply(this, arguments);
+}
+
+function getUserInfo(_x20) {
   return _getUserInfo.apply(this, arguments);
 }
 /**
@@ -1397,35 +1703,35 @@ function getUserInfo(_x) {
 function _getUserInfo() {
   _getUserInfo = _asyncToGenerator(
   /*#__PURE__*/
-  _regeneratorRuntime.mark(function _callee(store) {
+  _regeneratorRuntime.mark(function _callee14(store) {
     var response;
-    return _regeneratorRuntime.wrap(function _callee$(_context) {
+    return _regeneratorRuntime.wrap(function _callee14$(_context14) {
       while (1) {
-        switch (_context.prev = _context.next) {
+        switch (_context14.prev = _context14.next) {
           case 0:
-            _context.prev = 0;
-            _context.next = 3;
+            _context14.prev = 0;
+            _context14.next = 3;
             return getCurrentUserInfo();
 
           case 3:
-            response = _context.sent;
+            response = _context14.sent;
             store.commit('newUser', response.data.user);
-            _context.next = 10;
+            _context14.next = 10;
             break;
 
           case 7:
-            _context.prev = 7;
-            _context.t0 = _context["catch"](0);
+            _context14.prev = 7;
+            _context14.t0 = _context14["catch"](0);
             // An error probably means the user is not logged in.
             // Set the username to {}.  
             store.commit('newUser', {});
 
           case 10:
           case "end":
-            return _context.stop();
+            return _context14.stop();
         }
       }
-    }, _callee, null, [[0, 7]]);
+    }, _callee14, null, [[0, 7]]);
   }));
   return _getUserInfo.apply(this, arguments);
 }

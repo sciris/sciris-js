@@ -19,7 +19,7 @@ var state = {
  * @param {string} passowrd - password of the user 
  * @returns {Promise}
  */
-function loginCall(username, password) {
+async function loginCall(username, password) {
   // Get a hex version of a hashed password using the SHA224 algorithm.
   const hashPassword = sha224(password).toString();
   const args = [
@@ -27,7 +27,7 @@ function loginCall(username, password) {
     hashPassword
   ];
   
-  return rpcs.rpc('user_login', args);
+  return await rpcs.rpc('user_login', args);
 }
 
 /**
@@ -38,8 +38,8 @@ function loginCall(username, password) {
  * @async
  * @returns {Promise}
  */
-function logoutCall() {
-  return rpcs.rpc('user_logout');
+async function logoutCall() {
+  return await rpcs.rpc('user_logout');
 }
 
 /**
@@ -49,8 +49,8 @@ function logoutCall() {
  * @async
  * @returns {Promise}
  */
-function getCurrentUserInfo() {
-  return rpcs.rpc('get_current_user_info');
+async function getCurrentUserInfo() {
+  return await rpcs.rpc('get_current_user_info');
 }
 
 /**
@@ -64,7 +64,7 @@ function getCurrentUserInfo() {
  * @param {string} email 
  * @returns {Promise}
  */
-function registerUser(username, password, displayname, email) {
+async function registerUser(username, password, displayname, email) {
   // Get a hex version of a hashed password using the SHA224 algorithm.
   const hashPassword = sha224(password).toString();
   const args = [
@@ -72,7 +72,7 @@ function registerUser(username, password, displayname, email) {
     hashPassword, 
     displayname, email
   ];
-  return rpcs.rpc('user_register', args);
+  return await rpcs.rpc('user_register', args);
 }
 
 /**
@@ -86,7 +86,7 @@ function registerUser(username, password, displayname, email) {
  * @param {string} email - The new value to be set for the email
  * @returns {Promise}
  */
-function changeUserInfo(username, password, displayname, email) {
+async function changeUserInfo(username, password, displayname, email) {
   // Get a hex version of a hashed password using the SHA224 algorithm.
   const hashPassword = sha224(password).toString();
   const args = [
@@ -96,7 +96,7 @@ function changeUserInfo(username, password, displayname, email) {
     email
   ];
   
-  return rpcs.rpc('user_change_info', args); 
+  return await rpcs.rpc('user_change_info', args); 
 }
 
 /**
@@ -108,7 +108,7 @@ function changeUserInfo(username, password, displayname, email) {
  * @param {string} newpassword - The password to use for the user from now on 
  * @returns {Promise}
  */
-function changeUserPassword(oldpassword, newpassword) {
+async function changeUserPassword(oldpassword, newpassword) {
   // Get a hex version of the hashed passwords using the SHA224 algorithm.
   const hashOldPassword = sha224(oldpassword).toString();
   const hashNewPassword = sha224(newpassword).toString();
@@ -117,7 +117,7 @@ function changeUserPassword(oldpassword, newpassword) {
     hashNewPassword
   ];
   
-  return rpcs.rpc('user_change_password', args); 
+  return await rpcs.rpc('user_change_password', args); 
 }
 
 /**
@@ -128,11 +128,11 @@ function changeUserPassword(oldpassword, newpassword) {
  * @param {string} username - The username of the user 
  * @returns {Promise}
  */
-function adminGetUserInfo(username) {
+async function adminGetUserInfo(username) {
   const args = [
     username
   ];
-  return rpcs.rpc('admin_get_user_info', args);
+  return await rpcs.rpc('admin_get_user_info', args);
 }
 
 /**
@@ -143,11 +143,11 @@ function adminGetUserInfo(username) {
  * @param {string} username - The username of the user 
  * @returns {Promise}
  */
-function deleteUser(username) {
+async function deleteUser(username) {
   const args = [
     username
   ];
-  return rpcs.rpc('admin_delete_user', args);
+  return await rpcs.rpc('admin_delete_user', args);
 }
 
 /**
@@ -158,11 +158,11 @@ function deleteUser(username) {
  * @param {string} username - The username of the user 
  * @returns {Promise}
  */
-function activateUserAccount(username) {
+async function activateUserAccount(username) {
   const args = [
     username
   ];
-  return rpcs.rpc('admin_activate_account', args);
+  return await rpcs.rpc('admin_activate_account', args);
 }
 
 /**
@@ -173,11 +173,11 @@ function activateUserAccount(username) {
  * @param {string} username - The username of the user 
  * @returns {Promise}
  */
-function deactivateUserAccount(username) {
+async function deactivateUserAccount(username) {
   const args = [
     username
   ];
-  return rpcs.rpc('admin_deactivate_account', args); 
+  return await rpcs.rpc('admin_deactivate_account', args); 
 }
 
 /**
@@ -189,11 +189,11 @@ function deactivateUserAccount(username) {
  * @param {string} username - The username of the user 
  * @returns {Promise}
  */
-function grantUserAdminRights(username) {
+async function grantUserAdminRights(username) {
   const args = [
     username
   ];
-  return rpcs.rpc('admin_grant_admin', args);
+  return await rpcs.rpc('admin_grant_admin', args);
 }
 
 /**
@@ -205,11 +205,11 @@ function grantUserAdminRights(username) {
  * @param {string} username - The username of the user 
  * @returns {Promise}
  */
-function revokeUserAdminRights(username) {
+async function revokeUserAdminRights(username) {
   const args = [
     username
   ];
-  return rpcs.rpc('admin_revoke_admin', args);
+  return await rpcs.rpc('admin_revoke_admin', args);
 }
 
 /**
@@ -221,11 +221,11 @@ function revokeUserAdminRights(username) {
  * @param {string} username - The username of the user 
  * @returns {Promise}
  */
-function resetUserPassword(username) {
+async function resetUserPassword(username) {
   const args = [
     username
   ];
-  return rpcs.rpc('admin_reset_password', args);   
+  return await rpcs.rpc('admin_reset_password', args);   
 }
 
 // Higher level user functions that call the lower level ones above

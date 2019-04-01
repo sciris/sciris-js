@@ -16,7 +16,7 @@ import utils from './utils.js'
  * @function
  * @async
  * @param {number} task_id - id of the task to keep track of
- * @param {number} waitingtime - time to wait before checking the status of the task 
+ * @param {number} waitingtime - time to wait in seconds before checking the status of the task 
  * @param {string} func_name - name of the remote task function 
  * @param {string[]} args - Python style args to pass to the function 
  * @param {Object} kwargs - Python style kwatgs to pass to the function
@@ -35,16 +35,16 @@ async function getTaskResultWaiting(task_id, waitingtime, func_name, args, kwarg
     // Clean up the task_id task.
     await rpcs.rpc('delete_task', [task_id]);
 
+    return result;
+
   } catch (error){
     // While we might want to clean up the task as below, the Celery
     // worker is likely to "resurrect" the task if it actually is
     // running the task to completion.
     // Clean up the task_id task.
     // rpcCall('delete_task', [task_id])
-    throw Error(error);
+    throw new Error(error);
   }
-
-  return result;
 }
 
 /**
@@ -96,7 +96,7 @@ async function pollStep(task_id, timeout, pollinterval, elapsedtime) {
     // Check to see if the elapsed time is longer than the timeout 
     // (and we have a timeout we actually want to check against) and if so, fail.
     if ((elapsedtime > timeout) && (timeout > 0)) { 
-      throw Error('Task polling timed out');
+      throw new Error('Task polling timed out');
     } 
     
     // Sleep timeout seconds.
@@ -107,7 +107,7 @@ async function pollStep(task_id, timeout, pollinterval, elapsedtime) {
 
     // There was an issue with executing the taks
     if (task.data.task.status == 'error') { 
-      throw Error(task.data.task.errorText);
+      throw new Error(task.data.task.errorText);
     }
 
     // If the task is completed...

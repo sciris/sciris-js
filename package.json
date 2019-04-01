@@ -1,6 +1,6 @@
 {
   "name": "sciris-js",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "license": "MIT",
   "author": "Sciris <info@sciris.org>",
   "repository": {
@@ -10,7 +10,8 @@
   "scripts": {
     "build": "bili && npm run export",
     "export": "npx browserify main.js --standalone sciris -o dist/sciris-js.js",
-    "test": "./node_modules/.bin/mocha tests --require @babel/register --require jsdom-global/register"
+    "test": "npm run build && ./node_modules/.bin/mocha tests --require @babel/register --require jsdom-global/register",
+    "build_docs": "node_modules/jsdoc/jsdoc.js src/ -r -c .jsdocs -d docs/ -t node_modules/docdash/" 
   },
   "main": "dist/sciris-js.cjs.js",
   "module": "dist/sciris-js.es.js",
@@ -64,6 +65,7 @@
     "@babel/polyfill": "^7.4.0",
     "@babel/preset-env": "^7.4.1",
     "@babel/register": "^7.4.0",
+    "assert": "^1.4.1",
     "babel-loader": "^8.0.5",
     "bili": "^3.4.2",
     "browserify": "^16.2.3",

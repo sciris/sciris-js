@@ -24,27 +24,31 @@ function consoleLogCommand (type, funcname, args, kwargs) {
  * Attempt to convert a Blob passed in to a JSON. 
  *
  * @function
+ * @private
  * @async
  * @param {string} theBlob - username of the user 
  * @returns {Promise}
  */
-async function readJsonFromBlob(theBlob) {
+function readJsonFromBlob(theBlob) {
   // Create a FileReader; reader.result contains the contents of blob as text when this is called
-  const reader = new FileReader(); 
-
-  // Create a callback for after the load attempt is finished
-  reader.addEventListener("loadend", async function() { 
-    try { 
-      // Try the conversion.
-      return await JSON.parse(reader.result) 
-    } catch (e) {
-      // On failure to convert to JSON, reject the Promise.
-      throw Error('Failed to convert blob to JSON');
+  return new Promise((resolve, reject) => {
+    let reader = null;
+    try {
+      reader = new FileReader(); 
+    } catch (e){
+      // incase we're using node for testing
+      reader = new window.FileReader();
     }
+    reader.addEventListener("loadend", function() { // Create a callback for after the load attempt is finished
+      try { // Call a resolve passing back a JSON version of this.
+        const jsonresult = JSON.parse(reader.result) // Try the conversion.
+        resolve(jsonresult) // (Assuming successful) make the Promise resolve with the JSON result.
+      } catch (e) {
+        reject(Error('Failed to convert blob to JSON')) // On failure to convert to JSON, reject the Promise.
+      }
+    })
+    reader.readAsText(theBlob) // Start the load attempt, trying to read the blob in as text.
   })
-
-  // Start the load attempt, trying to read the blob in as text.
-  reader.readAsText(theBlob) 
 }
 
 /**
@@ -80,7 +84,7 @@ async function rpc(funcname, args, kwargs) {
     }
 
     //console.log('RPC error: ' + response.data.error);
-    throw Error(response.data.error);
+    throw new Error(response.data.error);
 
   } catch (error) {
     console.log('RPC error: ' + error);
@@ -91,11 +95,11 @@ async function rpc(funcname, args, kwargs) {
       // (which indicates an exception on the server side)...
       if (typeof(error.response.data.exception) !== 'undefined') {
         // For now, reject with an error message matching the exception.
-        throw Error(error.response.data.exception);
+        throw new Error(error.response.data.exception);
       }
     } else {
       // Reject with the error axios got.
-      throw Error(error);
+      throw new Error(error);
     }
   }
 }
@@ -166,7 +170,7 @@ function download(funcname, args, kwargs) {
  * @param {string} fileType - Type of file being uploaded 
  * @returns {Promise}
  */
-function upload(funcname, args, kwargs, fileType) {
+async function upload(funcname, args, kwargs, fileType) {
   consoleLogCommand("upload", funcname, args, kwargs);
 
   // Function for trapping the change event that has the user-selected file.
@@ -177,7 +181,7 @@ function upload(funcname, args, kwargs, fileType) {
 
     // If no files were selected, reject the promise.
     if (!files.length){
-      throw Error('No file selected');
+      throw new Error('No file selected');
     }
     // Create a FormData object for holding the file.
     const formData = new FormData();
@@ -192,19 +196,19 @@ function upload(funcname, args, kwargs, fileType) {
     try {
       const response = await axios.post('/api/rpcs', formData);
       if (typeof(response.data.error) != 'undefined') {
-        throw Error(response.data.error);
+        throw new Error(response.data.error);
       }
       return response;
     } catch (error) {
       // If there was an actual response returned from the server...
       if (!error.response) { 
-        throw Error(error);
+        throw new Error(error);
       }
       // If we have exception information in the response (which 
       // indicates an exception on the server side)...
       if (typeof(error.response.data.exception) != 'undefined') {
         // For now, reject with an error message matching the exception.
-        throw Error(error.response.data.exception);
+        throw new Error(error.response.data.exception);
       }
     }
   }
@@ -220,6 +224,7 @@ function upload(funcname, args, kwargs, fileType) {
 }
 
 export default {
+  readJsonFromBlob,
   rpc,
   download,
   upload
