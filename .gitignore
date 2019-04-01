@@ -80,3 +80,5 @@ typings/
 package-lock.json
 
 docs/
+
+dist/
