@@ -27,9 +27,19 @@ npm install
 npm run build
 ```
 
+## Build with documentation and test
+
+To build the docs run:
+
+`npm run build_docs`
+
+To run the tests:
+
+`npm run test`
+
 [billi](https://bili.egoist.moe/#/) is used for building this library.
 
-## Sciris Usage
+## Sciris usage
 
 ```js
 import Vue from 'vue'

@@ -11,7 +11,7 @@
     "build": "bili && npm run export",
     "export": "npx browserify main.js --standalone sciris -o dist/sciris-js.js",
     "test": "npm run build && ./node_modules/.bin/mocha tests --require @babel/register --require jsdom-global/register",
-    "build_docs": "node_modules/jsdoc/jsdoc.js src/ -r -c .jsdocs -d docs/ -t node_modules/docdash/" 
+    "build_docs": "node_modules/jsdoc/jsdoc.js src/ -r -c .jsdocs -d docs/ -t node_modules/docdash/"
   },
   "main": "dist/sciris-js.cjs.js",
   "module": "dist/sciris-js.es.js",
