@@ -143,9 +143,10 @@ color: #737373;
 .message-box .message 
 {
   line-height: 1.5em;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+// These lines lead to truncation of the message allowed down to 1 line.
+//  overflow: hidden;
+//  white-space: nowrap;
+//  text-overflow: ellipsis;
   width: 100%;
 }
 
