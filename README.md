@@ -29,6 +29,16 @@ npm run build
 
 [billi](https://bili.egoist.moe/#/) is used for building this library.
 
+## Publish to NPM
+
+To publish the latest version to npm first you need to update the version number in `package.json` and then:
+
+```
+npm publish
+```
+
+If you're not logged in you'll be prompted to enter your credentials in the CLI
+
 ## Sciris Usage
 
 ```js
