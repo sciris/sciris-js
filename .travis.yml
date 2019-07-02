@@ -6,9 +6,9 @@ jobs:
     node_js: '8'
     install: npm install
     script: npm run build
-    skip_cleanup: true
     if: NOT type = pull_request
     deploy:
+      skip_cleanup: true
       provider: npm
       email: "info@sciris.org"
       api_key:
