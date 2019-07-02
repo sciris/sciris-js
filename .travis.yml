@@ -1,0 +1,16 @@
+language: node_js
+stages:
+- name: deploy
+  if: branch = master
+jobs:
+  include:
+  - stage: npm release
+    node_js: '8'
+    install: skip
+    script: skip
+    if: NOT type = pull_request
+    deploy:
+      provider: npm
+      api_key:
+        secure: LevQXRIwX6H3i358NFEEq9vXf7YBwN1jauPIHvF5EGAaqmeED412rEoQGSSN9wvMwXz7puzNekRNBou3idJXLqltB1sSpETCes8XWvFtcak6/i794nftOBj0WKk3bzCFE9XKpXS8MLXVPNzxDbNhLJFQ1JYHTfg9wNXuK9gohbTd5jASGrIczXjMnujJUYOywFloBkIbxwyQBjbQAxu8qXpjUh+03PZbbi3GrtM5XVC/p4g7qgMSigJsp/J8vpTuOKEAmxXQySir3d7sF1WFhArzJJThyQlfnfMrd3QRzETcVUWsIRAlcNiIZ33W2jjEKwoSdaOk6LLDyxk+9DUEx2E7Ono9aHwFbLdzEYjKYy3ZRrfHGsvFIAv1dr/aLBF1p0CpznGkukvscSOS8XItGico8+akMOwzSXi7QGHPYYI20pPbbtW5wbh0s4Aj1B7oskNkRTex1cQf9dVN/pnCjWGd6PP5UMpblclOTuFUWFzv5lUF/g+zMMwAXTWfe9zTdNTCtyrpqRv8HQWnNVw7GN6WHNkameMxVUvHLeyTKN2Xoh/OwoxKKP6/Y0wMbJxhQCMl++in/RN2nn9+Uj7s+0xWPHmxRSYXtq7AMPva+oqOuvWj++bDkU41RCTtpoe0FdnMZpg4lgbLB73ZDBKs1GRT5eEXgyuh6cbrPFZbtpU=
+      on: deploy-npm-release
