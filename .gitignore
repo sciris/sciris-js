@@ -78,7 +78,3 @@ typings/
 
 # NPM lock file
 package-lock.json
-
-docs/**
-
-dist/**
