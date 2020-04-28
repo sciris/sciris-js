@@ -1,21 +1,13 @@
 <template>
-  <li class="dropdown" 
-    :class="{open:isOpen}" 
-    v-click-outside="closeDropDown">
+  <li class="dropdown" :class="{open:isOpen}" @click="toggleDropDown" v-click-outside="closeDropDown">
 
-    <a href="javascript:void(0)"
-      class="dropdown-toggle btn-rotate" 
-      data-toggle="dropdown" 
-      :style="style"
-      @click="toggleDropDown">
-
+    <a class="dropdown-toggle btn-rotate" data-toggle="dropdown" href="javascript:void(0)">
       <slot name="title">
         <i :class="icon"></i>
         <div class="dropdown-title">{{title}}
           <b class="caret"></b>
         </div>
       </slot>
-
     </a>
 
     <ul class="dropdown-menu">
@@ -25,7 +17,7 @@
 </template>
 
 <script>
-  export default{
+  export default {
     props: {
       title: String,
       icon: String,
@@ -34,21 +26,21 @@
         default: "170px"
       },
     },
-    data () {
+    data() {
       return {
         isOpen: false
       }
     },
     computed: {
-      style () {
+      style() {
         return 'width: ' + this.width;
       }
     },
     methods: {
-      toggleDropDown () {
+      toggleDropDown() {
         this.isOpen = !this.isOpen
       },
-      closeDropDown () {
+      closeDropDown() {
         this.isOpen = false
       }
     }
@@ -56,5 +48,5 @@
 </script>
 
 <style lang="scss">
-@import "../styles/dropdown.scss"
+  @import "../styles/dropdown.scss"
 </style>
