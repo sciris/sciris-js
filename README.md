@@ -1,8 +1,10 @@
 # sciris-js
 
+Sciris-JS is the frontend counterpart to the Python web framework [ScirisWeb](https://github.com/sciris/sciris).
+
 ## Project setup
 
-`d3` is required to be added in the global scope by includeing the following in your html.
+`d3` is required to be added in the global scope by including the following in your html.
 
 ```
 <script src="http://d3js.org/d3.v5.min.js"></script>
