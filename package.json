@@ -47,7 +47,7 @@
   "bundleDependencies": false,
   "dependencies": {
     "acorn": "^6.0.2",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "cryptiles": "^4.1.2",
     "crypto": "^1.0.1",
     "crypto-api": "^0.8.0",
